@@ -1,0 +1,28 @@
+{
+  "name": "@jupiterone/jupiterone-client-nodejs",
+  "version": "0.1.0",
+  "description": "A node.js client wrapper for JupiterOne public API",
+  "main": "j1client.js",
+  "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
+  "author": "JupiterOne <dev@jupiterone.io>",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "amazon-cognito-identity-js-node": "^0.0.3",
+    "apollo-cache-inmemory": "^1.5.1",
+    "apollo-client": "^2.5.1",
+    "apollo-link": "^1.2.11",
+    "apollo-link-batch-http": "^1.2.11",
+    "apollo-link-http": "^1.5.12",
+    "apollo-link-retry": "^2.2.13",
+    "graphql": "^14.1.1",
+    "graphql-tag": "^2.10.1",
+    "node-fetch": "^2.3.0"
+  },
+  "devDependencies": {
+    "dotenv": "^7.0.0",
+    "jest": "^24.0.0"
+  }
+}
