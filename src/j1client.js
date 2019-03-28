@@ -69,13 +69,13 @@ class JupiterOneClient {
     return results;
   }
 
-  async createEntity (key, type, klass, properties) {
+  async createEntity (key, type, classLabels, properties) {
     const res = await this.graphClient.mutate({
       mutation: CREATE_ENTITY,
       variables: {
         entityKey: key,
         entityType: type,
-        entityClass: klass,
+        entityClass: classLabels,
         properties
       }
     });
@@ -170,7 +170,7 @@ const CREATE_ENTITY = gql`
 mutation CreateEntity(
   $entityKey: String!
   $entityType: String!
-  $entityClass: String!
+  $entityClass: [String!]!
   $properties: JSON
 ) {
   createEntity(
