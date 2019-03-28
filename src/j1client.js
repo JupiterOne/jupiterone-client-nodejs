@@ -8,28 +8,49 @@ const { BatchHttpLink } = require('apollo-link-batch-http');
 const gql = require('graphql-tag');
 const fetch = require('node-fetch');
 
-const {
-  USER_POOL_ID: UserPoolId = 'us-east-2_9fnMVHuxD',
-  CLIENT_ID: ClientId = '1hcv141pqth5f49df7o28ngq1u',
-  JUPITERONE_API_URL: JupiterOneApiUrl = 'https://api.us.jupiterone.io/graphql'
-} = process.env;
-
 class JupiterOneClient {
-  constructor (account, username, password) {
+  constructor (account, username, password, poolId, clientId, dev = false) {
     this.account = account;
     this.username = username;
     this.password = password;
+    this.poolId = poolId;
+    this.clientId = clientId;
+    this.apiUrl = dev ? 'https://api.dev.jupiterone.io/graphql' : 'https://api.us.jupiterone.io/graphql';
   }
 
   async init () {
-    const accessToken = await authenticateUser(this.username, this.password);
+    const accessToken = await this.authenticateUser();
     const headers = {};
     headers['Authorization'] = `Bearer ${accessToken}`;
     headers['LifeOmic-Account'] = this.account;
-    const link = ApolloLink.from([ new RetryLink(), new BatchHttpLink({ uri: JupiterOneApiUrl, headers, fetch }) ]);
+    const link = ApolloLink.from([
+      new RetryLink(),
+      new BatchHttpLink({ uri: this.apiUrl, headers, fetch })
+    ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });
     return this;
+  }
+
+  async authenticateUser () {
+    const authenticationDetails = new Cognito.AuthenticationDetails({
+      Username: this.username,
+      Password: this.password
+    });
+    const Pool = new Cognito.CognitoUserPool({
+      UserPoolId: this.poolId,
+      ClientId: this.clientId
+    });
+    const User = new Cognito.CognitoUser({ Username: this.username, Pool });
+  
+    const result = await new Promise((resolve, reject) => {
+      User.authenticateUser(authenticationDetails, {
+        onSuccess: (result) => resolve(result),
+        onFailure: (err) => reject(err)
+      });
+    });
+  
+    return result.getAccessToken().getJwtToken();
   }
 
   async queryV1 (j1ql) {
@@ -67,6 +88,15 @@ class JupiterOneClient {
       }
     }
     return results;
+  }
+
+  async queryGraphQL (query) {
+    const res = await this.graphClient.query({ query });
+    if (res.errors) {
+      console.log(res.errors);
+      throw new Error(`JupiterOne returned error(s) for query: '${query}'`);
+    }
+    return res;
   }
 
   async createEntity (key, type, classLabels, properties) {
@@ -146,21 +176,6 @@ class JupiterOneClient {
     }
     return res.data.upsertEntityRawData.status;
   }
-}
-
-async function authenticateUser (Username, Password) {
-  const authenticationDetails = new Cognito.AuthenticationDetails({ Username, Password });
-  const Pool = new Cognito.CognitoUserPool({ UserPoolId, ClientId });
-  const User = new Cognito.CognitoUser({ Username, Pool });
-
-  const result = await new Promise((resolve, reject) => {
-    User.authenticateUser(authenticationDetails, {
-      onSuccess: (result) => resolve(result),
-      onFailure: (err) => reject(err)
-    });
-  });
-
-  return result.getAccessToken().getJwtToken();
 }
 
 const J1QL_SKIP_COUNT = 250;
@@ -247,6 +262,4 @@ const UPSERT_ENTITY_RAW_DATA = gql`
   }
 `;
 
-module.exports = {
-  JupiterOneClient
-};
+module.exports = JupiterOneClient;
