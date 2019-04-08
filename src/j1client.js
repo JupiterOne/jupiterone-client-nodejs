@@ -9,23 +9,27 @@ const gql = require('graphql-tag');
 const fetch = require('node-fetch');
 
 class JupiterOneClient {
-  constructor (account, username, password, poolId, clientId, dev = false) {
+  constructor (account, username, password, poolId, clientId, accessToken, dev = false) {
     this.account = account;
     this.username = username;
     this.password = password;
     this.poolId = poolId;
     this.clientId = clientId;
-    this.apiUrl = dev ? 'https://api.dev.jupiterone.io/graphql' : 'https://api.us.jupiterone.io/graphql';
+    this.accessToken = accessToken;
+    this.apiUrl = dev ? 'https://api.dev.jupiterone.io' : 'https://api.us.jupiterone.io';
+    this.queryEndpoint = this.apiUrl + '/graphql';
+    this.rulesEndpoint = this.apiUrl + '/rules/graphql';
   }
 
-  async init () {
-    const accessToken = await this.authenticateUser();
+  async init (rules) {
+    const token = this.accessToken ? this.accessToken : await this.authenticateUser();
+    const uri = rules ? this.rulesEndpoint : this.queryEndpoint;
     const headers = {};
-    headers['Authorization'] = `Bearer ${accessToken}`;
+    headers['Authorization'] = `Bearer ${token}`;
     headers['LifeOmic-Account'] = this.account;
     const link = ApolloLink.from([
       new RetryLink(),
-      new BatchHttpLink({ uri: this.apiUrl, headers, fetch })
+      new BatchHttpLink({ uri, headers, fetch })
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });
@@ -97,6 +101,21 @@ class JupiterOneClient {
       throw new Error(`JupiterOne returned error(s) for query: '${query}'`);
     }
     return res;
+  }
+
+  async mutateAlertRule(rule, update) {
+    const res = await this.graphClient.mutate({
+      mutation: update ? UPDATE_ALERT_RULE : CREATE_ALERT_RULE,
+      variables: {
+        instance: rule.instance
+      }
+    });
+    if (res.errors) {
+      throw new Error(`JupiterOne returned error(s) mutating alert rule: '${rule}'`);
+    }
+    return update
+      ? res.data.updateQuestionRuleInstance
+      : res.data.createQuestionRuleInstance;
   }
 
   async createEntity (key, type, classLabels, properties) {
@@ -258,6 +277,60 @@ const UPSERT_ENTITY_RAW_DATA = gql`
       rawData: $rawData
     ) {
       status
+    }
+  }
+`;
+
+const CREATE_ALERT_RULE = gql`
+  mutation CreateQuestionRuleInstance (
+    $instance: CreateQuestionRuleInstanceInput!
+  ) {
+    createQuestionRuleInstance (
+      instance: $instance
+    ) {
+      id
+      name
+      description
+      version
+      pollingInterval
+      question {
+        queries {
+          query
+          version
+        }
+      }
+      operations {
+        when
+        actions
+      }
+      outputs
+    }
+  }
+`;
+
+const UPDATE_ALERT_RULE = gql`
+  mutation UpdateQuestionRuleInstance (
+    $instance: UpdateQuestionRuleInstanceInput!
+  ) {
+    updateQuestionRuleInstance (
+      instance: $instance
+    ) {
+      id
+      name
+      description
+      version
+      pollingInterval
+      question {
+        queries {
+          query
+          version
+        }
+      }
+      operations {
+        when
+        actions
+      }
+      outputs
     }
   }
 `;

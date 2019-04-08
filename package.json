@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "j1client.js",
   "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
@@ -17,9 +17,23 @@
     "apollo-link-batch-http": "^1.2.11",
     "apollo-link-http": "^1.5.12",
     "apollo-link-retry": "^2.2.13",
+    "commander": "^2.14.1",
+    "file-set": "^2.0.0",
+    "fs-extra": "^5.0.0",
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
-    "node-fetch": "^2.3.0"
+    "inquirer": "^5.1.0",
+    "joi": "^13.1.2",
+    "moment": "^2.22.2",
+    "mustache": "^2.3.0",
+    "node-fetch": "^2.3.0",
+    "p-map": "^1.2.0",
+    "pluralize": "^7.0.0",
+    "progress": "^2.0.3",
+    "request": "^2.87.0",
+    "request-promise": "^4.2.2",
+    "strip-ansi": "^4.0.0",
+    "valid-url": "^1.0.9"
   },
   "devDependencies": {
     "dotenv": "^7.0.0",
