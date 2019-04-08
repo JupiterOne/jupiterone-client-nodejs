@@ -82,7 +82,7 @@ Updated entity 12345678-e75f-40d6-858e-123456abcdef.
 Done!
 ```
 
-The input JSON file is a single entity or an array of entities. For example,
+The input JSON file is a single entity or an array of entities. For example:
 
 ```json
 [
@@ -120,6 +120,9 @@ Authenticating with JupiterOne... Authenticated!
 Created alert rule <uuid>.
 Done!
 ```
+
+The input JSON file is one or an array of alert rule instances. The following is
+an example of a single alert rule instance:
 
 ```json
 {
