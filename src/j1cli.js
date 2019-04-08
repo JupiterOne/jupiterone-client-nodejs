@@ -1,14 +1,14 @@
 'use strict';
 
-const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID || 'us-east-2_9fnMVHuxD';
-const J1_CLIENT_ID = process.env.J1_CLIENT_ID || '1hcv141pqth5f49df7o28ngq1u';
-const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const JupiterOneClient = require('./j1client');
 const { prompt } = require('inquirer');
 const program = require('commander');
 const error = require('./util/error');
 const fs = require('fs');
 
+const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID || 'us-east-2_9fnMVHuxD';
+const J1_CLIENT_ID = process.env.J1_CLIENT_ID || '1hcv141pqth5f49df7o28ngq1u';
+const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const EUSAGEERROR = 126;
 
 async function main () {
@@ -52,7 +52,7 @@ async function main () {
 
 // ensure user supplied necessary params
 async function validateInputs () {
-  console.log('Validating inputs...');
+  process.stdout.write('Validating inputs... ');
   if (!program.account || program.account === '') {
     error.fatal('Missing -a|--account flag!', EUSAGEERROR);
   }
@@ -86,6 +86,7 @@ async function validateInputs () {
     }
   }
 
+  console.log('OK');
   return data;
 }
 
@@ -120,7 +121,7 @@ async function initializeJ1Client () {
       J1_CLIENT_ID,
       program.key || J1_API_TOKEN
     )).init(program.alert);
-  console.log('Authenticated!');
+  console.log('OK');
   return j1Client;
 }
 
