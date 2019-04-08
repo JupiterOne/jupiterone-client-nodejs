@@ -114,7 +114,7 @@ The `entityId` property is only necessary for `update` operations.
 **Create or update alert rules from a JSON input file:**
 
 ```bash
-./bin/j1cli -o create --alert -a j1dev -f ./local/existing-alerts.json
+./bin/j1cli -o create --alert -a j1dev -f ./local/alerts.json
 Validating inputs...
 Authenticating with JupiterOne... Authenticated!
 Created alert rule <uuid>.
