@@ -82,6 +82,8 @@ Updated entity 12345678-e75f-40d6-858e-123456abcdef.
 Done!
 ```
 
+NOTE: the `create` operation will also update an existing entity, if an entity matching the provided Key, Type, and Class already exists in JupiterOne. The `update` operation will fail unless that entity Id already exists.
+
 The input JSON file is a single entity or an array of entities. For example:
 
 ```json
