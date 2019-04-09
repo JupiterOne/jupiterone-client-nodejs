@@ -213,6 +213,9 @@ mutation CreateEntity(
     entityClass: $entityClass
     properties: $properties
   ) {
+    entity {
+      _id
+    }
     vertex {
       id
       entity {
@@ -256,10 +259,16 @@ const CREATE_RELATIONSHIP = gql`
       fromEntityId: $fromEntityId
       toEntityId: $toEntityId
     ) {
+      relationship {
+        _id
+      }
       edge {
         id
         toVertexId
         fromVertexId
+        relationship {
+          _id
+        }
       }
     }
   }

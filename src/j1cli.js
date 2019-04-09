@@ -165,7 +165,7 @@ async function createRelationship(j1Client, r) {
     r.fromEntityId,
     r.toEntityId
   );
-  return res.edge.id;
+  return res.edge.relationship._id;
 }
 
 async function mutateRelationships(j1Client, relationships, update) {
