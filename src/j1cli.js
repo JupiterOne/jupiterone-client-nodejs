@@ -5,11 +5,18 @@ const { prompt } = require('inquirer');
 const program = require('commander');
 const error = require('./util/error');
 const fs = require('fs');
+const { defaultAlertSettings } = require('@jupiterone/jupiterone-alert-rules');
 
 const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID || 'us-east-2_9fnMVHuxD';
 const J1_CLIENT_ID = process.env.J1_CLIENT_ID || '1hcv141pqth5f49df7o28ngq1u';
 const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const EUSAGEERROR = 126;
+
+const SUPPORTED_OPERATIONS = [
+  'create',
+  'update',
+  'provision-alert-rule-pack'
+]
 
 async function main () {
   program
@@ -19,11 +26,11 @@ async function main () {
     .option('-u, --user <email>', 'JupiterOne user email.')
     .option('-k, --key <apiToken>', 'JupiterOne API access token.')
     .option('-q, --query <j1ql>', 'Execute a query.')
-    .option('-o, --operation <action>', 'Supported operations: create, update')
+    .option('-o, --operation <action>', `Supported operations: ${SUPPORTED_OPERATIONS}`)
     .option('--entity', 'Specifies entity operations.')
     .option('--relationship', 'Specifies relationship operations.')
     .option('--alert', 'Specifies alert rule operations.')
-    .option('-f, --file <dir>', 'Input JSON file.')
+    .option('-f, --file <dir>', 'Input JSON file. Or the filename of the alert rule pack.')
     .parse(process.argv);
 
   try {
@@ -41,7 +48,12 @@ async function main () {
       } else if (program.relationship) {
         await mutateRelationships(j1Client, Array.isArray(data) ? data : [data], update);
       } else if (program.alert) {
-        await mutateAlertRules(j1Client, Array.isArray(data) ? data : [data], update);
+        if (program.operation === 'provision-alert-rule-pack') {
+          await provisionRulePackAlerts(j1Client, data, defaultAlertSettings)
+        }
+        else {
+          await mutateAlertRules(j1Client, Array.isArray(data) ? data : [data], update);
+        }
       }
     }
   } catch (err) {
@@ -63,19 +75,27 @@ async function validateInputs () {
     if (!program.entity && !program.relationship && !program.alert) {
       error.fatal('Must specify a query (using -q|--query) or an entity/relationship/rule operation (--entity or --relationship or --alert)', EUSAGEERROR);
     } else if (!program.operation || program.operation === '') {
-      error.fatal('Must specify command action for entity or rule operation (-c|--command <create|update|delete>)', EUSAGEERROR);
-    } else if (program.operation !== 'create' && program.operation !== 'update') {
+      error.fatal('Must specify command action for entity or rule operation (-o|--operation)', EUSAGEERROR);
+    } else if (SUPPORTED_OPERATIONS.indexOf(program.operation) < 0) {
       error.fatal(`Unsupported operation: ${program.operation}`);
     } else if (!program.file || program.file === '') {
       error.fatal('Must specify input JSON file with -f|--file)', EUSAGEERROR);
-    } else if (!fs.existsSync(program.file)) {
-      error.fatal(`Could not find input JSON file (${program.file}). Specify the correct path with '-f|--file'.`);
     } else {
-      data = jParse(program.file);
+      let filePath = program.file;
+      if (!fs.existsSync(filePath)) {
+        if (program.operation === 'provision-alert-rule-pack') {
+          filePath = `node_modules/@jupiterone/jupiterone-alert-rules/rule-packs/${program.file}.json`;
+          if (!fs.existsSync(filePath)) {
+            error.fatal(`Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`);
+          }
+        }
+      } 
+
+      data = jParse(filePath);
       if (!data) {
-        error.fatal(`Could not parse input JSON file (${program.file}).`);
+        error.fatal(`Could not parse input JSON file (${filePath}).`);
       }
-    }
+  }
   }
   
   if ((!program.key || program.key === '') && !J1_API_TOKEN) {
@@ -154,8 +174,8 @@ async function mutateEntities(j1Client, entities, update) {
   }
   const entityIds = await Promise.all(promises);
   update
-    ? console.log(`Updated entities:\n${JSON.stringify(entityIds, null, 2)}`)
-    : console.log(`Created entities:\n${JSON.stringify(entityIds, null, 2)}`);
+    ? console.log(`Updated ${entityIds.length} entities:\n${JSON.stringify(entityIds, null, 2)}`)
+    : console.log(`Created ${entityIds.length} entities:\n${JSON.stringify(entityIds, null, 2)}`);
 }
 
 async function createRelationship(j1Client, r) {
@@ -179,7 +199,7 @@ async function mutateRelationships(j1Client, relationships, update) {
     }
   }
   const relationshipIds = await Promise.all(promises);
-  console.log(`Created relationships:\n${JSON.stringify(relationshipIds, null, 2)}`);
+  console.log(`Created ${relationshipIds.length} relationships:\n${JSON.stringify(relationshipIds, null, 2)}`);
 }
 
 async function mutateAlertRules(j1Client, rules, update) {
@@ -209,8 +229,31 @@ async function mutateAlertRules(j1Client, rules, update) {
   }
   const res = await Promise.all(promises);
   update
-    ? console.log(`Updated alert rules:\n${JSON.stringify(res, null, 2)}.`)
-    : console.log(`Created alert rules:\n${JSON.stringify(res, null, 2)}.`);
+    ? console.log(`Updated ${res.length} alert rules:\n${JSON.stringify(res, null, 2)}.`)
+    : console.log(`Created ${res.length} alert rules:\n${JSON.stringify(res, null, 2)}.`);
+}
+
+async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
+  const promises = [];
+  for (const r of rules) {
+    if (r.instance) {
+      const update = r.instance.id !== undefined;
+      promises.push(j1Client.mutateAlertRule(rule, update));
+    }
+    else {
+      const instance = {
+        name: r.name,
+        description: r.description,
+        question: {
+          queries: r.queries
+        },
+        ...defaultSettings
+      }
+      promises.push(j1Client.mutateAlertRule({instance}, false));
+    }
+  }
+  const res = await Promise.all(promises);
+  process.stdout.write(`Provisioned ${res.length} rules:\n${JSON.stringify(res, null, 2)}\n`);
 }
 
 main();

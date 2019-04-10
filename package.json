@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "j1client.js",
   "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@jupiterone/jupiterone-alert-rules": "^0.1.0",
     "amazon-cognito-identity-js-node": "^0.0.3",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-client": "^2.5.1",
