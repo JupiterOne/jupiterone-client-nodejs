@@ -182,18 +182,13 @@ async function mutateRelationships(j1Client, relationships, update) {
   console.log(`Created relationships:\n${JSON.stringify(relationshipIds, null, 2)}`);
 }
 
-async function mutateAlertRule(j1Client, rule, update) {
-  const res = await j1Client.mutateAlertRule(rule, update);
-  return res.id;
-}
-
 async function mutateAlertRules(j1Client, rules, update) {
   const promises = [];
   for (const r of rules) {
     if (update) {
       // Check if the alert rule instance has an id, which is required for update
       if (r.instance && r.instance.id && r.instance.id !== '') {
-        promises.push(mutateAlertRule(j1Client, r, update));
+        promises.push(j1Client.mutateAlertRule(r, update));
       } else {
         console.log(
           `Skipped updating the following alert rule instance because it has no 'id' property:\n ${
@@ -208,14 +203,14 @@ async function mutateAlertRules(j1Client, rules, update) {
             JSON.stringify(r, null, 2)
           }`);
       } else {
-        promises.push(mutateAlertRule(j1Client, r, update));
+        promises.push(j1Client.mutateAlertRule(r, update));
       }
     }
   }
-  const ruleIds = await Promise.all(promises);
+  const res = await Promise.all(promises);
   update
-    ? console.log(`Updated alert rules:\n${JSON.stringify(ruleIds, null, 2)}.`)
-    : console.log(`Created alert rules:\n${JSON.stringify(ruleIds, null, 2)}.`);
+    ? console.log(`Updated alert rules:\n${JSON.stringify(res, null, 2)}.`)
+    : console.log(`Created alert rules:\n${JSON.stringify(res, null, 2)}.`);
 }
 
 main();
