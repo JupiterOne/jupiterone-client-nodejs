@@ -18,10 +18,11 @@ Options:
   -u, --user <email>        JupiterOne user email.
   -k, --key <apiToken>      JupiterOne API access token.
   -q, --query <j1ql>        Execute a query.
-  -o, --operation <action>  Supported operations: create, update
+  -o, --operation <action>  Supported operations: create, update, provision-alert-rule-pack
   --entity                  Specifies entity operations.
   --relationship            Specifies relationship operations.
-  -f, --file <dir>          Input JSON file.
+  --alert                   Specifies alert rule operations.
+  -f, --file <dir>          Input JSON file. Or the filename of the alert rule pack.
   -h, --help                output usage information
 ```
 
@@ -32,7 +33,7 @@ Options:
 ```bash
 ./bin/j1cli -a j1dev -q 'Find jupiterone_account'
 Validating inputs...
-Authenticating with JupiterOne... Authenticated!
+Authenticating with JupiterOne... OK
 [
   {
     "id": "06ab12cd-a402-406c-8582-abcdef001122",
@@ -118,7 +119,7 @@ The `entityId` property is only necessary for `update` operations.
 ```bash
 ./bin/j1cli -o create --alert -a j1dev -f ./local/alerts.json
 Validating inputs...
-Authenticating with JupiterOne... Authenticated!
+Authenticating with JupiterOne... OK
 Created alert rule <uuid>.
 Done!
 ```
@@ -172,3 +173,22 @@ an example of a single alert rule instance:
 ```
 
 Add `"id": "<uuid>"` property to the instance JSON when updating an alert rule.
+
+### Provision Alert Rules from Rule Pack
+
+The following command will provision all the default alert rules from
+`jupiterone-alert-rules` with the rule pack name `aws-config`:
+
+```bash
+./bin/j1cli -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f aws-config
+```
+
+You can specify your own rule pack to provision as well, by specifying the full
+file path to the `rule-pack.json` file:
+
+```bash
+./bin/j1cli -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f path/to/your/rule-pack.json
+```
+
+For more details about the rules and rule packs, see the `jupiterone-alert-rules`
+project.
