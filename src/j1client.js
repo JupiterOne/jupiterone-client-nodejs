@@ -304,6 +304,7 @@ const CREATE_ALERT_RULE = gql`
       pollingInterval
       question {
         queries {
+          name
           query
           version
         }
@@ -331,6 +332,7 @@ const UPDATE_ALERT_RULE = gql`
       pollingInterval
       question {
         queries {
+          name
           query
           version
         }
