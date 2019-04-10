@@ -299,20 +299,6 @@ const CREATE_ALERT_RULE = gql`
     ) {
       id
       name
-      description
-      version
-      pollingInterval
-      question {
-        queries {
-          query
-          version
-        }
-      }
-      operations {
-        when
-        actions
-      }
-      outputs
     }
   }
 `;
@@ -331,6 +317,7 @@ const UPDATE_ALERT_RULE = gql`
       pollingInterval
       question {
         queries {
+          name
           query
           version
         }
