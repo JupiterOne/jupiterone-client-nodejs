@@ -6,6 +6,9 @@
   "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
   "author": "JupiterOne <dev@jupiterone.io>",
   "license": "MIT",
+  "bin": {
+    "j1": "bin/j1"
+  },
   "scripts": {
     "test": "jest"
   },

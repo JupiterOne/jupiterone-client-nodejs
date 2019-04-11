@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+require('../src/j1cli.js')

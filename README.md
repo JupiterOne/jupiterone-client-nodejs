@@ -4,13 +4,27 @@ A node.js client wrapper and CLI utility for JupiterOne public API.
 
 This is currently an experimental project and subject to change.
 
+## Installation
+
+To install the client local to the current project:
+
+```bash
+npm install @jupiterone/jupiterone-client-nodejs
+```
+
+To install the client globally:
+
+```bash
+npm install @jupiterone/jupiterone-client-nodejs -g
+```
+
 ## Using the J1 CLI
 
 Usage:
 
 ```bash
-$ ./bin/j1cli --help
-Usage: j1cli [options]
+$ j1 --help
+Usage: j1 [options]
 
 Options:
   -v, --version             output the version number
@@ -31,7 +45,7 @@ Options:
 **Run a J1QL query:**
 
 ```bash
-./bin/j1cli -a j1dev -q 'Find jupiterone_account'
+j1 -a j1dev -q 'Find jupiterone_account'
 Validating inputs...
 Authenticating with JupiterOne... OK
 [
@@ -68,14 +82,14 @@ Done!
 **Create or update entities from a JSON input file:**
 
 ```bash
-./bin/j1cli -o create --entity -a j1dev -f ./local/entities.json
+j1 -o create --entity -a j1dev -f ./local/entities.json
 Validating inputs...
 Authenticating with JupiterOne... Authenticated!
 Created entity 12345678-fe34-44ee-b3b0-abcdef123456.
 Created entity 12345678-e75f-40d6-858e-123456abcdef.
 Done!
 
-./bin/j1cli -o update --entity -a j1dev -f ./local/entities.json
+j1 -o update --entity -a j1dev -f ./local/entities.json
 Validating inputs...
 Authenticating with JupiterOne... Authenticated!
 Updated entity 12345678-fe34-44ee-b3b0-abcdef123456.
@@ -117,7 +131,7 @@ The `entityId` property is only necessary for `update` operations.
 **Create or update alert rules from a JSON input file:**
 
 ```bash
-./bin/j1cli -o create --alert -a j1dev -f ./local/alerts.json
+j1 -o create --alert -a j1dev -f ./local/alerts.json
 Validating inputs...
 Authenticating with JupiterOne... OK
 Created alert rule <uuid>.
@@ -180,14 +194,14 @@ The following command will provision all the default alert rules from
 `jupiterone-alert-rules` with the rule pack name `aws-config`:
 
 ```bash
-./bin/j1cli -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f aws-config
+j1 -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f aws-config
 ```
 
 You can specify your own rule pack to provision as well, by specifying the full
 file path to the `rule-pack.json` file:
 
 ```bash
-./bin/j1cli -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f path/to/your/rule-pack.json
+j1 -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f path/to/your/rule-pack.json
 ```
 
 For more details about the rules and rule packs, see the `jupiterone-alert-rules`
