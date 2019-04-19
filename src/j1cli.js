@@ -248,7 +248,6 @@ async function mutateAlertRules(j1Client, rules, update) {
       skipped.push(r.name);
     }
   }
-  const res = await Promise.all(promises);
   update
     ? console.log(`Updated ${res.length} alert rules:\n${JSON.stringify(res, null, 2)}.`)
     : console.log(`Created ${res.length} alert rules:\n${JSON.stringify(res, null, 2)}.`);
