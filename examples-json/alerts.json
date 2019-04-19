@@ -1,0 +1,131 @@
+[
+  {
+    "instance": {
+      "id": "1b9f58f4-1fc1-4335-98b6-716c9036d671",
+      "name": "unencrypted-prod-data",
+      "description": "Data stores in production tagged critical and unencrypted",
+      "version": "v1",
+      "pollingInterval": "ONE_HOUR",
+      "outputs": [
+        "alertLevel"
+      ],
+      "operations": [
+        {
+          "when": {
+            "type": "FILTER",
+            "version": 1,
+            "condition": [
+              "AND",
+              [ "queries.unencryptedCriticalData.total", "!=", 0 ]
+            ]
+          },
+          "actions": [
+            {
+              "type": "SET_PROPERTY",
+              "targetProperty": "alertLevel",
+              "targetValue": "CRITICAL"
+            },
+            {
+              "type": "CREATE_ALERT"
+            }
+          ]
+        }
+      ],
+      "question": {
+        "queries": [
+          {
+            "query": "Find DataStore with (production=true or tag.Production=true) and classification='critical' and encrypted!=true as d return d.tag.AccountName as Account, d.displayName as UnencryptedDataStores, d._type as Type, d.encrypted as Encrypted",
+            "version": "v1",
+            "name": "unencryptedCriticalData"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "instance": {
+      "id": "ecbb6bb8-59f1-4f6e-a515-aa29eb8c77cc",
+      "name": "unclassified-prod-data",
+      "description": "Data stores in production without a classification property/tag",
+      "version": "v1",
+      "pollingInterval": "ONE_HOUR",
+      "outputs": [
+        "alertLevel"
+      ],
+      "operations": [
+        {
+          "when": {
+            "type": "FILTER",
+            "version": 1,
+            "condition": [
+              "AND",
+              [ "queries.unclassifiedProdData.total", "!=", 0 ]
+            ]
+          },
+          "actions": [
+            {
+              "type": "SET_PROPERTY",
+              "targetProperty": "alertLevel",
+              "targetValue": "HIGH"
+            },
+            {
+              "type": "CREATE_ALERT"
+            }
+          ]
+        }
+      ],
+      "question": {
+        "queries": [
+          {
+            "name": "unclassifiedProdData",
+            "query": "Find DataStore with (production=true or tag.Production=true) and classification=undefined",
+            "version": "v1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "instance": {
+      "id": "df58badb-c5c4-4b6b-a97c-6a5c5de94580",
+      "name": "prod-data-no-owner",
+      "description": "Data stores in production without an owner property/tag",
+      "version": "v1",
+      "pollingInterval": "ONE_DAY",
+      "outputs": [
+        "alertLevel"
+      ],
+      "operations": [
+        {
+          "when": {
+            "type": "FILTER",
+            "version": 1,
+            "condition": [
+              "AND",
+              [ "queries.query.total", "!=", 0 ]
+            ]
+          },
+          "actions": [
+            {
+              "type": "SET_PROPERTY",
+              "targetProperty": "alertLevel",
+              "targetValue": "HIGH"
+            },
+            {
+              "type": "CREATE_ALERT"
+            }
+          ]
+        }
+      ],
+      "question": {
+        "queries": [
+          {
+            "name": "query",
+            "query": "Find DataStore with (production=true or tag.Production=true) and owner=undefined",
+            "version": "v1"
+          }
+        ]
+      }
+    }
+  }
+]

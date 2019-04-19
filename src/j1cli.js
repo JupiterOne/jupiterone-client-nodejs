@@ -5,6 +5,7 @@ const { prompt } = require('inquirer');
 const program = require('commander');
 const error = require('./util/error');
 const fs = require('fs');
+const yaml = require('js-yaml');
 const { defaultAlertSettings } = require('@jupiterone/jupiterone-alert-rules');
 
 const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID || 'us-east-2_9fnMVHuxD';
@@ -89,7 +90,7 @@ async function validateInputs () {
             error.fatal(`Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`);
           }
         }
-      } 
+      }
 
       data = jParse(filePath);
       if (!data) {
@@ -111,9 +112,17 @@ async function validateInputs () {
 }
 
 function jParse (file) {
-  let data;
-  try { data = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (err) { return null; }
-  return data;
+  try {
+    const data = fs.readFileSync(file, 'utf8');
+    if (file.split('.').pop().toLowerCase() === 'yml') {
+      return yaml.safeLoad(data);
+    } else {
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.warn(err);
+    return null;
+  }
 }
 
 // Note: this will happily read from STDIN if data is piped in...
@@ -203,34 +212,54 @@ async function mutateRelationships(j1Client, relationships, update) {
 }
 
 async function mutateAlertRules(j1Client, rules, update) {
-  const promises = [];
+  const created = [];
+  const updated = [];
+  const skipped = [];
+  const results = [];
   for (const r of rules) {
-    if (update) {
-      // Check if the alert rule instance has an id, which is required for update
-      if (r.instance && r.instance.id && r.instance.id !== '') {
-        promises.push(j1Client.mutateAlertRule(r, update));
+    try {
+      if (update) {
+        // Check if the alert rule instance has an id, which is required for update
+        if (r.instance && r.instance.id && r.instance.id !== '') {
+          const res = await j1Client.mutateAlertRule(r, update)
+          results.push(res);
+          updated.push({id: res.id, name: r.instance.name});
+        } else {
+          console.log(
+            `Skipped updating the following alert rule instance because it has no 'id' property:\n ${
+              JSON.stringify(r, null, 2)
+            }`);
+          skipped.push({id: r.instance.id, name: r.instance.name});
+        }
       } else {
-        console.log(
-          `Skipped updating the following alert rule instance because it has no 'id' property:\n ${
-            JSON.stringify(r, null, 2)
-          }`);
+        // If it is a 'create' operation, skip existing alert rule instance to avoid duplicate
+        if (r.instance && r.instance.id && r.instance.id !== '') {
+          console.log(
+            `Skipped creating the following alert rule instance because it already exists:\n ${
+              JSON.stringify(r, null, 2)
+            }`);
+          skipped.push({id: r.instance.id, name: r.instance.name});
+        } else {
+          const res = await j1Client.mutateAlertRule(r, update)
+          results.push(res);
+          created.push({id: res.id, name: r.instance.name});
+        }
       }
-    } else {
-      // If it is a 'create' operation, skip existing alert rule instance to avoid duplicate
-      if (r.instance && r.instance.id && r.instance.id !== '') {
-        console.log(
-          `Skipped creating the following alert rule instance because it already exists:\n ${
-            JSON.stringify(r, null, 2)
-          }`);
-      } else {
-        promises.push(j1Client.mutateAlertRule(r, update));
-      }
+    } catch (err) {
+      console.warn(`Error mutating alert rule ${r}.\n${err}\n Skipped.`);
+      skipped.push({id: r.instance.id, name: r.instance.name});
     }
   }
-  const res = await Promise.all(promises);
-  update
-    ? console.log(`Updated ${res.length} alert rules:\n${JSON.stringify(res, null, 2)}.`)
-    : console.log(`Created ${res.length} alert rules:\n${JSON.stringify(res, null, 2)}.`);
+
+  if (created.length > 0) {
+    console.log(`Created ${created.length} alert rules:\n${JSON.stringify(created, null, 2)}.`)
+  }
+  if (updated.length > 0) {
+    console.log(`Updated ${updated.length} alert rules:\n${JSON.stringify(updated, null, 2)}.`)
+  }
+  if (skipped.length > 0) {
+    console.log(`Skipped ${skipped.length} alert rules:\n${JSON.stringify(skipped, null, 2)}.`)
+  }
 }
 
 async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {

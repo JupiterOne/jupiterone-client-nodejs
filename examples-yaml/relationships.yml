@@ -1,0 +1,7 @@
+---
+  - relationshipId: 3429d452-7cda-4ac1-b472-60c438a67e03
+    relationshipKey: test:entity:2|uses|test:entity:3
+    relationshipType: generic_resource_uses_resource
+    relationshipClass: USES
+    fromEntityId: 75121349-fe34-44ee-b3b0-4d41bc912a23
+    toEntityId: 3f61775c-e75f-40d6-858e-b868399b92e0
