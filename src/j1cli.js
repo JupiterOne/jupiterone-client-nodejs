@@ -5,6 +5,7 @@ const { prompt } = require('inquirer');
 const program = require('commander');
 const error = require('./util/error');
 const fs = require('fs');
+const yaml = require('js-yaml');
 const { defaultAlertSettings } = require('@jupiterone/jupiterone-alert-rules');
 
 const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID || 'us-east-2_9fnMVHuxD';
@@ -89,7 +90,7 @@ async function validateInputs () {
             error.fatal(`Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`);
           }
         }
-      } 
+      }
 
       data = jParse(filePath);
       if (!data) {
@@ -111,9 +112,17 @@ async function validateInputs () {
 }
 
 function jParse (file) {
-  let data;
-  try { data = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (err) { return null; }
-  return data;
+  try {
+    const data = fs.readFileSync(file, 'utf8');
+    if (file.split('.').pop().toLowerCase() === 'yml') {
+      return yaml.safeLoad(data);
+    } else {
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.warn(err);
+    return null;
+  }
 }
 
 // Note: this will happily read from STDIN if data is piped in...
@@ -203,28 +212,40 @@ async function mutateRelationships(j1Client, relationships, update) {
 }
 
 async function mutateAlertRules(j1Client, rules, update) {
-  const promises = [];
+  const created = [];
+  const updated = [];
+  const skipped = [];
+  const res = [];
   for (const r of rules) {
-    if (update) {
-      // Check if the alert rule instance has an id, which is required for update
-      if (r.instance && r.instance.id && r.instance.id !== '') {
-        promises.push(j1Client.mutateAlertRule(r, update));
+    try {
+      if (update) {
+        // Check if the alert rule instance has an id, which is required for update
+        if (r.instance && r.instance.id && r.instance.id !== '') {
+          res.push(await j1Client.mutateAlertRule(r, update));
+          updated.push(r.name);
+        } else {
+          console.log(
+            `Skipped updating the following alert rule instance because it has no 'id' property:\n ${
+              JSON.stringify(r, null, 2)
+            }`);
+          skipped.push(r.name);
+        }
       } else {
-        console.log(
-          `Skipped updating the following alert rule instance because it has no 'id' property:\n ${
-            JSON.stringify(r, null, 2)
-          }`);
+        // If it is a 'create' operation, skip existing alert rule instance to avoid duplicate
+        if (r.instance && r.instance.id && r.instance.id !== '') {
+          console.log(
+            `Skipped creating the following alert rule instance because it already exists:\n ${
+              JSON.stringify(r, null, 2)
+            }`);
+          skipped.push(r.name);
+        } else {
+          res.push(await j1Client.mutateAlertRule(r, update));
+          created.push(r.name);
+        }
       }
-    } else {
-      // If it is a 'create' operation, skip existing alert rule instance to avoid duplicate
-      if (r.instance && r.instance.id && r.instance.id !== '') {
-        console.log(
-          `Skipped creating the following alert rule instance because it already exists:\n ${
-            JSON.stringify(r, null, 2)
-          }`);
-      } else {
-        promises.push(j1Client.mutateAlertRule(r, update));
-      }
+    } catch (err) {
+      console.warn(`Error mutating alert rule ${r}.\n${err}\n Skipped.`);
+      skipped.push(r.name);
     }
   }
   const res = await Promise.all(promises);
