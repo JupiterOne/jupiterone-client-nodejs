@@ -314,6 +314,9 @@ const UPDATE_ALERT_RULE = gql`
       name
       description
       version
+      specVersion
+      latest
+      deleted
       pollingInterval
       question {
         queries {
