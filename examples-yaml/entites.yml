@@ -1,0 +1,15 @@
+---
+- entityId: 75121349-fe34-44ee-b3b0-4d41bc912a23
+  entityKey: test:entity:2
+  entityType: generic_resource
+  entityClass: Resource
+  properties:
+    name: Test Entity Resource 2
+    displayName: Test Entity Resource 2
+- entityId: 627ae4e5-5bce-4961-b64f-47a9ea2c5ad8
+  entityKey: test:entity:3
+  entityType: generic_resource
+  entityClass: Resource
+  properties:
+    name: Test Entity Resource 3
+    displayName: Test Entity Resource 3

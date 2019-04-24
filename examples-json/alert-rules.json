@@ -4,7 +4,7 @@
       "id": "1b9f58f4-1fc1-4335-98b6-716c9036d671",
       "name": "unencrypted-prod-data",
       "description": "Data stores in production tagged critical and unencrypted",
-      "version": "v1",
+      "specVersion": 1,
       "pollingInterval": "ONE_HOUR",
       "outputs": [
         "alertLevel"
@@ -13,7 +13,7 @@
         {
           "when": {
             "type": "FILTER",
-            "version": 1,
+            "specVersion": 1,
             "condition": [
               "AND",
               [ "queries.unencryptedCriticalData.total", "!=", 0 ]
@@ -47,7 +47,7 @@
       "id": "ecbb6bb8-59f1-4f6e-a515-aa29eb8c77cc",
       "name": "unclassified-prod-data",
       "description": "Data stores in production without a classification property/tag",
-      "version": "v1",
+      "specVersion": 1,
       "pollingInterval": "ONE_HOUR",
       "outputs": [
         "alertLevel"
@@ -56,7 +56,7 @@
         {
           "when": {
             "type": "FILTER",
-            "version": 1,
+            "specVersion": 1,
             "condition": [
               "AND",
               [ "queries.unclassifiedProdData.total", "!=", 0 ]
@@ -90,7 +90,7 @@
       "id": "df58badb-c5c4-4b6b-a97c-6a5c5de94580",
       "name": "prod-data-no-owner",
       "description": "Data stores in production without an owner property/tag",
-      "version": "v1",
+      "specVersion": 1,
       "pollingInterval": "ONE_DAY",
       "outputs": [
         "alertLevel"
@@ -99,7 +99,7 @@
         {
           "when": {
             "type": "FILTER",
-            "version": 1,
+            "specVersion": 1,
             "condition": [
               "AND",
               [ "queries.query.total", "!=", 0 ]

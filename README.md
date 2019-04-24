@@ -146,7 +146,7 @@ an example of a single alert rule instance:
   "instance": {
     "name": "unencrypted-prod-data",
     "description": "Data stores in production tagged critical and unencrypted",
-    "version": "v1",
+    "specVersion": 1,
     "pollingInterval": "ONE_DAY",
     "outputs": [
       "alertLevel"
@@ -155,7 +155,7 @@ an example of a single alert rule instance:
       {
         "when": {
           "type": "FILTER",
-          "version": 1,
+          "specVersion": 1,
           "condition": [
             "AND",
             [ "queries.unencryptedCriticalData.total", "!=", 0 ]
