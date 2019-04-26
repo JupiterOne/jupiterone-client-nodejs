@@ -309,13 +309,11 @@ mutation DeleteEntity (
   ) {
     entity {
       _id
-      ...
     }
     vertex {
       id,
       entity {
         _id
-        ...
       }
       properties
     }
