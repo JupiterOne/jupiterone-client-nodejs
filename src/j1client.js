@@ -134,24 +134,41 @@ class JupiterOneClient {
     return res.data.createEntity;
   }
 
-  async updateEntity (id, properties) {
+  async updateEntity (entityId, properties) {
     let res;
     try {
       res = await this.graphClient.mutate({
         mutation: UPDATE_ENTITY,
         variables: {
-          entityId: id,
+          entityId,
           properties
         }
       });
       if (res.errors) {
-        throw new Error(`JupiterOne returned error(s) updating entity with id: '${id}'`);
+        throw new Error(`JupiterOne returned error(s) updating entity with id: '${entityId}'`);
       }
     } catch (err) {
-      console.log({err, id, properties, res}, 'trap');
+      console.log({err, id, properties, res}, 'error updating entity');
       throw err;
     }
     return res.data.updateEntity;
+  }
+
+  async deleteEntity (entityId) {
+    let res;
+    try {
+      res = await this.graphClient.mutate({
+        mutation: DELETE_ENTITY,
+        variables: { entityId }
+      });
+      if (res.errors) {
+        throw new Error(`JupiterOne returned error(s) deleting entity with id: '${entityId}'`);
+      }
+    } catch (err) {
+      console.log({err, id, properties, res}, 'error deleting entity');
+      throw err;
+    }
+    return res.data.deleteEntity;
   }
 
   async createRelationship (key, type, klass, fromId, toId) {
@@ -194,6 +211,43 @@ class JupiterOneClient {
       throw new Error(`Unable to store raw template data for ${name}: ` + exception.message);
     }
     return res.data.upsertEntityRawData.status;
+  }
+
+  async createQuestion(question) {
+    const res = await this.graphClient.mutate({
+      mutation: CREATE_QUESTION,
+      variables: { question }
+    });
+    if (res.errors) {
+      throw new Error(`JupiterOne returned error(s) creating question: '${question}'`);
+    }
+    return res.data.createQuestion;
+  }
+
+  async updateQuestion(question) {
+    const { id, ...update } = question;
+    const res = await this.graphClient.mutate({
+      mutation: UPDATE_QUESTION,
+      variables: { 
+        id,
+        update
+      }
+    });
+    if (res.errors) {
+      throw new Error(`JupiterOne returned error(s) updating question: '${question}'`);
+    }
+    return res.data.updateQuestion;
+  }
+
+  async deleteQuestion(questionId) {
+    const res = await this.graphClient.mutate({
+      mutation: DELETE_QUESTION,
+      variables: { id: questionId }
+    });
+    if (res.errors) {
+      throw new Error(`JupiterOne returned error(s) updating question with ID: '${questionId}'`);
+    }
+    return res.data.deleteQuestion;
   }
 }
 
@@ -243,6 +297,30 @@ const UPDATE_ENTITY = gql`
     }
   }
 `;
+
+const DELETE_ENTITY = gql`
+mutation DeleteEntity (
+  $entityId: String!
+  $timestamp: Long
+) {
+  deleteEntity (
+    entityId: $entityId,
+    timestamp: $timestamp,
+  ) {
+    entity {
+      _id
+      ...
+    }
+    vertex {
+      id,
+      entity {
+        _id
+        ...
+      }
+      properties
+    }
+  }
+}`
 
 const CREATE_RELATIONSHIP = gql`
   mutation CreateRelationship(
@@ -330,6 +408,84 @@ const UPDATE_ALERT_RULE = gql`
         actions
       }
       outputs
+    }
+  }
+`;
+
+const CREATE_QUESTION = gql`
+  mutation CreateQuestion($question: CreateQuestionInput!) {
+    createQuestion(question: $question) {
+      id
+      title
+      description
+      queries {
+        query
+        version
+      }
+      variables {
+        name
+        required
+        default
+      }
+      compliance {
+        standard
+        requirements
+      }
+      tags
+      accountId
+      integrationDefinitionId
+    }
+  }
+`;
+
+const UPDATE_QUESTION = gql`
+  mutation UpdateQuestion($id: ID!, $update: QuestionUpdate!) {
+    updateQuestion(id: $id, update: $update) {
+      id
+      title
+      description
+      queries {
+        query
+        version
+      }
+      variables {
+        name
+        required
+        default
+      }
+      compliance {
+        standard
+        requirements
+      }
+      tags
+      accountId
+      integrationDefinitionId
+    }
+  }
+`;
+
+const DELETE_QUESTION = gql`
+  mutation DeleteQuestion($id: ID!) {
+    deleteQuestion(id: $id) {
+      id
+      title
+      description
+      queries {
+        query
+        version
+      }
+      variables {
+        name
+        required
+        default
+      }
+      compliance {
+        standard
+        requirements
+      }
+      tags
+      accountId
+      integrationDefinitionId
     }
   }
 `;
