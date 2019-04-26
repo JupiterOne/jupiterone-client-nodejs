@@ -191,7 +191,7 @@ async function mutateEntities(j1Client, entities, operation) {
     }
   } else if (operation === 'delete') {
     for (const e of entities) {
-      promises.push(deleteEntity(j1Client, e));
+      promises.push(deleteEntity(j1Client, e.entityId));
     }
   }
   const entityIds = await Promise.all(promises);
