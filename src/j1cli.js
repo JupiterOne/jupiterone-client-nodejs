@@ -341,7 +341,6 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
       promises.push(j1Client.mutateAlertRule(r, update));
     }
     else {
-      
       const instance = r.alertLevel ? 
         {
           name: r.name,
