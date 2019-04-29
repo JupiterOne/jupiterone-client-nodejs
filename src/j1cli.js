@@ -341,26 +341,40 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
       promises.push(j1Client.mutateAlertRule(r, update));
     }
     else {
-      const instance = {
-        name: r.name,
-        description: r.description,
-        question: {
-          queries: r.queries
-        },
-        ...defaultSettings
-      }
-      if (r.alertLevel) {
-        instance.operations[0].actions = [
-          {
-            type: "SET_PROPERTY",
-            targetProperty: "alertLevel",
-            targetValue: r.alertLevel
+      
+      const instance = r.alertLevel ? 
+        {
+          name: r.name,
+          description: r.description,
+          question: {
+            queries: r.queries
           },
-          {
-            type: "CREATE_ALERT"
-          }
-        ];
-      }
+          specVersion: defaultSettings.specVersion,
+          pollingInterval: defaultSettings.pollingInterval,
+          outputs: defaultAlertSettings.outputs,
+          operations: [
+            {
+              when: defaultSettings.operations[0].when,
+              actions: [
+                {
+                  type: "SET_PROPERTY",
+                  targetProperty: "alertLevel",
+                  targetValue: r.alertLevel
+                },
+                {
+                  type: "CREATE_ALERT"
+                }
+              ]
+            }
+          ]
+        } : {
+          name: r.name,
+          description: r.description,
+          question: {
+            queries: r.queries
+          },
+          ...defaultAlertSettings
+        };
       promises.push(j1Client.mutateAlertRule({instance}, false));
     }
   }
