@@ -16,6 +16,7 @@ const EUSAGEERROR = 126;
 const SUPPORTED_OPERATIONS = [
   'create',
   'update',
+  'delete',
   'provision-alert-rule-pack'
 ]
 
@@ -31,6 +32,7 @@ async function main () {
     .option('--entity', 'Specifies entity operations.')
     .option('--relationship', 'Specifies relationship operations.')
     .option('--alert', 'Specifies alert rule operations.')
+    .option('--question', 'Specifies question operations. A question is answered by one or more queries.')
     .option('-f, --file <dir>', 'Input JSON file. Or the filename of the alert rule pack.')
     .parse(process.argv);
 
@@ -45,7 +47,7 @@ async function main () {
     else {
       const update = program.operation === 'update';
       if (program.entity) {
-        await mutateEntities(j1Client, Array.isArray(data) ? data : [data], update);
+        await mutateEntities(j1Client, Array.isArray(data) ? data : [data], program.operation);
       } else if (program.relationship) {
         await mutateRelationships(j1Client, Array.isArray(data) ? data : [data], update);
       } else if (program.alert) {
@@ -55,6 +57,8 @@ async function main () {
         else {
           await mutateAlertRules(j1Client, Array.isArray(data) ? data : [data], update);
         }
+      } else if (program.question) {
+        await mutateQuestions(j1Client, Array.isArray(data) ? data : [data], program.operation);
       }
     }
   } catch (err) {
@@ -73,12 +77,12 @@ async function validateInputs () {
   let data;
 
   if (!program.query || program.query === '') {
-    if (!program.entity && !program.relationship && !program.alert) {
-      error.fatal('Must specify a query (using -q|--query) or an entity/relationship/rule operation (--entity or --relationship or --alert)', EUSAGEERROR);
-    } else if (!program.operation || program.operation === '') {
-      error.fatal('Must specify command action for entity or rule operation (-o|--operation)', EUSAGEERROR);
+    if (!program.operation || program.operation === '') {
+      error.fatal('Must specify a query (using -q|--query) or operation action (-o|--operation)', EUSAGEERROR);
     } else if (SUPPORTED_OPERATIONS.indexOf(program.operation) < 0) {
       error.fatal(`Unsupported operation: ${program.operation}`);
+    } else if (!program.entity && !program.relationship && !program.alert && !program.question) {
+      error.fatal('Must specify an operation target type (--entity, --relationship, --alert, or --question)', EUSAGEERROR);
     } else if (!program.file || program.file === '') {
       error.fatal('Must specify input JSON file with -f|--file)', EUSAGEERROR);
     } else {
@@ -170,21 +174,28 @@ async function updateEntity(j1Client, entityId, properties) {
   return entityId;
 }
 
-async function mutateEntities(j1Client, entities, update) {
+async function deleteEntity(j1Client, entityId) {
+  await j1Client.deleteEntity(entityId);
+  return entityId;
+}
+
+async function mutateEntities(j1Client, entities, operation) {
   const promises = [];
-  if (update) {
-    for (const e of entities) {
-      promises.push(updateEntity(j1Client, e.entityId, e.properties));
-    }
-  } else {
+  if (operation === 'create') {
     for (const e of entities) {
       promises.push(createEntity(j1Client, e));
     }
+  } else if (operation === 'update') {
+    for (const e of entities) {
+      promises.push(updateEntity(j1Client, e.entityId, e.properties));
+    }
+  } else if (operation === 'delete') {
+    for (const e of entities) {
+      promises.push(deleteEntity(j1Client, e.entityId));
+    }
   }
   const entityIds = await Promise.all(promises);
-  update
-    ? console.log(`Updated ${entityIds.length} entities:\n${JSON.stringify(entityIds, null, 2)}`)
-    : console.log(`Created ${entityIds.length} entities:\n${JSON.stringify(entityIds, null, 2)}`);
+  console.log(`${operation}d ${entityIds.length} entities:\n${JSON.stringify(entityIds, null, 2)}`)
 }
 
 async function createRelationship(j1Client, r) {
@@ -259,6 +270,64 @@ async function mutateAlertRules(j1Client, rules, update) {
   }
   if (skipped.length > 0) {
     console.log(`Skipped ${skipped.length} alert rules:\n${JSON.stringify(skipped, null, 2)}.`)
+  }
+}
+
+async function mutateQuestions(j1Client, questions, operation) {
+  const created = [];
+  const updated = [];
+  const deleted = [];
+  const skipped = [];
+  const results = [];
+  for (const q of questions) {
+    try {
+      if (operation === 'create') {
+        // Update if there is an ID
+        if (q.id) {
+          const res = await j1Client.updateQuestion(q);
+          results.push(res);
+          updated.push({id: q.id, title: q.title});
+        } else {
+          const res = await j1Client.createQuestion(q);
+          results.push(res);
+          created.push({id: res.id, title: q.title});
+        }
+      } else if (operation === 'update') {
+        if (q.id && q.id.length > 0) {
+          const res = await j1Client.updateQuestion(q);
+          results.push(res);
+          updated.push({id: q.id, title: q.title});
+        } else { 
+          // Skip if there is no ID
+          skipped.push({id: q.id, title: q.title});
+        }
+      } else if (operation === 'delete') {
+        if (q.id && q.id.length > 0) {
+          const res = await j1Client.deleteQuestion(q.id);
+          results.push(res);
+          deleted.push({id: q.id, title: q.title});
+        } else { 
+          // Skip if there is no ID
+          skipped.push({id: q.id, title: q.title});
+        }
+      }
+    } catch (err) {
+      console.warn(`Error mutating question ${q}.\n${err}\n Skipped.`);
+      skipped.push({id: q.id, title: q.title});
+    }
+  }
+
+  if (created.length > 0) {
+    console.log(`Created ${created.length} questions:\n${JSON.stringify(created, null, 2)}.`)
+  }
+  if (updated.length > 0) {
+    console.log(`Updated ${updated.length} questions:\n${JSON.stringify(updated, null, 2)}.`)
+  }
+  if (deleted.length > 0) {
+    console.log(`Deleted ${deleted.length} questions:\n${JSON.stringify(deleted, null, 2)}.`)
+  }
+  if (skipped.length > 0) {
+    console.log(`Skipped ${skipped.length} questions:\n${JSON.stringify(skipped, null, 2)}.`)
   }
 }
 
