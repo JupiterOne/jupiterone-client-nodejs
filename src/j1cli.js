@@ -93,6 +93,8 @@ async function validateInputs () {
           if (!fs.existsSync(filePath)) {
             error.fatal(`Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`);
           }
+        } else {
+          error.fatal(`Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`);
         }
       }
 
@@ -336,16 +338,31 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
   for (const r of rules) {
     if (r.instance) {
       const update = r.instance.id !== undefined;
-      promises.push(j1Client.mutateAlertRule(rule, update));
+      promises.push(j1Client.mutateAlertRule(r, update));
     }
     else {
       const instance = {
+        ...defaultSettings,
         name: r.name,
         description: r.description,
         question: {
           queries: r.queries
         },
-        ...defaultSettings
+        operations: r.alertLevel ? [
+          {
+            when: defaultSettings.operations[0].when,
+            actions: [
+              {
+                type: "SET_PROPERTY",
+                targetProperty: "alertLevel",
+                targetValue: r.alertLevel
+              },
+              {
+                type: "CREATE_ALERT"
+              }
+            ]
+          }
+        ] : defaultSettings.operations
       }
       promises.push(j1Client.mutateAlertRule({instance}, false));
     }

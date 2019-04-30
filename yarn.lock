@@ -276,10 +276,10 @@
     "@types/istanbul-lib-coverage" "^1.1.0"
     "@types/yargs" "^12.0.9"
 
-"@jupiterone/jupiterone-alert-rules@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@jupiterone/jupiterone-alert-rules/-/jupiterone-alert-rules-0.2.0.tgz#6d34dfcd6a901e2f93fd8082ceb84736bfc3937d"
-  integrity sha512-obTx16HXdF7m1dubKv/XOPL/kMXWoyt0YzOiaa5xU7JUZub7vt+euJSizSu54DWNBAejHFHZD5GxMAjE+FdNpA==
+"@jupiterone/jupiterone-alert-rules@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@jupiterone/jupiterone-alert-rules/-/jupiterone-alert-rules-0.3.0.tgz#224e2e5ab445ef21497e57a4b0cc2f4afc73504b"
+  integrity sha512-BDAKVgL7TobJ3PD3Phioa0LgopEHzRelZSgiBjFvAMFR8wiQs4GE/iSt/tVENQP/kKDfQLyM0wiyaJlgdHLyhQ==
 
 "@types/babel__core@^7.1.0":
   version "7.1.0"
