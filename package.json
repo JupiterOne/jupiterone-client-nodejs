@@ -27,7 +27,6 @@
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
     "inquirer": "^5.1.0",
-    "joi": "^13.1.2",
     "js-yaml": "^3.13.1",
     "moment": "^2.22.2",
     "mustache": "^2.3.0",
