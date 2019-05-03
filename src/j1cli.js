@@ -8,8 +8,8 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const { defaultAlertSettings } = require('@jupiterone/jupiterone-alert-rules');
 
-const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID || 'us-east-2_9fnMVHuxD';
-const J1_CLIENT_ID = process.env.J1_CLIENT_ID || '1hcv141pqth5f49df7o28ngq1u';
+const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID;
+const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
 const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const EUSAGEERROR = 126;
 
@@ -104,7 +104,7 @@ async function validateInputs () {
       }
   }
   }
-  
+
   if ((!program.key || program.key === '') && !J1_API_TOKEN) {
     if (!program.user || program.user === '') {
       error.fatal('Must authenticate with either the API key (using -k|--key) or username/password (using -u|--user)', EUSAGEERROR);
@@ -147,15 +147,15 @@ async function gatherPassword () {
 
 async function initializeJ1Client () {
   process.stdout.write('Authenticating with JupiterOne... ');
-  const j1Client = 
-    await (new JupiterOneClient(
-      program.account,
-      program.user,
-      program.password,
-      J1_USER_POOL_ID,
-      J1_CLIENT_ID,
-      program.key || J1_API_TOKEN
-    )).init(program.alert);
+  const j1Client =
+    await (new JupiterOneClient({
+      account: program.account,
+      username: program.user,
+      password: program.password,
+      poolId: J1_USER_POOL_ID,
+      clientId: J1_CLIENT_ID,
+      accessToken: program.key || J1_API_TOKEN
+    })).init(program.alert);
   console.log('OK');
   return j1Client;
 }
@@ -299,7 +299,7 @@ async function mutateQuestions(j1Client, questions, operation) {
           const res = await j1Client.updateQuestion(q);
           results.push(res);
           updated.push({id: q.id, title: q.title});
-        } else { 
+        } else {
           // Skip if there is no ID
           skipped.push({id: q.id, title: q.title});
         }
@@ -308,7 +308,7 @@ async function mutateQuestions(j1Client, questions, operation) {
           const res = await j1Client.deleteQuestion(q.id);
           results.push(res);
           deleted.push({id: q.id, title: q.title});
-        } else { 
+        } else {
           // Skip if there is no ID
           skipped.push({id: q.id, title: q.title});
         }

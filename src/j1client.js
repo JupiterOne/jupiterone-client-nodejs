@@ -8,14 +8,26 @@ const { BatchHttpLink } = require('apollo-link-batch-http');
 const gql = require('graphql-tag');
 const fetch = require('node-fetch');
 
+const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
+const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
+
 class JupiterOneClient {
-  constructor (account, username, password, poolId, clientId, accessToken, dev = false) {
+  constructor ({
+    account,
+    username,
+    password,
+    poolId = J1_USER_POOL_ID_PROD,
+    clientId = J1_CLIENT_ID_PROD,
+    accessToken,
+    dev = false
+  }) {
     this.account = account;
     this.username = username;
     this.password = password;
     this.poolId = poolId;
     this.clientId = clientId;
     this.accessToken = accessToken;
+
     this.apiUrl = dev ? 'https://api.dev.jupiterone.io' : 'https://api.us.jupiterone.io';
     this.queryEndpoint = this.apiUrl + '/graphql';
     this.rulesEndpoint = this.apiUrl + '/rules/graphql';
@@ -23,16 +35,19 @@ class JupiterOneClient {
 
   async init (rules) {
     const token = this.accessToken ? this.accessToken : await this.authenticateUser();
+    this.headers = {
+      'Authorization': `Bearer ${token}`,
+      'LifeOmic-Account': this.account
+    };
+
     const uri = rules ? this.rulesEndpoint : this.queryEndpoint;
-    const headers = {};
-    headers['Authorization'] = `Bearer ${token}`;
-    headers['LifeOmic-Account'] = this.account;
     const link = ApolloLink.from([
       new RetryLink(),
-      new BatchHttpLink({ uri, headers, fetch })
+      new BatchHttpLink({ uri, headers: this.headers, fetch })
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });
+
     return this;
   }
 
@@ -46,14 +61,14 @@ class JupiterOneClient {
       ClientId: this.clientId
     });
     const User = new Cognito.CognitoUser({ Username: this.username, Pool });
-  
+
     const result = await new Promise((resolve, reject) => {
       User.authenticateUser(authenticationDetails, {
         onSuccess: (result) => resolve(result),
         onFailure: (err) => reject(err)
       });
     });
-  
+
     return result.getAccessToken().getJwtToken();
   }
 
@@ -101,6 +116,20 @@ class JupiterOneClient {
       throw new Error(`JupiterOne returned error(s) for query: '${query}'`);
     }
     return res;
+  }
+
+  async ingestEntities (integrationInstanceId, entities) {
+    return fetch(
+      this.apiUrl + "/integrations/ingest",
+      {
+        method: "POST",
+        body: JSON.stringify({ integrationInstanceId, entities }),
+        headers: {
+          "Content-Type": "application/json",
+          ...this.headers
+        }
+      }
+    ).then(res => res.json());
   }
 
   async mutateAlertRule(rule, update) {
@@ -228,7 +257,7 @@ class JupiterOneClient {
     const { id, ...update } = question;
     const res = await this.graphClient.mutate({
       mutation: UPDATE_QUESTION,
-      variables: { 
+      variables: {
         id,
         update
       }
