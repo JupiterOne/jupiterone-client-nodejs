@@ -162,6 +162,11 @@ async function initializeJ1Client () {
 
 async function createEntity(j1Client, e) {
   const classLabels = Array.isArray(e.entityClass) ? e.class : [e.entityClass];
+
+  e.createdOn = e.createdOn 
+    ? new Date(e.createdOn).getTime()
+    : new Date().getTime();
+  
   const res = await j1Client.createEntity(
     e.entityKey,
     e.entityType,
@@ -172,6 +177,10 @@ async function createEntity(j1Client, e) {
 }
 
 async function updateEntity(j1Client, entityId, properties) {
+  e.updatedOn = e.updatedOn 
+    ? new Date(e.updatedOn).getTime()
+    : new Date().getTime();
+
   await j1Client.updateEntity(entityId, properties);
   return entityId;
 }
