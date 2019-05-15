@@ -6,7 +6,7 @@ const { ApolloLink } = require('apollo-link');
 const { RetryLink } = require('apollo-link-retry');
 const { BatchHttpLink } = require('apollo-link-batch-http');
 const gql = require('graphql-tag');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 
 const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
 const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
