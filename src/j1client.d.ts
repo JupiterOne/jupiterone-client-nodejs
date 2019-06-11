@@ -1,4 +1,4 @@
-declare module '@jupiterone/jupiterone-client-nodejs' {
+declare module "@jupiterone/jupiterone-client-nodejs" {
   export interface JupiterOneClientOptions {
     account: string;
     username?: string;
@@ -7,6 +7,13 @@ declare module '@jupiterone/jupiterone-client-nodejs' {
     clientId?: string;
     accessToken?: string;
     dev?: boolean;
+  }
+
+  export interface CommitRange {
+    account_uuid: string;
+    repo_uuid: string;
+    source: string;
+    destination: string;
   }
 
   export interface IngestionResults {
@@ -25,6 +32,13 @@ declare module '@jupiterone/jupiterone-client-nodejs' {
     init(rules?: boolean): Promise<void>;
 
     queryV1(j1ql: string): Promise<QueryResult[]>;
-    ingestEntities(integrationInstanceId: string, entities: object[]): Promise<IngestionResults>;
+    ingestEntities(
+      integrationInstanceId: string,
+      entities: object[]
+    ): Promise<IngestionResults>;
+    ingestCommitRange(
+      integrationInstanceId: string,
+      commitRange: CommitRange
+    ): Promise<IngestionResults>;
   }
 }
