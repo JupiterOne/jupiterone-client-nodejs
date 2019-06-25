@@ -298,6 +298,7 @@ class JupiterOneClient {
       }
     });
     if (res.errors) {
+      f;
       throw new Error(
         `JupiterOne returned error(s) updating question: '${question}'`
       );

@@ -1,6 +1,6 @@
 [
   {
-    "title": "New Question",
+    "title": "Totally New Question",
     "queries": [
       {
         "query": "Find Person with lastName='Jones'"
@@ -18,7 +18,7 @@
     "tags": ["Test", "CIS Controls", "HIPAA"]
   },
   {
-    "title": "Are my assets tracked? How many entities are there?",
+    "title": "Lol this is a new question for sure",
     "description": "Returns the current count of total assets/entities tracked in JupiterOne - either automatically ingested via integrations or manually entered through the Asset Inventory app or API.",
     "queries": [
       {
@@ -30,12 +30,27 @@
     "compliance": [
       {
         "standard": "CIS Controls",
-        "requirements": ["1.1", "1.4", "1.5", "2.1", "2.3", "2.4", "2.5"]
-      },
-      {
-        "standard": "HITRUST CSF",
-        "requirements": ["07.a"]
+        "requirements": ["1.1", "2.3", "2.4", "2.5"]
       }
     ]
+  },
+  {
+    "title": "Seriously this is a new question",
+    "queries": [
+      {
+        "query": "Find Person with lastName='Jones'"
+      },
+      {
+        "name": "accounts",
+        "query": "FIND jupiterone_account"
+      }
+    ],
+    "compliance": [
+      {
+        "standard": "PCI-DSS",
+        "requirements": ["1.4", "1.5", "1.6", "1.7"]
+      }
+    ],
+    "tags": ["PCI-DSS", "accounts"]
   }
 ]
