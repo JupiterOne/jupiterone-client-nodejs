@@ -15,7 +15,8 @@
         "requirements": ["5.3.1", "7.1.3"]
       }
     ],
-    "tags": ["Test", "CIS Controls", "HIPAA"]
+    "tags": ["CIS Controls", "HIPAA"],
+    "id": "fd5b1fa3-c051-416f-9739-bfbd11f2da2f"
   },
   {
     "title": "Are my assets tracked? How many entities are there?",
@@ -30,7 +31,7 @@
     "compliance": [
       {
         "standard": "CIS Controls",
-        "requirements": ["1.1", "1.4", "1.5", "2.1", "2.3", "2.4", "2.5"]
+        "requirements": ["1.1", "1.4", "1.5", "2.3", "2.4", "2.5"]
       },
       {
         "standard": "HITRUST CSF",

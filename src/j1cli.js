@@ -390,8 +390,8 @@ async function mutateQuestions(j1Client, questions, operation) {
           const res = await j1Client.createQuestion(q);
           results.push(res);
           created.push({ id: res.id, title: q.title });
-          questionStrings.push({ id: q.id, title: q.title });
           q.id = res.id;
+          questionStrings.push({ id: q.id, title: q.title });
         }
       } else if (operation === "update") {
         if (q.id && q.id.length > 0) {
