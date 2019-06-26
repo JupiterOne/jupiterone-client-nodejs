@@ -1,12 +1,9 @@
 [
   {
-    "title": "New Question",
+    "title": "my query",
     "queries": [
       {
-        "query": "Find Person with lastName='Jones'"
-      },
-      {
-        "query": "Find compliance records"
+        "query": "FIND organizations"
       }
     ],
     "compliance": [
@@ -15,8 +12,7 @@
         "requirements": ["5.3.1", "7.1.3"]
       }
     ],
-    "tags": ["CIS Controls", "HIPAA"],
-    "id": "fd5b1fa3-c051-416f-9739-bfbd11f2da2f"
+    "tags": ["Sometag"]
   },
   {
     "title": "Are my assets tracked? How many entities are there?",

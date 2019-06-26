@@ -366,16 +366,12 @@ async function mutateAlertRules(j1Client, rules, update) {
   }
 }
 
-//j1Client,
-//Array.isArray(data) ? data : [data],
-//program.operation
 async function mutateQuestions(j1Client, questions, operation) {
   const created = [];
   const updated = [];
   const deleted = [];
   const skipped = [];
   const results = [];
-  var questionStrings = [];
   let newFile = false;
   for (const q of questions) {
     try {
@@ -385,20 +381,17 @@ async function mutateQuestions(j1Client, questions, operation) {
           const res = await j1Client.updateQuestion(q);
           results.push(res);
           updated.push({ id: q.id, title: q.title });
-          questionStrings.push({ id: q.id, title: q.title });
         } else {
           const res = await j1Client.createQuestion(q);
           results.push(res);
           created.push({ id: res.id, title: q.title });
           q.id = res.id;
-          questionStrings.push({ id: q.id, title: q.title });
         }
       } else if (operation === "update") {
         if (q.id && q.id.length > 0) {
           const res = await j1Client.updateQuestion(q);
           results.push(res);
           updated.push({ id: q.id, title: q.title });
-          questionStrings.push({ id: q.id, title: q.title });
         } else {
           // Skip if there is no ID
           skipped.push({ id: q.id, title: q.title });
@@ -457,10 +450,10 @@ async function mutateQuestions(j1Client, questions, operation) {
     );
   }
   if (newFile) {
-    var stringify = JSON.stringify(questions, null, 4);
-    fs.writeFile("modified_questions.json", stringify, function(err) {
-      if (err) throw err;
-    });
+    var jsonString = JSON.stringify(questions, null, 2);
+
+    const writeFile = util.promisify(fs.writeFile);
+    await writeFile("modified_questions.json", jsonString);
     console.log(
       'A modified version of your JSON ("modified_questions.json") with your new IDs has been added to your current directory.'
     );
