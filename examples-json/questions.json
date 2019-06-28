@@ -1,6 +1,20 @@
 [
   {
-    "id": "managed-question-asset-inventory-count",
+    "title": "my query",
+    "queries": [
+      {
+        "query": "FIND organizations"
+      }
+    ],
+    "compliance": [
+      {
+        "standard": "ISO 27002",
+        "requirements": ["5.3.1", "7.1.3"]
+      }
+    ],
+    "tags": ["Sometag"]
+  },
+  {
     "title": "Are my assets tracked? How many entities are there?",
     "description": "Returns the current count of total assets/entities tracked in JupiterOne - either automatically ingested via integrations or manually entered through the Asset Inventory app or API.",
     "queries": [
@@ -13,21 +27,12 @@
     "compliance": [
       {
         "standard": "CIS Controls",
-        "requirements": ["1.1", "1.2", "1.4", "1.5", "2.1", "2.3", "2.4", "2.5"]
+        "requirements": ["1.1", "1.4", "1.5", "2.3", "2.4", "2.5"]
       },
       {
         "standard": "HITRUST CSF",
         "requirements": ["07.a"]
       }
     ]
-  },
-  {
-    "title": "A Short Question",
-    "queries": [
-      {
-        "query": "Find Person with lastName='Jones'"
-      }
-    ],
-    "tags": ["Test"]
   }
 ]

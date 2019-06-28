@@ -5,6 +5,7 @@ const { prompt } = require("inquirer");
 const program = require("commander");
 const error = require("./util/error");
 const fs = require("fs");
+const util = require("util");
 const yaml = require("js-yaml");
 const { defaultAlertSettings } = require("@jupiterone/jupiterone-alert-rules");
 
@@ -32,11 +33,11 @@ async function main() {
       "-o, --operation <action>",
       `Supported operations: ${SUPPORTED_OPERATIONS}`
     )
-    .option("--entity", "Specifies entity operations.")
-    .option("--relationship", "Specifies relationship operations.")
-    .option("--alert", "Specifies alert rule operations.")
+    .option("-e, --entity", "Specifies entity operations.")
+    .option("-r, --relationship", "Specifies relationship operations.")
+    .option("-l, --alert", "Specifies alert rule operations.")
     .option(
-      "--question",
+      "-w, --question",
       "Specifies question operations. A question is answered by one or more queries."
     )
     .option(
@@ -48,7 +49,6 @@ async function main() {
   try {
     const data = await validateInputs();
     const j1Client = await initializeJ1Client();
-
     if (program.query) {
       const res = await j1Client.queryV1(program.query);
       console.log(JSON.stringify(res, null, 2));
@@ -93,12 +93,10 @@ async function main() {
 // ensure user supplied necessary params
 async function validateInputs() {
   process.stdout.write("Validating inputs... ");
+  let data;
   if (!program.account || program.account === "") {
     error.fatal("Missing -a|--account flag!", EUSAGEERROR);
   }
-
-  let data;
-
   if (!program.query || program.query === "") {
     if (!program.operation || program.operation === "") {
       error.fatal(
@@ -198,8 +196,7 @@ async function initializeJ1Client() {
     username: program.user,
     password: program.password,
     poolId: J1_USER_POOL_ID,
-    clientId: J1_CLIENT_ID,
-    accessToken: program.key || J1_API_TOKEN
+    clientId: J1_CLIENT_ID
   }).init(program.alert);
   console.log("OK");
   return j1Client;
@@ -373,6 +370,7 @@ async function mutateQuestions(j1Client, questions, operation) {
   const deleted = [];
   const skipped = [];
   const results = [];
+  let newFile = false;
   for (const q of questions) {
     try {
       if (operation === "create") {
@@ -385,6 +383,7 @@ async function mutateQuestions(j1Client, questions, operation) {
           const res = await j1Client.createQuestion(q);
           results.push(res);
           created.push({ id: res.id, title: q.title });
+          q.id = res.id;
         }
       } else if (operation === "update") {
         if (q.id && q.id.length > 0) {
@@ -419,6 +418,7 @@ async function mutateQuestions(j1Client, questions, operation) {
         2
       )}.`
     );
+    newFile = true;
   }
   if (updated.length > 0) {
     console.log(
@@ -445,6 +445,15 @@ async function mutateQuestions(j1Client, questions, operation) {
         null,
         2
       )}.`
+    );
+  }
+  if (newFile) {
+    var jsonString = JSON.stringify(questions, null, 2);
+
+    const writeFile = util.promisify(fs.writeFile);
+    await writeFile("modified_questions.json", jsonString);
+    console.log(
+      'A modified version of your JSON ("modified_questions.json") with your new IDs has been added to your current directory.'
     );
   }
 }
