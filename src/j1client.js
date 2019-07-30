@@ -1,18 +1,18 @@
-const Cognito = require('amazon-cognito-identity-js-node');
+const Cognito = require("amazon-cognito-identity-js-node");
 
-const { ApolloClient } = require('apollo-client');
-const { InMemoryCache } = require('apollo-cache-inmemory');
-const { ApolloLink } = require('apollo-link');
-const { RetryLink } = require('apollo-link-retry');
-const { BatchHttpLink } = require('apollo-link-batch-http');
-const gql = require('graphql-tag');
-const fetch = require('node-fetch').default;
+const { ApolloClient } = require("apollo-client");
+const { InMemoryCache } = require("apollo-cache-inmemory");
+const { ApolloLink } = require("apollo-link");
+const { RetryLink } = require("apollo-link-retry");
+const { BatchHttpLink } = require("apollo-link-batch-http");
+const gql = require("graphql-tag");
+const fetch = require("node-fetch").default;
 
-const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
-const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
+const J1_USER_POOL_ID_PROD = "us-east-2_9fnMVHuxD";
+const J1_CLIENT_ID_PROD = "1hcv141pqth5f49df7o28ngq1u";
 
 class JupiterOneClient {
-  constructor ({
+  constructor({
     account,
     username,
     password,
@@ -28,16 +28,20 @@ class JupiterOneClient {
     this.clientId = clientId;
     this.accessToken = accessToken;
 
-    this.apiUrl = dev ? 'https://api.dev.jupiterone.io' : 'https://api.us.jupiterone.io';
-    this.queryEndpoint = this.apiUrl + '/graphql';
-    this.rulesEndpoint = this.apiUrl + '/rules/graphql';
+    this.apiUrl = dev
+      ? "https://api.dev.jupiterone.io"
+      : "https://api.us.jupiterone.io";
+    this.queryEndpoint = this.apiUrl + "/graphql";
+    this.rulesEndpoint = this.apiUrl + "/rules/graphql";
   }
 
-  async init (rules) {
-    const token = this.accessToken ? this.accessToken : await this.authenticateUser();
+  async init(rules) {
+    const token = this.accessToken
+      ? this.accessToken
+      : await this.authenticateUser();
     this.headers = {
-      'Authorization': `Bearer ${token}`,
-      'LifeOmic-Account': this.account
+      Authorization: `Bearer ${token}`,
+      "LifeOmic-Account": this.account
     };
 
     const uri = rules ? this.rulesEndpoint : this.queryEndpoint;
@@ -51,7 +55,7 @@ class JupiterOneClient {
     return this;
   }
 
-  async authenticateUser () {
+  async authenticateUser() {
     const authenticationDetails = new Cognito.AuthenticationDetails({
       Username: this.username,
       Password: this.password
@@ -64,15 +68,15 @@ class JupiterOneClient {
 
     const result = await new Promise((resolve, reject) => {
       User.authenticateUser(authenticationDetails, {
-        onSuccess: (result) => resolve(result),
-        onFailure: (err) => reject(err)
+        onSuccess: result => resolve(result),
+        onFailure: err => reject(err)
       });
     });
 
     return result.getAccessToken().getJwtToken();
   }
 
-  async queryV1 (j1ql) {
+  async queryV1(j1ql) {
     let complete = false;
     let page = 0;
     let results = [];
@@ -80,13 +84,14 @@ class JupiterOneClient {
     while (!complete) {
       const query = gql`
       {
-        queryV1(query: "${j1ql} SKIP ${page * J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}") {
+        queryV1(query: "${j1ql} SKIP ${page *
+        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}") {
           data
         }
       }`;
       page++;
 
-      const res = await this.graphClient.query({query});
+      const res = await this.graphClient.query({ query });
       if (res.errors) {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
@@ -109,7 +114,7 @@ class JupiterOneClient {
     return results;
   }
 
-  async queryGraphQL (query) {
+  async queryGraphQL(query) {
     const res = await this.graphClient.query({ query });
     if (res.errors) {
       console.log(res.errors);
@@ -118,18 +123,30 @@ class JupiterOneClient {
     return res;
   }
 
-  async ingestEntities (integrationInstanceId, entities) {
-    return fetch(
-      this.apiUrl + "/integrations/ingest",
-      {
-        method: "POST",
-        body: JSON.stringify({ integrationInstanceId, entities }),
-        headers: {
-          "Content-Type": "application/json",
-          ...this.headers
-        }
+  async ingestEntities(integrationInstanceId, entities) {
+    return fetch(this.apiUrl + "/integrations/ingest", {
+      method: "POST",
+      body: JSON.stringify({ integrationInstanceId, entities }),
+      headers: {
+        "Content-Type": "application/json",
+        ...this.headers
       }
-    ).then(res => res.json());
+    }).then(res => res.json());
+  }
+
+  async ingestCommitRange(integrationInstanceId, commitRange) {
+    return fetch(this.apiUrl + "/integrations/action", {
+      method: "POST",
+      body: JSON.stringify({
+        integrationInstanceId,
+        action: { name: "INGEST", commitRange }
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        ...this.headers
+      },
+      timeout: 10000
+    }).then(res => res.json());
   }
 
   async mutateAlertRule(rule, update) {
@@ -140,14 +157,16 @@ class JupiterOneClient {
       }
     });
     if (res.errors) {
-      throw new Error(`JupiterOne returned error(s) mutating alert rule: '${rule}'`);
+      throw new Error(
+        `JupiterOne returned error(s) mutating alert rule: '${rule}'`
+      );
     }
     return update
       ? res.data.updateQuestionRuleInstance
       : res.data.createQuestionRuleInstance;
   }
 
-  async createEntity (key, type, classLabels, properties) {
+  async createEntity(key, type, classLabels, properties) {
     const res = await this.graphClient.mutate({
       mutation: CREATE_ENTITY,
       variables: {
@@ -158,12 +177,14 @@ class JupiterOneClient {
       }
     });
     if (res.errors) {
-      throw new Error(`JupiterOne returned error(s) creating entity with key: '${key}'`);
+      throw new Error(
+        `JupiterOne returned error(s) creating entity with key: '${key}'`
+      );
     }
     return res.data.createEntity;
   }
 
-  async updateEntity (entityId, properties) {
+  async updateEntity(entityId, properties) {
     let res;
     try {
       res = await this.graphClient.mutate({
@@ -174,16 +195,18 @@ class JupiterOneClient {
         }
       });
       if (res.errors) {
-        throw new Error(`JupiterOne returned error(s) updating entity with id: '${entityId}'`);
+        throw new Error(
+          `JupiterOne returned error(s) updating entity with id: '${entityId}'`
+        );
       }
     } catch (err) {
-      console.log({err, id, properties, res}, 'error updating entity');
+      console.log({ err, id, properties, res }, "error updating entity");
       throw err;
     }
     return res.data.updateEntity;
   }
 
-  async deleteEntity (entityId) {
+  async deleteEntity(entityId) {
     let res;
     try {
       res = await this.graphClient.mutate({
@@ -191,16 +214,18 @@ class JupiterOneClient {
         variables: { entityId }
       });
       if (res.errors) {
-        throw new Error(`JupiterOne returned error(s) deleting entity with id: '${entityId}'`);
+        throw new Error(
+          `JupiterOne returned error(s) deleting entity with id: '${entityId}'`
+        );
       }
     } catch (err) {
-      console.log({err, id, properties, res}, 'error deleting entity');
+      console.log({ err, id, properties, res }, "error deleting entity");
       throw err;
     }
     return res.data.deleteEntity;
   }
 
-  async createRelationship (key, type, klass, fromId, toId) {
+  async createRelationship(key, type, klass, fromId, toId) {
     const res = await this.graphClient.mutate({
       mutation: CREATE_RELATIONSHIP,
       variables: {
@@ -212,32 +237,40 @@ class JupiterOneClient {
       }
     });
     if (res.errors) {
-      throw new Error(`JupiterOne returned error(s) creating relationship with key: '${key}'`);
+      throw new Error(
+        `JupiterOne returned error(s) creating relationship with key: '${key}'`
+      );
     }
     return res.data.createRelationship;
   }
 
-  async upsertEntityRawData (entityId, name, contentType, data) {
+  async upsertEntityRawData(entityId, name, contentType, data) {
     const operation = {
       mutation: UPSERT_ENTITY_RAW_DATA,
       variables: {
-        source: 'api',
+        source: "api",
         entityId,
-        rawData: [{
-          name,
-          contentType,
-          data
-        }]
+        rawData: [
+          {
+            name,
+            contentType,
+            data
+          }
+        ]
       }
     };
     let res;
     try {
       res = await this.graphClient.mutate(operation);
       if (res.errors) {
-        throw new Error(`JupiterOne returned error(s) upserting rawData for entity with id: '${entityId}'`);
+        throw new Error(
+          `JupiterOne returned error(s) upserting rawData for entity with id: '${entityId}'`
+        );
       }
     } catch (exception) {
-      throw new Error(`Unable to store raw template data for ${name}: ` + exception.message);
+      throw new Error(
+        `Unable to store raw template data for ${name}: ` + exception.message
+      );
     }
     return res.data.upsertEntityRawData.status;
   }
@@ -248,7 +281,9 @@ class JupiterOneClient {
       variables: { question }
     });
     if (res.errors) {
-      throw new Error(`JupiterOne returned error(s) creating question: '${question}'`);
+      throw new Error(
+        `JupiterOne returned error(s) creating question: '${question}'`
+      );
     }
     return res.data.createQuestion;
   }
@@ -263,7 +298,9 @@ class JupiterOneClient {
       }
     });
     if (res.errors) {
-      throw new Error(`JupiterOne returned error(s) updating question: '${question}'`);
+      throw new Error(
+        `JupiterOne returned error(s) updating question: '${question}'`
+      );
     }
     return res.data.updateQuestion;
   }
@@ -274,7 +311,9 @@ class JupiterOneClient {
       variables: { id: questionId }
     });
     if (res.errors) {
-      throw new Error(`JupiterOne returned error(s) updating question with ID: '${questionId}'`);
+      throw new Error(
+        `JupiterOne returned error(s) updating question with ID: '${questionId}'`
+      );
     }
     return res.data.deleteQuestion;
   }
@@ -284,39 +323,34 @@ const J1QL_SKIP_COUNT = 250;
 const J1QL_LIMIT_COUNT = 250;
 
 const CREATE_ENTITY = gql`
-mutation CreateEntity(
-  $entityKey: String!
-  $entityType: String!
-  $entityClass: [String!]!
-  $properties: JSON
-) {
-  createEntity(
-    entityKey: $entityKey
-    entityType: $entityType
-    entityClass: $entityClass
-    properties: $properties
+  mutation CreateEntity(
+    $entityKey: String!
+    $entityType: String!
+    $entityClass: [String!]!
+    $properties: JSON
   ) {
-    entity {
-      _id
-    }
-    vertex {
-      id
+    createEntity(
+      entityKey: $entityKey
+      entityType: $entityType
+      entityClass: $entityClass
+      properties: $properties
+    ) {
       entity {
         _id
       }
+      vertex {
+        id
+        entity {
+          _id
+        }
+      }
     }
   }
-}`;
+`;
 
 const UPDATE_ENTITY = gql`
-  mutation UpdateEntity(
-    $entityId: String!
-    $properties: JSON
-  ) {
-    updateEntity(
-      entityId: $entityId
-      properties: $properties
-    ) {
+  mutation UpdateEntity($entityId: String!, $properties: JSON) {
+    updateEntity(entityId: $entityId, properties: $properties) {
       entity {
         _id
       }
@@ -328,26 +362,21 @@ const UPDATE_ENTITY = gql`
 `;
 
 const DELETE_ENTITY = gql`
-mutation DeleteEntity (
-  $entityId: String!
-  $timestamp: Long
-) {
-  deleteEntity (
-    entityId: $entityId,
-    timestamp: $timestamp,
-  ) {
-    entity {
-      _id
-    }
-    vertex {
-      id,
+  mutation DeleteEntity($entityId: String!, $timestamp: Long) {
+    deleteEntity(entityId: $entityId, timestamp: $timestamp) {
       entity {
         _id
       }
-      properties
+      vertex {
+        id
+        entity {
+          _id
+        }
+        properties
+      }
     }
   }
-}`
+`;
 
 const CREATE_RELATIONSHIP = gql`
   mutation CreateRelationship(
@@ -396,12 +425,10 @@ const UPSERT_ENTITY_RAW_DATA = gql`
 `;
 
 const CREATE_ALERT_RULE = gql`
-  mutation CreateQuestionRuleInstance (
+  mutation CreateQuestionRuleInstance(
     $instance: CreateQuestionRuleInstanceInput!
   ) {
-    createQuestionRuleInstance (
-      instance: $instance
-    ) {
+    createQuestionRuleInstance(instance: $instance) {
       id
       name
     }
@@ -409,12 +436,10 @@ const CREATE_ALERT_RULE = gql`
 `;
 
 const UPDATE_ALERT_RULE = gql`
-  mutation UpdateQuestionRuleInstance (
+  mutation UpdateQuestionRuleInstance(
     $instance: UpdateQuestionRuleInstanceInput!
   ) {
-    updateQuestionRuleInstance (
-      instance: $instance
-    ) {
+    updateQuestionRuleInstance(instance: $instance) {
       id
       name
       description

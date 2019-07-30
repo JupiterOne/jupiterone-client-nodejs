@@ -148,9 +148,7 @@ an example of a single alert rule instance:
     "description": "Data stores in production tagged critical and unencrypted",
     "specVersion": 1,
     "pollingInterval": "ONE_DAY",
-    "outputs": [
-      "alertLevel"
-    ],
+    "outputs": ["alertLevel"],
     "operations": [
       {
         "when": {
@@ -158,7 +156,7 @@ an example of a single alert rule instance:
           "specVersion": 1,
           "condition": [
             "AND",
-            [ "queries.unencryptedCriticalData.total", "!=", 0 ]
+            ["queries.unencryptedCriticalData.total", "!=", 0]
           ]
         },
         "actions": [

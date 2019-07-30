@@ -6,9 +6,7 @@
       "description": "Data stores in production tagged critical and unencrypted",
       "specVersion": 1,
       "pollingInterval": "ONE_HOUR",
-      "outputs": [
-        "alertLevel"
-      ],
+      "outputs": ["alertLevel"],
       "operations": [
         {
           "when": {
@@ -16,7 +14,7 @@
             "specVersion": 1,
             "condition": [
               "AND",
-              [ "queries.unencryptedCriticalData.total", "!=", 0 ]
+              ["queries.unencryptedCriticalData.total", "!=", 0]
             ]
           },
           "actions": [
@@ -49,9 +47,7 @@
       "description": "Data stores in production without a classification property/tag",
       "specVersion": 1,
       "pollingInterval": "ONE_HOUR",
-      "outputs": [
-        "alertLevel"
-      ],
+      "outputs": ["alertLevel"],
       "operations": [
         {
           "when": {
@@ -59,7 +55,7 @@
             "specVersion": 1,
             "condition": [
               "AND",
-              [ "queries.unclassifiedProdData.total", "!=", 0 ]
+              ["queries.unclassifiedProdData.total", "!=", 0]
             ]
           },
           "actions": [
@@ -92,18 +88,13 @@
       "description": "Data stores in production without an owner property/tag",
       "specVersion": 1,
       "pollingInterval": "ONE_DAY",
-      "outputs": [
-        "alertLevel"
-      ],
+      "outputs": ["alertLevel"],
       "operations": [
         {
           "when": {
             "type": "FILTER",
             "specVersion": 1,
-            "condition": [
-              "AND",
-              [ "queries.query.total", "!=", 0 ]
-            ]
+            "condition": ["AND", ["queries.query.total", "!=", 0]]
           },
           "actions": [
             {
