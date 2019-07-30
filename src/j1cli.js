@@ -102,7 +102,7 @@ async function validateInputs () {
       if (!data) {
         error.fatal(`Could not parse input JSON file (${filePath}).`);
       }
-  }
+    }
   }
 
   if ((!program.key || program.key === '') && !J1_API_TOKEN) {
@@ -161,7 +161,7 @@ async function initializeJ1Client () {
 }
 
 async function createEntity(j1Client, e) {
-  const classLabels = Array.isArray(e.entityClass) ? e.class : [e.entityClass];
+  const classLabels = Array.isArray(e.entityClass) ? e.entityClass : [e.entityClass];
 
   e.properties.createdOn = e.properties.createdOn 
     ? new Date(e.properties.createdOn).getTime()
