@@ -40,5 +40,12 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
       integrationInstanceId: string,
       commitRange: CommitRange
     ): Promise<IngestionResults>;
+    createRelationship(
+      relationshipKey: string,
+      relationshipType: string,
+      relationshipClas: string,
+      fromEntityId: string,
+      toEntityId: string
+    ): Promise<object>;
   }
 }
