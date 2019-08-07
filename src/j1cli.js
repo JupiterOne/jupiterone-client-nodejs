@@ -8,6 +8,7 @@ const fs = require("fs");
 const util = require("util");
 const yaml = require("js-yaml");
 const { defaultAlertSettings } = require("@jupiterone/jupiterone-alert-rules");
+const pAll = require("p-all");
 
 const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID;
 const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
@@ -85,7 +86,7 @@ async function main() {
       }
     }
   } catch (err) {
-    error.fatal(`Unexpected error: ${err}`);
+    error.fatal(`Unexpected error: ${err.stack || err.toString()}`);
   }
   console.log("Done!");
 }
@@ -204,7 +205,9 @@ async function initializeJ1Client() {
 }
 
 async function createEntity(j1Client, e) {
-  const classLabels = Array.isArray(e.entityClass) ? e.entityClass : [e.entityClass];
+  const classLabels = Array.isArray(e.entityClass)
+    ? e.entityClass
+    : [e.entityClass];
 
   e.properties.createdOn = e.properties.createdOn
     ? new Date(e.properties.createdOn).getTime()
@@ -234,21 +237,29 @@ async function deleteEntity(j1Client, entityId) {
 }
 
 async function mutateEntities(j1Client, entities, operation) {
-  const promises = [];
+  const work = [];
   if (operation === "create") {
     for (const e of entities) {
-      promises.push(createEntity(j1Client, e));
+      work.push(() => {
+        return createEntity(j1Client, e);
+      });
     }
   } else if (operation === "update") {
     for (const e of entities) {
-      promises.push(updateEntity(j1Client, e.entityId, e.properties));
+      work.push(() => {
+        return updateEntity(j1Client, e.entityId, e.properties);
+      });
     }
   } else if (operation === "delete") {
     for (const e of entities) {
-      promises.push(deleteEntity(j1Client, e.entityId));
+      work.push(() => {
+        return deleteEntity(j1Client, e.entityId);
+      });
     }
   }
-  const entityIds = await Promise.all(promises);
+  const entityIds = await pAll(work, {
+    concurrency: 5
+  });
   console.log(
     `${operation}d ${entityIds.length} entities:\n${JSON.stringify(
       entityIds,
@@ -270,17 +281,21 @@ async function createRelationship(j1Client, r) {
 }
 
 async function mutateRelationships(j1Client, relationships, update) {
-  const promises = [];
+  const work = [];
   if (update) {
     console.log(
       "Updating relationships is not currently supported via the CLI."
     );
   } else {
     for (const r of relationships) {
-      promises.push(createRelationship(j1Client, r));
+      work.push(() => {
+        return createRelationship(j1Client, r);
+      });
     }
   }
-  const relationshipIds = await Promise.all(promises);
+  const relationshipIds = await pAll(work, {
+    concurrency: 5
+  });
   console.log(
     `Created ${relationshipIds.length} relationships:\n${JSON.stringify(
       relationshipIds,
@@ -460,11 +475,13 @@ async function mutateQuestions(j1Client, questions, operation) {
 }
 
 async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
-  const promises = [];
+  const work = [];
   for (const r of rules) {
     if (r.instance) {
       const update = r.instance.id !== undefined;
-      promises.push(j1Client.mutateAlertRule(r, update));
+      work.push(() => {
+        return j1Client.mutateAlertRule(r, update);
+      });
     } else {
       const instance = {
         ...defaultSettings,
@@ -491,10 +508,14 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
             ]
           : defaultSettings.operations
       };
-      promises.push(j1Client.mutateAlertRule({ instance }, false));
+      work.push(() => {
+        return j1Client.mutateAlertRule({ instance }, false);
+      });
     }
   }
-  const res = await Promise.all(promises);
+  const res = await pAll(work, {
+    concurrency: 5
+  });
   process.stdout.write(
     `Provisioned ${res.length} rules:\n${JSON.stringify(res, null, 2)}\n`
   );

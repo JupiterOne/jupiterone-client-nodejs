@@ -200,7 +200,10 @@ class JupiterOneClient {
         );
       }
     } catch (err) {
-      console.log({ err, id, properties, res }, "error updating entity");
+      console.log(
+        { err: err.stack || err.toString(), entityId, properties },
+        "error updating entity"
+      );
       throw err;
     }
     return res.data.updateEntity;

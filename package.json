@@ -36,6 +36,7 @@
     "moment": "^2.22.2",
     "mustache": "^2.3.0",
     "node-fetch": "^2.3.0",
+    "p-all": "^2.1.0",
     "p-map": "^1.2.0",
     "papaparse": "^4.6.3",
     "pluralize": "^7.0.0",
@@ -59,8 +60,8 @@
   },
   "lint-staged": {
     "linters": {
-      "*": [
-        "prettier --write",
+      "*.{ts,tsx,js,jsx,json,css,md}": [
+        "yarn format",
         "git add"
       ]
     },
