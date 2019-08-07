@@ -196,7 +196,8 @@ async function initializeJ1Client() {
     username: program.user,
     password: program.password,
     poolId: J1_USER_POOL_ID,
-    clientId: J1_CLIENT_ID
+    clientId: J1_CLIENT_ID,
+    accessToken: program.key || J1_API_TOKEN
   }).init(program.alert);
   console.log("OK");
   return j1Client;
