@@ -26,12 +26,12 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
     properties: object;
   }
 
+  export type QueryOrDataResult = QueryResult[] | Object[];
+
   export default class JupiterOneClient {
     constructor(options: JupiterOneClientOptions);
-
     init(rules?: boolean): Promise<void>;
-
-    queryV1(j1ql: string): Promise<QueryResult[]>;
+    queryV1(j1ql: string): Promise<QueryOrDataResult>;
     ingestEntities(
       integrationInstanceId: string,
       entities: object[]
