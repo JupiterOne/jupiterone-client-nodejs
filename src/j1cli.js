@@ -275,7 +275,8 @@ async function createRelationship(j1Client, r) {
     r.relationshipType,
     r.relationshipClass,
     r.fromEntityId,
-    r.toEntityId
+    r.toEntityId,
+    r.properties
   );
   return res.edge.relationship._id;
 }
