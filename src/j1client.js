@@ -228,7 +228,7 @@ class JupiterOneClient {
     return res.data.deleteEntity;
   }
 
-  async createRelationship(key, type, klass, fromId, toId) {
+  async createRelationship(key, type, klass, fromId, toId, properties) {
     const res = await this.graphClient.mutate({
       mutation: CREATE_RELATIONSHIP,
       variables: {
@@ -236,7 +236,8 @@ class JupiterOneClient {
         relationshipType: type,
         relationshipClass: klass,
         fromEntityId: fromId,
-        toEntityId: toId
+        toEntityId: toId,
+        properties
       }
     });
     if (res.errors) {
@@ -388,6 +389,7 @@ const CREATE_RELATIONSHIP = gql`
     $relationshipClass: String!
     $fromEntityId: String!
     $toEntityId: String!
+    $properties: JSON
   ) {
     createRelationship(
       relationshipKey: $relationshipKey
@@ -406,6 +408,7 @@ const CREATE_RELATIONSHIP = gql`
         relationship {
           _id
         }
+        properties
       }
     }
   }
