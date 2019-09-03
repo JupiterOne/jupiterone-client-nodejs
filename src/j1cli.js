@@ -244,17 +244,47 @@ async function mutateEntities(j1Client, entities, operation) {
         return createEntity(j1Client, e);
       });
     }
-  } else if (operation === "update") {
+  } else {
     for (const e of entities) {
-      work.push(() => {
-        return updateEntity(j1Client, e.entityId, e.properties);
-      });
-    }
-  } else if (operation === "delete") {
-    for (const e of entities) {
-      work.push(() => {
-        return deleteEntity(j1Client, e.entityId);
-      });
+      let entityId;
+      if (e.entityId) {
+        entityId = e.entityId;
+      } else if (e.entityKey) {
+        const query = `Find * with _key='${e.entityKey}'`;
+        const res = await j1Client.queryV1(query);
+        if (res.length === 1) {
+          entityId = res[0].entity._id;
+        } else if (res.length === 0) {
+          console.log(`Skipping entity with _key='${e.entityKey}' - NOT FOUND`);
+          continue;
+        } else if (res.length > 0) {
+          console.log(
+            `Skipping entity with _key='${e.entityKey}' - KEY NOT UNIQUE`
+          );
+          continue;
+        } else {
+          console.log(`Skipping entity with _key='${e.entityKey}'`);
+          continue;
+        }
+      }
+
+      if (entityId) {
+        if (operation === "update") {
+          work.push(() => {
+            return updateEntity(j1Client, entityId, e.properties);
+          });
+        } else if (operation === "delete") {
+          work.push(() => {
+            return deleteEntity(j1Client, entityId);
+          });
+        }
+      } else {
+        console.log(
+          `Skipping entity: '${JSON.stringify(
+            e
+          )}' - undefined entityId or entityKey`
+        );
+      }
     }
   }
   const entityIds = await pAll(work, {
