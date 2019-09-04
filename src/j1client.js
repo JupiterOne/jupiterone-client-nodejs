@@ -222,7 +222,7 @@ class JupiterOneClient {
         );
       }
     } catch (err) {
-      console.log({ err, id, properties, res }, "error deleting entity");
+      console.log({ err, entityId, res }, "error deleting entity");
       throw err;
     }
     return res.data.deleteEntity;
