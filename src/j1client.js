@@ -19,7 +19,8 @@ class JupiterOneClient {
     poolId = J1_USER_POOL_ID_PROD,
     clientId = J1_CLIENT_ID_PROD,
     accessToken,
-    dev = false
+    dev = false,
+    useRulesEndpoint = false
   }) {
     this.account = account;
     this.username = username;
@@ -27,6 +28,7 @@ class JupiterOneClient {
     this.poolId = poolId;
     this.clientId = clientId;
     this.accessToken = accessToken;
+    this.useRulesEndpoint = useRulesEndpoint;
 
     this.apiUrl = dev
       ? "https://api.dev.jupiterone.io"
@@ -35,7 +37,7 @@ class JupiterOneClient {
     this.rulesEndpoint = this.apiUrl + "/rules/graphql";
   }
 
-  async init(rules) {
+  async init() {
     const token = this.accessToken
       ? this.accessToken
       : await this.authenticateUser();
@@ -44,7 +46,7 @@ class JupiterOneClient {
       "LifeOmic-Account": this.account
     };
 
-    const uri = rules ? this.rulesEndpoint : this.queryEndpoint;
+    const uri = this.useRulesEndpoint ? this.rulesEndpoint : this.queryEndpoint;
     const link = ApolloLink.from([
       new RetryLink(),
       new BatchHttpLink({ uri, headers: this.headers, fetch })
