@@ -7,6 +7,7 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
     clientId?: string;
     accessToken?: string;
     dev?: boolean;
+    useRulesEndpoint?: boolean;
   }
 
   export interface CommitRange {
@@ -29,7 +30,7 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
   export default class JupiterOneClient {
     constructor(options: JupiterOneClientOptions);
 
-    init(rules?: boolean): Promise<void>;
+    init(): Promise<JupiterOneClient>;
 
     queryV1(j1ql: string): Promise<QueryResult[]>;
     ingestEntities(
