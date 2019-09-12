@@ -397,6 +397,7 @@ const CREATE_RELATIONSHIP = gql`
       relationshipClass: $relationshipClass
       fromEntityId: $fromEntityId
       toEntityId: $toEntityId
+      properties: $properties
     ) {
       relationship {
         _id
