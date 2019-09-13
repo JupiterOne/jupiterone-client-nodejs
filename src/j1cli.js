@@ -45,6 +45,10 @@ async function main() {
       "-f, --file <dir>",
       "Input JSON file. Or the filename of the alert rule pack."
     )
+    .option(
+      "--output-file <file>", 
+      "Writes query result to specified output file, or results.json by default"
+    )
     .parse(process.argv);
 
   try {
@@ -52,7 +56,16 @@ async function main() {
     const j1Client = await initializeJ1Client();
     if (program.query) {
       const res = await j1Client.queryV1(program.query);
-      console.log(JSON.stringify(res, null, 2));
+      const result = JSON.stringify(res, null, 2);
+      console.log(result);
+      if(program.outputFile){
+        const outputFile = program.outputFile.length > 0
+          ? program.outputFile
+          : 'results.json';
+        fs.writeFileSync(outputFile, result, (err) => {
+          if (err) throw err;
+        });
+      }
     } else {
       const update = program.operation === "update";
       if (program.entity) {
