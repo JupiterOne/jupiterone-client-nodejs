@@ -58,7 +58,7 @@ async function main() {
       const res = await j1Client.queryV1(program.query);
       const result = JSON.stringify(res, null, 2);
       console.log(result);
-      if(program.opfile){
+      if(program.outputFile){
         const outputFile = program.outputFile.length > 0
           ? program.outputFile
           : 'results.json';
