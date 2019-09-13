@@ -42,11 +42,15 @@ async function main() {
       "Specifies question operations. A question is answered by one or more queries."
     )
     .option(
-      "-f, --file <dir>",
+      "-f, --input-file <dir>",
       "Input JSON file. Or the filename of the alert rule pack."
     )
     .option(
-      "--output-file <file>", 
+      "--delete-duplicates",
+      "Optionally force deletion of duplicate entities with identical keys."
+    )
+    .option(
+      "--output-file <file>",
       "Writes query result to specified output file, or results.json by default",
       "results.json"
     )
@@ -59,8 +63,8 @@ async function main() {
       const res = await j1Client.queryV1(program.query);
       const result = JSON.stringify(res, null, 2);
       console.log(result);
-      if(program.outputFile){
-        fs.writeFileSync(program.outputFile, result, (err) => {
+      if (program.outputFile) {
+        fs.writeFileSync(program.outputFile, result, err => {
           if (err) throw err;
         });
       }
@@ -127,13 +131,13 @@ async function validateInputs() {
         "Must specify an operation target type (--entity, --relationship, --alert, or --question)",
         EUSAGEERROR
       );
-    } else if (!program.file || program.file === "") {
+    } else if (!program.inputFile || program.inputFile === "") {
       error.fatal("Must specify input JSON file with -f|--file)", EUSAGEERROR);
     } else {
-      let filePath = program.file;
+      let filePath = program.inputFile;
       if (!fs.existsSync(filePath)) {
         if (program.operation === "provision-alert-rule-pack") {
-          filePath = `node_modules/@jupiterone/jupiterone-alert-rules/rule-packs/${program.file}.json`;
+          filePath = `node_modules/@jupiterone/jupiterone-alert-rules/rule-packs/${program.inputFile}.json`;
           if (!fs.existsSync(filePath)) {
             error.fatal(
               `Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`
@@ -258,6 +262,8 @@ async function mutateEntities(j1Client, entities, operation) {
   } else {
     for (const e of entities) {
       let entityId;
+      let entityIds;
+
       if (e.entityId) {
         entityId = e.entityId;
       } else if (e.entityKey) {
@@ -269,10 +275,13 @@ async function mutateEntities(j1Client, entities, operation) {
           console.log(`Skipping entity with _key='${e.entityKey}' - NOT FOUND`);
           continue;
         } else if (res.length > 0) {
-          console.log(
-            `Skipping entity with _key='${e.entityKey}' - KEY NOT UNIQUE`
-          );
-          continue;
+          if (operation !== "delete" && !program.deleteDuplicates) {
+            console.log(
+              `Skipping entity with _key='${e.entityKey}' - KEY NOT UNIQUE`
+            );
+            continue;
+          }
+          entityIds = res.map(r => r.entity._id);
         } else {
           console.log(`Skipping entity with _key='${e.entityKey}'`);
           continue;
@@ -288,6 +297,15 @@ async function mutateEntities(j1Client, entities, operation) {
           work.push(() => {
             return deleteEntity(j1Client, entityId);
           });
+        }
+      } else if (entityIds) {
+        // deletes duplicate entities with identical key
+        if (operation === "delete" && program.deleteDuplicates) {
+          for (const id of entityIds) {
+            work.push(() => {
+              return deleteEntity(j1Client, id);
+            });
+          }
         }
       } else {
         console.log(
