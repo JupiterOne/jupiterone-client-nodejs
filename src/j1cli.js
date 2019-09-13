@@ -59,7 +59,10 @@ async function main() {
       const result = JSON.stringify(res, null, 2);
       console.log(result);
       if(program.opfile){
-        fs.writeFileSync("result.json", result, (err) => {
+        const outputFile = program.outputFile.length > 0
+          ? program.outputFile
+          : 'results.json';
+        fs.writeFileSync(outputFile, result, (err) => {
           if (err) throw err;
         });
       }
