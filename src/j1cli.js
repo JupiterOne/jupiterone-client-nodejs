@@ -45,6 +45,10 @@ async function main() {
       "-f, --file <dir>",
       "Input JSON file. Or the filename of the alert rule pack."
     )
+    .option(
+      "--delete-duplicates",
+      "Optionally force deletion of duplicate entities with identical keys."
+    )
     .parse(process.argv);
 
   try {
@@ -247,6 +251,7 @@ async function mutateEntities(j1Client, entities, operation) {
   } else {
     for (const e of entities) {
       let entityId;
+      let entityIds;
       if (e.entityId) {
         entityId = e.entityId;
       } else if (e.entityKey) {
@@ -258,10 +263,13 @@ async function mutateEntities(j1Client, entities, operation) {
           console.log(`Skipping entity with _key='${e.entityKey}' - NOT FOUND`);
           continue;
         } else if (res.length > 0) {
-          console.log(
-            `Skipping entity with _key='${e.entityKey}' - KEY NOT UNIQUE`
-          );
-          continue;
+          entityIds = res.map(r => r.entity._id);
+          if (operation !== "delete" && !program.deleteDuplicates) {
+            console.log(
+              `Skipping entity with _key='${e.entityKey}' - KEY NOT UNIQUE`
+            );
+            continue;
+          }
         } else {
           console.log(`Skipping entity with _key='${e.entityKey}'`);
           continue;
@@ -277,6 +285,15 @@ async function mutateEntities(j1Client, entities, operation) {
           work.push(() => {
             return deleteEntity(j1Client, entityId);
           });
+        }
+      } else if (entityIds) {
+        // deletes duplicate entities with identical key
+        if (operation === "delete" && program.deleteDuplicates) {
+          for (const id of entityIds) {
+            work.push(() => {
+              return deleteEntity(j1Client, id);
+            });
+          }
         }
       } else {
         console.log(
