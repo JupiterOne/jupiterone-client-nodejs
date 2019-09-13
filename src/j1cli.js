@@ -42,12 +42,16 @@ async function main() {
       "Specifies question operations. A question is answered by one or more queries."
     )
     .option(
-      "-f, --file <dir>",
+      "-f, --input-file <dir>",
       "Input JSON file. Or the filename of the alert rule pack."
     )
     .option(
       "--delete-duplicates",
       "Optionally force deletion of duplicate entities with identical keys."
+    )
+    .option(
+      "--output-file <file>",
+      "Writes query result to specified output file, or results.json by default"
     )
     .parse(process.argv);
 
@@ -56,7 +60,15 @@ async function main() {
     const j1Client = await initializeJ1Client();
     if (program.query) {
       const res = await j1Client.queryV1(program.query);
-      console.log(JSON.stringify(res, null, 2));
+      const result = JSON.stringify(res, null, 2);
+      console.log(result);
+      if (program.outputFile) {
+        const outputFile =
+          program.outputFile.length > 0 ? program.outputFile : "results.json";
+        fs.writeFileSync(outputFile, result, err => {
+          if (err) throw err;
+        });
+      }
     } else {
       const update = program.operation === "update";
       if (program.entity) {
@@ -120,13 +132,13 @@ async function validateInputs() {
         "Must specify an operation target type (--entity, --relationship, --alert, or --question)",
         EUSAGEERROR
       );
-    } else if (!program.file || program.file === "") {
+    } else if (!program.inputFile || program.inputFile === "") {
       error.fatal("Must specify input JSON file with -f|--file)", EUSAGEERROR);
     } else {
-      let filePath = program.file;
+      let filePath = program.inputFile;
       if (!fs.existsSync(filePath)) {
         if (program.operation === "provision-alert-rule-pack") {
-          filePath = `node_modules/@jupiterone/jupiterone-alert-rules/rule-packs/${program.file}.json`;
+          filePath = `node_modules/@jupiterone/jupiterone-alert-rules/rule-packs/${program.inputFile}.json`;
           if (!fs.existsSync(filePath)) {
             error.fatal(
               `Could not find input JSON file (${filePath}). Specify the correct file path or alert-rule-pack name with '-f|--file'.`
