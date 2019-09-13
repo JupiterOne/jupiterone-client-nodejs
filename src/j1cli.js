@@ -45,7 +45,10 @@ async function main() {
       "-f, --file <dir>",
       "Input JSON file. Or the filename of the alert rule pack."
     )
-    .option("--opfile", "Writes query result to results.json")
+    .option(
+      "--output-file <file>", 
+      "Writes query result to specified output file, or results.json by default"
+    )
     .parse(process.argv);
 
   try {
