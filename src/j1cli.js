@@ -10,6 +10,8 @@ const yaml = require("js-yaml");
 const { defaultAlertSettings } = require("@jupiterone/jupiterone-alert-rules");
 const pAll = require("p-all");
 
+const writeFile = util.promisify(fs.writeFile);
+
 const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID;
 const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
 const J1_API_TOKEN = process.env.J1_API_TOKEN;
@@ -64,9 +66,7 @@ async function main() {
       const result = JSON.stringify(res, null, 2);
       console.log(result);
       if (program.outputFile) {
-        fs.writeFileSync(program.outputFile, result, err => {
-          if (err) throw err;
-        });
+        await writeFile(program.outputFile, result);
       }
     } else {
       const update = program.operation === "update";
@@ -524,9 +524,8 @@ async function mutateQuestions(j1Client, questions, operation) {
     );
   }
   if (newFile) {
-    var jsonString = JSON.stringify(questions, null, 2);
+    const jsonString = JSON.stringify(questions, null, 2);
 
-    const writeFile = util.promisify(fs.writeFile);
     await writeFile("modified_questions.json", jsonString);
     console.log(
       'A modified version of your JSON ("modified_questions.json") with your new IDs has been added to your current directory.'
