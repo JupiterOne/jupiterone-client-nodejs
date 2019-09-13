@@ -47,7 +47,8 @@ async function main() {
     )
     .option(
       "--output-file <file>", 
-      "Writes query result to specified output file, or results.json by default"
+      "Writes query result to specified output file, or results.json by default",
+      "results.json"
     )
     .parse(process.argv);
 
@@ -59,10 +60,7 @@ async function main() {
       const result = JSON.stringify(res, null, 2);
       console.log(result);
       if(program.outputFile){
-        const outputFile = program.outputFile.length > 0
-          ? program.outputFile
-          : 'results.json';
-        fs.writeFileSync(outputFile, result, (err) => {
+        fs.writeFileSync(program.outputFile, result, (err) => {
           if (err) throw err;
         });
       }
