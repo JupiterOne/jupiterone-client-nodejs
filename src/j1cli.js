@@ -263,6 +263,7 @@ async function mutateEntities(j1Client, entities, operation) {
     for (const e of entities) {
       let entityId;
       let entityIds;
+
       if (e.entityId) {
         entityId = e.entityId;
       } else if (e.entityKey) {
@@ -274,13 +275,13 @@ async function mutateEntities(j1Client, entities, operation) {
           console.log(`Skipping entity with _key='${e.entityKey}' - NOT FOUND`);
           continue;
         } else if (res.length > 0) {
-          entityIds = res.map(r => r.entity._id);
           if (operation !== "delete" && !program.deleteDuplicates) {
             console.log(
               `Skipping entity with _key='${e.entityKey}' - KEY NOT UNIQUE`
             );
             continue;
           }
+          entityIds = res.map(r => r.entity._id);
         } else {
           console.log(`Skipping entity with _key='${e.entityKey}'`);
           continue;
