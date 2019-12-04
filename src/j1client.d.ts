@@ -30,7 +30,7 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
   export default class JupiterOneClient {
     constructor(options: JupiterOneClientOptions);
 
-    init(): Promise<JupiterOneClient>;
+    init(httpLink?: HttpLink): Promise<JupiterOneClient>;
 
     queryV1(j1ql: string): Promise<QueryResult[]>;
     ingestEntities(

@@ -37,7 +37,7 @@ class JupiterOneClient {
     this.rulesEndpoint = this.apiUrl + "/rules/graphql";
   }
 
-  async init() {
+  async init(httpLink) {
     const token = this.accessToken
       ? this.accessToken
       : await this.authenticateUser();
@@ -49,7 +49,7 @@ class JupiterOneClient {
     const uri = this.useRulesEndpoint ? this.rulesEndpoint : this.queryEndpoint;
     const link = ApolloLink.from([
       new RetryLink(),
-      new BatchHttpLink({ uri, headers: this.headers, fetch })
+      httpLink || new BatchHttpLink({ uri, headers: this.headers, fetch })
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });

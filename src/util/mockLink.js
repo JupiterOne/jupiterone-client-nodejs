@@ -1,6 +1,6 @@
 const { ApolloLink, Observable } = require("apollo-link");
 
-export default class MockLink extends ApolloLink {
+class MockLink extends ApolloLink {
   constructor(execute) {
     super();
     this.execute = execute;
@@ -23,3 +23,5 @@ export default class MockLink extends ApolloLink {
     });
   }
 }
+
+module.exports = MockLink;
