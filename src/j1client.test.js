@@ -49,7 +49,7 @@ describe("JupiterOneClient", () => {
         console.log(results);
 
         expect(false).toBeTruthy();
-      });
+      }, 10000);
     });
 
     describe("failing 4 times with 429, then succeeding", () => {
@@ -80,7 +80,7 @@ describe("JupiterOneClient", () => {
         console.log(results);
 
         expect(false).toBeTruthy();
-      });
+      }, 10000);
     });
 
     describe("failing 5 times with 429, then succeeding", () => {
@@ -106,12 +106,12 @@ describe("JupiterOneClient", () => {
           });
       });
 
-      it("fails", async () => {
+      it.only("fails", async () => {
         const results = await j1Client.queryV1(j1qlString);
         console.log(results);
 
         expect(false).toBeTruthy();
-      });
+      }, 10000);
     });
   });
 });
