@@ -1,6 +1,8 @@
-const { ApolloError } = require("apollo-client");
+const { Polly } = require("@pollyjs/core");
+const NodeHTTPAdapter = require("@pollyjs/adapter-node-http");
 const JupiterOneClient = require("./j1client");
-const MockLink = require("./util/mockLink");
+
+Polly.register(NodeHTTPAdapter);
 
 const FAKE_ACCOUNT = "johndoe";
 const FAKE_KEY = "abc123";
@@ -15,103 +17,50 @@ const mockResponse = {
   }
 };
 
-describe("JupiterOneClient", () => {
-  let j1Client;
+let polly;
+let j1Client;
+let attempts = 0;
+let attemptsToFail = 0;
 
-  describe("rate limit throttling", () => {
-    let attempts = 0;
+beforeEach(async () => {
+  attempts = 0;
 
-    describe("failing 4 times with 401, then succeeding", () => {
-      beforeEach(() => {
-        attempts = 0;
+  j1Client = await new JupiterOneClient({
+    account: FAKE_ACCOUNT,
+    accessToken: FAKE_KEY
+  }).init();
 
-        const mockLink = new MockLink(async () => {
-          attempts++;
-          if (attempts <= 4) {
-            throw new ApolloError("Authentication failed.", 401);
-          } else {
-            return mockResponse;
-          }
-        });
-
-        return new JupiterOneClient({
-          account: FAKE_ACCOUNT,
-          accessToken: FAKE_KEY
-        })
-          .init(mockLink)
-          .then(client => {
-            j1Client = client;
-          });
-      });
-
-      it("fails", async () => {
-        const results = await j1Client.queryV1(j1qlString);
-        console.log(results);
-
-        expect(false).toBeTruthy();
-      }, 10000);
-    });
-
-    describe("failing 4 times with 429, then succeeding", () => {
-      beforeEach(() => {
-        attempts = 0;
-
-        const mockLink = new MockLink(async () => {
-          attempts++;
-          if (attempts <= 4) {
-            throw new ApolloError("Too many requests.", 429);
-          } else {
-            return mockResponse;
-          }
-        });
-
-        return new JupiterOneClient({
-          account: FAKE_ACCOUNT,
-          accessToken: FAKE_KEY
-        })
-          .init(mockLink)
-          .then(client => {
-            j1Client = client;
-          });
-      });
-
-      it("fails", async () => {
-        const results = await j1Client.queryV1(j1qlString);
-        console.log(results);
-
-        expect(false).toBeTruthy();
-      }, 10000);
-    });
-
-    describe("failing 5 times with 429, then succeeding", () => {
-      beforeEach(() => {
-        attempts = 0;
-
-        const mockLink = new MockLink(async () => {
-          attempts++;
-          if (attempts <= 5) {
-            throw new ApolloError("Too many requests.", 429);
-          } else {
-            return mockResponse;
-          }
-        });
-
-        return new JupiterOneClient({
-          account: FAKE_ACCOUNT,
-          accessToken: FAKE_KEY
-        })
-          .init(mockLink)
-          .then(client => {
-            j1Client = client;
-          });
-      });
-
-      it.only("fails", async () => {
-        const results = await j1Client.queryV1(j1qlString);
-        console.log(results);
-
-        expect(false).toBeTruthy();
-      }, 10000);
-    });
+  polly = new Polly("JupiterOneClient tests", {
+    adapters: ["node-http"]
   });
+  polly.server.any().intercept((req, res) => {
+    attempts++;
+    res.status(attempts <= attemptsToFail ? 401 : 200);
+    res.json(mockResponse);
+  });
+});
+
+afterEach(() => {
+  return polly.stop(); // returns a Promise
+});
+
+describe("failing 4 times", () => {
+  beforeEach(() => {
+    attemptsToFail = 4;
+  });
+
+  it("succeeds", async () => {
+    const results = await j1Client.queryV1(j1qlString);
+    expect(results.length).toBe(0);
+  }, 10000);
+});
+
+describe("failing 5 times", () => {
+  beforeEach(() => {
+    attemptsToFail = 5;
+  });
+
+  it("fails", async () => {
+    await expect(j1Client.queryV1(j1qlString)).rejects.toThrow();
+  }, 10000);
 });
