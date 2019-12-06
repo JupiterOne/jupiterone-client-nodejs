@@ -35,8 +35,10 @@ beforeEach(async () => {
   });
   polly.server.any().intercept((req, res) => {
     attempts++;
-    res.status(attempts <= attemptsToFail ? 401 : 200);
-    res.json(mockResponse);
+    const shouldFailThisTime = attempts <= attemptsToFail;
+
+    res.status(shouldFailThisTime ? 401 : 200);
+    res.json(shouldFailThisTime ? {} : mockResponse);
   });
 });
 
