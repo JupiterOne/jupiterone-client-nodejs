@@ -14,9 +14,9 @@ deploy:
   provider: npm
   email: npm@jupiter.io
   api_key:
-    secure: something123
+    secure: "kHQQnle27X9d7lUYyG3JrNrgoojO4woSMoslmU/rNl15ZY+pdDZk6tOtvEUtG88xocd8k5vqf6eurSVjEtUnpj00TxHTbKY+1XTWBkdb53LEa0h0bnLyFPIgFKgLC+UjVXvzsqdRuktF+GWFiV/aryQmvh2jwsSZ2mSThjw/gZPu3yA+Ofjs/6Nno2h5m19AmEdnpe8RKN/ZeAe9gllphzOxCZcDe8vq2W31SMvdv75dAt6MJWo0cOS7tu5MpN0FmKtFVXWPoWXQvXwGq35os9w+k+Ywja5o2Z1vVEZzhqA7+gKrlGBh/dGE4m/hoNI1fWm5VjSf5ZioyHir8+vtMMKFET7v1eag+snYa3fyTxpADKmCE78gIpJXoGO5oQFh1hTHfIfUwz+7GqHEHo5C14g2FDSd/cPWJnSoLy698p4y31KQP/I81rSI2wJ8mil45q5Pk5Pup/PZOwFskSyVEvm5ZfdgWmFvlV+6McQQNvL6mvSYMLv97xL+TnW+8mbzy+8HYnTFIhZBLt6W90yxOvWDEOgigauovaQMylhLsX3j4G8SYFV2ieCcjLocLC2vU5jNdu/oSxF5mNduiEAKbNy3E35mXqT2SovmyEU3TjQMXZ+f/EdoyhVQhNQI0yzcyMocB37TgLuM22p1jHg5Xx665CfMCn1b3Q69qiSv2iY="
   on:
     tags: true
     branch: master
     repo: JupiterOne/jupiterone-client-nodejs
-    node: '8'
+    node: '12'
