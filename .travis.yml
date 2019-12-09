@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - '8'
+  - '12'
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+
+script: yarn test
+
+deploy:
+  provider: npm
+  email: npm@jupiter.io
+  api_key:
+    secure: something123
+  on:
+    tags: true
+    branch: master
+    repo: JupiterOne/jupiterone-client-nodejs
+    node: '8'
