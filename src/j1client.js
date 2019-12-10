@@ -457,6 +457,7 @@ const UPDATE_ALERT_RULE = gql`
       latest
       deleted
       pollingInterval
+      templates
       question {
         queries {
           name
