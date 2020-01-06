@@ -211,12 +211,12 @@ class JupiterOneClient {
     return res.data.updateEntity;
   }
 
-  async deleteEntity(entityId) {
+  async deleteEntity(entityId, hardDelete) {
     let res;
     try {
       res = await this.graphClient.mutate({
         mutation: DELETE_ENTITY,
-        variables: { entityId }
+        variables: { entityId, hardDelete }
       });
       if (res.errors) {
         throw new Error(
@@ -368,16 +368,23 @@ const UPDATE_ENTITY = gql`
 `;
 
 const DELETE_ENTITY = gql`
-  mutation DeleteEntity($entityId: String!, $timestamp: Long) {
-    deleteEntity(entityId: $entityId, timestamp: $timestamp) {
+  mutation DeleteEntity(
+    $entityId: String!
+    $timestamp: Long
+    $hardDelete: Boolean
+  ) {
+    deleteEntity(
+      entityId: $entityId
+      timestamp: $timestamp
+      hardDelete: $hardDelete
+    ) {
       entity {
         _id
+        _deleted
+        _endOn
       }
       vertex {
         id
-        entity {
-          _id
-        }
         properties
       }
     }
