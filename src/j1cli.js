@@ -48,6 +48,10 @@ async function main() {
       "Input JSON file. Or the filename of the alert rule pack."
     )
     .option(
+      "--hard-delete",
+      "Optionally force hard deletion of entities (default is soft delete)."
+    )
+    .option(
       "--delete-duplicates",
       "Optionally force deletion of duplicate entities with identical keys."
     )
@@ -246,8 +250,8 @@ async function updateEntity(j1Client, entityId, properties) {
   return entityId;
 }
 
-async function deleteEntity(j1Client, entityId) {
-  await j1Client.deleteEntity(entityId);
+async function deleteEntity(j1Client, entityId, hardDelete) {
+  await j1Client.deleteEntity(entityId, hardDelete);
   return entityId;
 }
 
@@ -295,7 +299,7 @@ async function mutateEntities(j1Client, entities, operation) {
           });
         } else if (operation === "delete") {
           work.push(() => {
-            return deleteEntity(j1Client, entityId);
+            return deleteEntity(j1Client, entityId, program.hardDelete);
           });
         }
       } else if (entityIds) {
