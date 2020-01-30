@@ -1,5 +1,6 @@
 "use strict";
 
+const path = require("path");
 const JupiterOneClient = require("./j1client");
 const { prompt } = require("inquirer");
 const program = require("commander");
@@ -176,15 +177,11 @@ async function validateInputs() {
   return data;
 }
 
-function jParse(file) {
+function jParse(filePath) {
   try {
-    const data = fs.readFileSync(file, "utf8");
-    if (
-      file
-        .split(".")
-        .pop()
-        .toLowerCase() === "yml"
-    ) {
+    const data = fs.readFileSync(filePath, "utf8");
+    const fileExtension = path.extname(filePath);
+    if (fileExtension === ".yml" || fileExtension === ".yaml") {
       return yaml.safeLoad(data);
     } else {
       return JSON.parse(data);
