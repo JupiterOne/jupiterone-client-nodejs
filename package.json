@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.17.1",
+  "version": "0.17.2",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "src/j1client.js",
   "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
