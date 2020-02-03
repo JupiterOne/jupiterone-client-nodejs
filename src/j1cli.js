@@ -241,9 +241,8 @@ async function createEntity(j1Client, e) {
 }
 
 async function updateEntity(j1Client, entityId, properties) {
-  properties.updatedOn = properties.updatedOn
-    ? new Date(properties.updatedOn).getTime()
-    : new Date().getTime();
+  properties.updatedOn =
+    properties.updatedOn && new Date(properties.updatedOn).getTime();
 
   await j1Client.updateEntity(entityId, properties);
   return entityId;
