@@ -228,9 +228,8 @@ async function createEntity(j1Client, e) {
     ? e.entityClass
     : [e.entityClass];
 
-  e.properties.createdOn = e.properties.createdOn
-    ? new Date(e.properties.createdOn).getTime()
-    : new Date().getTime();
+  e.properties.createdOn =
+    e.properties.createdOn && new Date(e.properties.createdOn).getTime();
 
   const res = await j1Client.createEntity(
     e.entityKey,
@@ -307,7 +306,7 @@ async function mutateEntities(j1Client, entities, operation) {
         if (operation === "delete" && program.deleteDuplicates) {
           for (const id of entityIds) {
             work.push(() => {
-              return deleteEntity(j1Client, id);
+              return deleteEntity(j1Client, id, program.hardDelete);
             });
           }
         }
