@@ -16,6 +16,7 @@ const writeFile = util.promisify(fs.writeFile);
 const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID;
 const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
 const J1_API_TOKEN = process.env.J1_API_TOKEN;
+const J1_DEV_ENABLED = process.env.J1_DEV_ENABLED;
 const EUSAGEERROR = 126;
 
 const SUPPORTED_OPERATIONS = [
@@ -214,7 +215,8 @@ async function initializeJ1Client() {
     password: program.password,
     poolId: J1_USER_POOL_ID,
     clientId: J1_CLIENT_ID,
-    accessToken: program.key || J1_API_TOKEN
+    accessToken: program.key || J1_API_TOKEN,
+    dev: !!J1_DEV_ENABLED
   }).init(program.alert);
   console.log("OK");
   return j1Client;
