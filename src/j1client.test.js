@@ -54,7 +54,7 @@ describe("failing 4 times", () => {
   test("client retries failed requests and returns successful response", async () => {
     const results = await j1Client.queryV1(j1qlString);
     expect(results.length).toBe(0);
-  }, 10000);
+  }, 100000);
 });
 
 describe("failing 5 times", () => {
