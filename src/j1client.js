@@ -1,3 +1,5 @@
+const { retry } = require("@lifeomic/attempt");
+
 const Cognito = require("amazon-cognito-identity-js-node");
 
 const { ApolloClient } = require("apollo-client");
@@ -10,6 +12,13 @@ const fetch = require("node-fetch").default;
 
 const J1_USER_POOL_ID_PROD = "us-east-2_9fnMVHuxD";
 const J1_CLIENT_ID_PROD = "1hcv141pqth5f49df7o28ngq1u";
+
+const RETRY_OPTIONS = {
+  initialDelay: 100,
+  delay: 1000,
+  factor: 1.5,
+  maxAttempts: 10
+};
 
 class JupiterOneClient {
   constructor({
@@ -93,8 +102,12 @@ class JupiterOneClient {
       }`;
       page++;
 
-      const res = await this.graphClient.query({ query });
-      if (res.errors) {
+      let res;
+      await retry(async () => {
+        res = await this.graphClient.query({ query });
+      }, RETRY_OPTIONS);
+
+      if (!res || res.errors) {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
       const { data } = res.data.queryV1;
@@ -117,8 +130,12 @@ class JupiterOneClient {
   }
 
   async queryGraphQL(query) {
-    const res = await this.graphClient.query({ query });
-    if (res.errors) {
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.query({ query });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       console.log(res.errors);
       throw new Error(`JupiterOne returned error(s) for query: '${query}'`);
     }
@@ -152,13 +169,17 @@ class JupiterOneClient {
   }
 
   async mutateAlertRule(rule, update) {
-    const res = await this.graphClient.mutate({
-      mutation: update ? UPDATE_ALERT_RULE : CREATE_ALERT_RULE,
-      variables: {
-        instance: rule.instance
-      }
-    });
-    if (res.errors) {
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.mutate({
+        mutation: update ? UPDATE_ALERT_RULE : CREATE_ALERT_RULE,
+        variables: {
+          instance: rule.instance
+        }
+      });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       throw new Error(
         `JupiterOne returned error(s) mutating alert rule: '${rule}'`
       );
@@ -169,16 +190,20 @@ class JupiterOneClient {
   }
 
   async createEntity(key, type, classLabels, properties) {
-    const res = await this.graphClient.mutate({
-      mutation: CREATE_ENTITY,
-      variables: {
-        entityKey: key,
-        entityType: type,
-        entityClass: classLabels,
-        properties
-      }
-    });
-    if (res.errors) {
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.mutate({
+        mutation: CREATE_ENTITY,
+        variables: {
+          entityKey: key,
+          entityType: type,
+          entityClass: classLabels,
+          properties
+        }
+      });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       throw new Error(
         `JupiterOne returned error(s) creating entity with key: '${key}'`
       );
@@ -189,14 +214,17 @@ class JupiterOneClient {
   async updateEntity(entityId, properties) {
     let res;
     try {
-      res = await this.graphClient.mutate({
-        mutation: UPDATE_ENTITY,
-        variables: {
-          entityId,
-          properties
-        }
-      });
-      if (res.errors) {
+      await retry(async () => {
+        res = await this.graphClient.mutate({
+          mutation: UPDATE_ENTITY,
+          variables: {
+            entityId,
+            properties
+          }
+        });
+      }, RETRY_OPTIONS);
+
+      if (!res || res.errors) {
         throw new Error(
           `JupiterOne returned error(s) updating entity with id: '${entityId}'`
         );
@@ -214,11 +242,14 @@ class JupiterOneClient {
   async deleteEntity(entityId, hardDelete) {
     let res;
     try {
-      res = await this.graphClient.mutate({
-        mutation: DELETE_ENTITY,
-        variables: { entityId, hardDelete }
-      });
-      if (res.errors) {
+      await retry(async () => {
+        res = await this.graphClient.mutate({
+          mutation: DELETE_ENTITY,
+          variables: { entityId, hardDelete }
+        });
+      }, RETRY_OPTIONS);
+
+      if (!res || res.errors) {
         throw new Error(
           `JupiterOne returned error(s) deleting entity with id: '${entityId}'`
         );
@@ -231,18 +262,22 @@ class JupiterOneClient {
   }
 
   async createRelationship(key, type, klass, fromId, toId, properties) {
-    const res = await this.graphClient.mutate({
-      mutation: CREATE_RELATIONSHIP,
-      variables: {
-        relationshipKey: key,
-        relationshipType: type,
-        relationshipClass: klass,
-        fromEntityId: fromId,
-        toEntityId: toId,
-        properties
-      }
-    });
-    if (res.errors) {
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.mutate({
+        mutation: CREATE_RELATIONSHIP,
+        variables: {
+          relationshipKey: key,
+          relationshipType: type,
+          relationshipClass: klass,
+          fromEntityId: fromId,
+          toEntityId: toId,
+          properties
+        }
+      });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       throw new Error(
         `JupiterOne returned error(s) creating relationship with key: '${key}'`
       );
@@ -267,8 +302,11 @@ class JupiterOneClient {
     };
     let res;
     try {
-      res = await this.graphClient.mutate(operation);
-      if (res.errors) {
+      await retry(async () => {
+        res = await this.graphClient.mutate(operation);
+      }, RETRY_OPTIONS);
+
+      if (!res || res.errors) {
         throw new Error(
           `JupiterOne returned error(s) upserting rawData for entity with id: '${entityId}'`
         );
@@ -282,11 +320,15 @@ class JupiterOneClient {
   }
 
   async createQuestion(question) {
-    const res = await this.graphClient.mutate({
-      mutation: CREATE_QUESTION,
-      variables: { question }
-    });
-    if (res.errors) {
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.mutate({
+        mutation: CREATE_QUESTION,
+        variables: { question }
+      });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       throw new Error(
         `JupiterOne returned error(s) creating question: '${question}'`
       );
@@ -296,14 +338,19 @@ class JupiterOneClient {
 
   async updateQuestion(question) {
     const { id, ...update } = question;
-    const res = await this.graphClient.mutate({
-      mutation: UPDATE_QUESTION,
-      variables: {
-        id,
-        update
-      }
-    });
-    if (res.errors) {
+
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.mutate({
+        mutation: UPDATE_QUESTION,
+        variables: {
+          id,
+          update
+        }
+      });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       throw new Error(
         `JupiterOne returned error(s) updating question: '${question}'`
       );
@@ -312,11 +359,15 @@ class JupiterOneClient {
   }
 
   async deleteQuestion(questionId) {
-    const res = await this.graphClient.mutate({
-      mutation: DELETE_QUESTION,
-      variables: { id: questionId }
-    });
-    if (res.errors) {
+    let res;
+    await retry(async () => {
+      res = await this.graphClient.mutate({
+        mutation: DELETE_QUESTION,
+        variables: { id: questionId }
+      });
+    }, RETRY_OPTIONS);
+
+    if (!res || res.errors) {
       throw new Error(
         `JupiterOne returned error(s) updating question with ID: '${questionId}'`
       );

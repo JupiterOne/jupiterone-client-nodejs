@@ -308,6 +308,11 @@
   resolved "https://registry.yarnpkg.com/@jupiterone/jupiterone-alert-rules/-/jupiterone-alert-rules-0.3.0.tgz#224e2e5ab445ef21497e57a4b0cc2f4afc73504b"
   integrity sha512-BDAKVgL7TobJ3PD3Phioa0LgopEHzRelZSgiBjFvAMFR8wiQs4GE/iSt/tVENQP/kKDfQLyM0wiyaJlgdHLyhQ==
 
+"@lifeomic/attempt@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@lifeomic/attempt/-/attempt-3.0.0.tgz#75fecc204f8b0ac18b5363b4404bb32450f01859"
+  integrity sha512-Ibk4Vfl46dSrhtH5fHsrTA4waAuyP7/qcr3uo0mO70azRc6LWgJILlMy3B1oOvyiN9jQcdqwsThaQkPKLiYKTg==
+
 "@pollyjs/adapter-node-http@^2.7.0":
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/@pollyjs/adapter-node-http/-/adapter-node-http-2.7.0.tgz#01818e5a5eb9f256e341e7a1e121d5be60f1a544"

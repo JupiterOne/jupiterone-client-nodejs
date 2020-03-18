@@ -57,14 +57,14 @@ describe("failing 4 times", () => {
   }, 10000);
 });
 
-describe("failing 5 times", () => {
+describe("failing 10 times", () => {
   beforeEach(() => {
-    attemptsToFail = 5;
+    attemptsToFail = 10;
   });
 
-  test("client retries 5 times and throws error", async () => {
+  test("client retries 10 times and throws error", async () => {
     await expect(j1Client.queryV1(j1qlString)).rejects.toThrow(
       /Network error: Response not successful: Received status code 401/
     );
-  }, 10000);
+  }, 100000);
 });
