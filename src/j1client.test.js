@@ -66,5 +66,5 @@ describe("failing 5 times", () => {
     await expect(j1Client.queryV1(j1qlString)).rejects.toThrow(
       /Network error: Response not successful: Received status code 401/
     );
-  }, 10000);
+  }, 100000);
 });

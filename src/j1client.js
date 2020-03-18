@@ -48,7 +48,13 @@ class JupiterOneClient {
 
     const uri = this.useRulesEndpoint ? this.rulesEndpoint : this.queryEndpoint;
     const link = ApolloLink.from([
-      new RetryLink(),
+      new RetryLink({
+        delay: {
+          initial: 2000,
+          max: 5000,
+          jitter: true
+        }
+      }),
       new BatchHttpLink({ uri, headers: this.headers, fetch })
     ]);
     const cache = new InMemoryCache();
