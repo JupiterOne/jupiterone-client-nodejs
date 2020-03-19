@@ -10,7 +10,7 @@ const fetch = require("node-fetch").default;
 
 const J1_USER_POOL_ID_PROD = "us-east-2_9fnMVHuxD";
 const J1_CLIENT_ID_PROD = "1hcv141pqth5f49df7o28ngq1u";
-const REQUEST_TIMEOUT_IN_MS = 1000 * 60 * 5; // 5 minute timeout.
+const QUERY_RESULTS_TIMEOUT = 1000 * 60 * 5; // Poll s3 location for 5 minutes before timeout.
 
 const JobStatus = {
   IN_PROGRESS: "IN_PROGRESS",
@@ -119,9 +119,9 @@ class JupiterOneClient {
         await sleep(200);
         statusFile = await fetch(deferredUrl).then(res => res.json());
         status = statusFile.status;
-        if (Date.now() - startTimeInMs > REQUEST_TIMEOUT_IN_MS) {
+        if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
           throw new Error(
-            `Exceeded request timeout of ${REQUEST_TIMEOUT_IN_MS /
+            `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT /
               1000} seconds.`
           );
         }
