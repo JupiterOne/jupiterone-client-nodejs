@@ -480,7 +480,7 @@ const UPSERT_ENTITY_RAW_DATA = gql`
   }
 `;
 
-function getQueryV1Gpl(j1ql, page) {
+function queryV1Gql(j1ql, page) {
   return gql`
   {
     queryV1(
