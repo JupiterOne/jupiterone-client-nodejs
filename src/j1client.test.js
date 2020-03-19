@@ -20,12 +20,7 @@ const mockDeferredResponse = {
 };
 
 const mockQueryV1Response = {
-  data: {
-    queryV1: {
-      data: [],
-      __typename: "QueryV1Response"
-    }
-  }
+  data: []
 };
 
 const mockS3ResponsePass = {

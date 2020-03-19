@@ -10,6 +10,19 @@ const fetch = require("node-fetch").default;
 
 const J1_USER_POOL_ID_PROD = "us-east-2_9fnMVHuxD";
 const J1_CLIENT_ID_PROD = "1hcv141pqth5f49df7o28ngq1u";
+const REQUEST_TIMEOUT_IN_MS = 1000 * 60 * 5; // 5 minute timeout.
+
+const JobStatus = {
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED"
+};
+
+const sleep = function(ms) {
+  return new Promise(function(resolve) {
+    return setTimeout(resolve, ms);
+  });
+};
 
 class JupiterOneClient {
   constructor({
@@ -90,24 +103,7 @@ class JupiterOneClient {
     let results = [];
 
     while (!complete) {
-      // is this a good syntax for enums in JS? If so I'll move it out of the function's scope.
-      const JobStatus = {
-        IN_PROGRESS: "IN_PROGRESS",
-        COMPLETED: "COMPLETED",
-        FAILED: "FAILED"
-      };
-      const query = gql`
-      {
-        queryV1(
-          query: "${j1ql} SKIP ${page *
-        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}",
-          deferredResponse: FORCE
-        ) {
-          type
-          url
-          data
-        }
-      }`;
+      const query = getQueryV1Gpl(j1ql, page);
       page++;
 
       const res = await this.graphClient.query({ query });
@@ -118,26 +114,32 @@ class JupiterOneClient {
       const deferredUrl = res.data.queryV1.url;
       let status = JobStatus.IN_PROGRESS;
       let statusFile;
-      var sleep = function(ms) {
-        return new Promise(function(resolve) {
-          return setTimeout(resolve, ms);
-        });
-      };
+      let startTimeInMs = Date.now();
       do {
         await sleep(200);
         statusFile = await fetch(deferredUrl).then(res => res.json());
         status = statusFile.status;
-      } while (status == JobStatus.IN_PROGRESS);
+        if (Date.now() - startTimeInMs > REQUEST_TIMEOUT_IN_MS) {
+          throw new Error(
+            `Exceeded request timeout of ${REQUEST_TIMEOUT_IN_MS /
+              1000} seconds.`
+          );
+        }
+      } while (status === JobStatus.IN_PROGRESS);
+
+      console.log(statusFile);
 
       let result;
-      if (status == JobStatus.COMPLETED) {
+      if (status === JobStatus.COMPLETED) {
         result = await fetch(statusFile.url).then(res => res.json());
       } else {
         // JobStatus.FAILED
-        throw new Error(result.error || "Job failed without an error message.");
+        throw new Error(
+          statusFile.error || "Job failed without an error message."
+        );
       }
 
-      const { data } = result.data.queryV1;
+      const { data } = result;
 
       // data will assume tree shape if you specify 'return tree' in J1QL
       const isTree = data.vertices && data.edges;
@@ -479,6 +481,20 @@ const UPSERT_ENTITY_RAW_DATA = gql`
     }
   }
 `;
+
+function getQueryV1Gpl(j1ql, page) {
+  return gql`
+  {
+    queryV1(
+      query: "${j1ql} SKIP ${page * J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}",
+      deferredResponse: FORCE
+    ) {
+      type
+      url
+      data
+    }
+  }`;
+}
 
 const CREATE_ALERT_RULE = gql`
   mutation CreateQuestionRuleInstance(
