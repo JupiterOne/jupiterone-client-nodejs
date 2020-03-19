@@ -90,10 +90,21 @@ class JupiterOneClient {
     let results = [];
 
     while (!complete) {
+      // is this a good syntax for enums in JS? If so I'll move it out of the function's scope.
+      const JobStatus = {
+        IN_PROGRESS: "IN_PROGRESS",
+        COMPLETED: "COMPLETED",
+        FAILED: "FAILED"
+      };
       const query = gql`
       {
-        queryV1(query: "${j1ql} SKIP ${page *
-        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}") {
+        queryV1(
+          query: "${j1ql} SKIP ${page *
+        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}",
+          deferredResponse: FORCE
+        ) {
+          type
+          url
           data
         }
       }`;
@@ -103,7 +114,30 @@ class JupiterOneClient {
       if (res.errors) {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
-      const { data } = res.data.queryV1;
+
+      const deferredUrl = res.data.queryV1.url;
+      let status = JobStatus.IN_PROGRESS;
+      let statusFile;
+      var sleep = function(ms) {
+        return new Promise(function(resolve) {
+          return setTimeout(resolve, ms);
+        });
+      };
+      do {
+        await sleep(200);
+        statusFile = await fetch(deferredUrl).then(res => res.json());
+        status = statusFile.status;
+      } while (status == JobStatus.IN_PROGRESS);
+
+      let result;
+      if (status == JobStatus.COMPLETED) {
+        result = await fetch(statusFile.url).then(res => res.json());
+      } else {
+        // JobStatus.FAILED
+        throw new Error(result.error || "Job failed without an error message.");
+      }
+
+      const { data } = result.data.queryV1;
 
       // data will assume tree shape if you specify 'return tree' in J1QL
       const isTree = data.vertices && data.edges;

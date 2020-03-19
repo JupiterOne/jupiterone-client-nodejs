@@ -8,13 +8,36 @@ const FAKE_ACCOUNT = "johndoe";
 const FAKE_KEY = "abc123";
 
 const j1qlString = "Find jupiterone_account";
-const mockResponse = {
+const mockDeferredResponse = {
+  data: {
+    queryV1: {
+      data: null,
+      type: "deferred",
+      url: "https://jqs-deferred.s3.amazonaws.com/deferred/1",
+      __typename: "QueryV1Response"
+    }
+  }
+};
+
+const mockQueryV1Response = {
   data: {
     queryV1: {
       data: [],
       __typename: "QueryV1Response"
     }
   }
+};
+
+const mockS3ResponsePass = {
+  status: "COMPLETED",
+  error: null,
+  url: "https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1"
+};
+
+const mockS3ResponseFail = {
+  status: "FAILED",
+  error: "There was an error",
+  url: null
 };
 
 let polly;
@@ -33,13 +56,32 @@ beforeEach(async () => {
   polly = new Polly("JupiterOneClient tests", {
     adapters: ["node-http"]
   });
-  polly.server.any().intercept((req, res) => {
-    attempts++;
-    const shouldFailThisTime = attempts <= attemptsToFail;
 
-    res.status(shouldFailThisTime ? 401 : 200);
-    res.json(shouldFailThisTime ? {} : mockResponse);
-  });
+  polly.server
+    .any("https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1")
+    .intercept((req, res) => {
+      res.status(200);
+      res.json(mockQueryV1Response);
+    });
+
+  polly.server
+    .any("https://jqs-deferred.s3.amazonaws.com/deferred/1")
+    .intercept((req, res) => {
+      const s3ResponsePass = true;
+
+      res.status(s3ResponsePass ? 401 : 200);
+      res.json(s3ResponsePass ? mockS3ResponsePass : mockS3ResponseFail);
+    });
+
+  polly.server
+    .post("https://api.us.jupiterone.io/graphql")
+    .intercept((req, res) => {
+      attempts++;
+      const shouldFailThisTime = attempts <= attemptsToFail;
+
+      res.status(shouldFailThisTime ? 401 : 200);
+      res.json(shouldFailThisTime ? {} : mockDeferredResponse);
+    });
 });
 
 afterEach(() => {
