@@ -18,11 +18,11 @@ const JobStatus = {
   FAILED: "FAILED"
 };
 
-const sleep = function(ms) {
+function sleep(ms) {
   return new Promise(function(resolve) {
     return setTimeout(resolve, ms);
   });
-};
+}
 
 class JupiterOneClient {
   constructor({
@@ -126,8 +126,6 @@ class JupiterOneClient {
           );
         }
       } while (status === JobStatus.IN_PROGRESS);
-
-      console.log(statusFile);
 
       let result;
       if (status === JobStatus.COMPLETED) {
