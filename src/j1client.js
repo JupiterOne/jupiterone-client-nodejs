@@ -103,7 +103,7 @@ class JupiterOneClient {
     let results = [];
 
     while (!complete) {
-      const query = getQueryV1Gpl(j1ql, page);
+      const query = queryV1Gql(j1ql, page);
       page++;
 
       const res = await this.graphClient.query({ query });
