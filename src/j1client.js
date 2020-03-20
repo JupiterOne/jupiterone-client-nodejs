@@ -103,10 +103,17 @@ class JupiterOneClient {
     let results = [];
 
     while (!complete) {
-      const query = queryV1Gql(j1ql, page);
-      page++;
+      let j1qlForPage = `${j1ql} SKIP ${page *
+        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}`;
 
-      const res = await this.graphClient.query({ query });
+      const res = await this.graphClient.query({
+        query: QUERY_V1,
+        variables: {
+          query: j1qlForPage,
+          deferredResponse: "FORCE"
+        }
+      });
+      page++;
       if (res.errors) {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
@@ -480,19 +487,27 @@ const UPSERT_ENTITY_RAW_DATA = gql`
   }
 `;
 
-function queryV1Gql(j1ql, page) {
-  return gql`
-  {
+const QUERY_V1 = gql`
+  query QueryLanguageV1(
+    $query: String!
+    $variables: JSON
+    $includeDeleted: Boolean
+    $deferredResponse: DeferredResponseOption
+    $deferredFormat: DeferredResponseFormat
+  ) {
     queryV1(
-      query: "${j1ql} SKIP ${page * J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}",
-      deferredResponse: FORCE
+      query: $query
+      variables: $variables
+      includeDeleted: $includeDeleted
+      deferredResponse: $deferredResponse
+      deferredFormat: $deferredFormat
     ) {
       type
-      url
       data
+      url
     }
-  }`;
-}
+  }
+`;
 
 const CREATE_ALERT_RULE = gql`
   mutation CreateQuestionRuleInstance(
