@@ -18,10 +18,12 @@ const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
 const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const J1_DEV_ENABLED = process.env.J1_DEV_ENABLED;
 const EUSAGEERROR = 126;
+const CONCURRENCY = 2;
 
 const SUPPORTED_OPERATIONS = [
   "create",
   "update",
+  "upsert", // only works on entities
   "delete",
   "provision-alert-rule-pack"
 ];
@@ -280,7 +282,7 @@ async function mutateEntities(j1Client, entities, operation) {
         const res = await j1Client.queryV1(query);
         if (res.length === 1) {
           entityId = res[0].entity._id;
-        } else if (res.length === 0) {
+        } else if (res.length === 0 && operation != "upsert") {
           console.log(`Skipping entity with _key='${e.entityKey}' - NOT FOUND`);
           continue;
         } else if (res.length > 0) {
@@ -291,14 +293,11 @@ async function mutateEntities(j1Client, entities, operation) {
             continue;
           }
           entityIds = res.map(r => r.entity._id);
-        } else {
-          console.log(`Skipping entity with _key='${e.entityKey}'`);
-          continue;
         }
       }
 
       if (entityId) {
-        if (operation === "update") {
+        if (operation === "update" || operation === "upsert") {
           work.push(() => {
             return updateEntity(j1Client, entityId, e.properties);
           });
@@ -316,6 +315,10 @@ async function mutateEntities(j1Client, entities, operation) {
             });
           }
         }
+      } else if (operation === "upsert") {
+        work.push(() => {
+          return createEntity(j1Client, e);
+        });
       } else {
         console.log(
           `Skipping entity: '${JSON.stringify(
@@ -326,7 +329,7 @@ async function mutateEntities(j1Client, entities, operation) {
     }
   }
   const entityIds = await pAll(work, {
-    concurrency: 5
+    concurrency: CONCURRENCY
   });
   console.log(
     `${operation}d ${entityIds.length} entities:\n${JSON.stringify(
@@ -363,7 +366,7 @@ async function mutateRelationships(j1Client, relationships, update) {
     }
   }
   const relationshipIds = await pAll(work, {
-    concurrency: 5
+    concurrency: CONCURRENCY
   });
   console.log(
     `Created ${relationshipIds.length} relationships:\n${JSON.stringify(
@@ -582,7 +585,7 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
     }
   }
   const res = await pAll(work, {
-    concurrency: 5
+    concurrency: CONCURRENCY
   });
   process.stdout.write(
     `Provisioned ${res.length} rules:\n${JSON.stringify(res, null, 2)}\n`
