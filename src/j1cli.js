@@ -282,7 +282,7 @@ async function mutateEntities(j1Client, entities, operation) {
         const res = await j1Client.queryV1(query);
         if (res.length === 1) {
           entityId = res[0].entity._id;
-        } else if (res.length === 0) {
+        } else if (res.length === 0 && operation != "upsert") {
           console.log(`Skipping entity with _key='${e.entityKey}' - NOT FOUND`);
           continue;
         } else if (res.length > 0) {
@@ -293,9 +293,6 @@ async function mutateEntities(j1Client, entities, operation) {
             continue;
           }
           entityIds = res.map(r => r.entity._id);
-        } else {
-          console.log(`Skipping entity with _key='${e.entityKey}'`);
-          continue;
         }
       }
 

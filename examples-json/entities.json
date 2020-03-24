@@ -1,6 +1,5 @@
 [
   {
-    "entityId": "75121349-fe34-44ee-b3b0-4d41bc912a23",
     "entityKey": "test:entity:2",
     "entityType": "generic_resource",
     "entityClass": "Resource",
@@ -10,7 +9,6 @@
     }
   },
   {
-    "entityId": "3f61775c-e75f-40d6-858e-b868399b92e0",
     "entityKey": "test:entity:3",
     "entityType": "generic_resource",
     "entityClass": "Resource",
