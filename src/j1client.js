@@ -10,6 +10,19 @@ const fetch = require("node-fetch").default;
 
 const J1_USER_POOL_ID_PROD = "us-east-2_9fnMVHuxD";
 const J1_CLIENT_ID_PROD = "1hcv141pqth5f49df7o28ngq1u";
+const QUERY_RESULTS_TIMEOUT = 1000 * 60 * 5; // Poll s3 location for 5 minutes before timeout.
+
+const JobStatus = {
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED"
+};
+
+function sleep(ms) {
+  return new Promise(function(resolve) {
+    return setTimeout(resolve, ms);
+  });
+}
 
 class JupiterOneClient {
   constructor({
@@ -90,20 +103,48 @@ class JupiterOneClient {
     let results = [];
 
     while (!complete) {
-      const query = gql`
-      {
-        queryV1(query: "${j1ql} SKIP ${page *
-        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}") {
-          data
-        }
-      }`;
-      page++;
+      let j1qlForPage = `${j1ql} SKIP ${page *
+        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}`;
 
-      const res = await this.graphClient.query({ query });
+      const res = await this.graphClient.query({
+        query: QUERY_V1,
+        variables: {
+          query: j1qlForPage,
+          deferredResponse: "FORCE"
+        }
+      });
+      page++;
       if (res.errors) {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
-      const { data } = res.data.queryV1;
+
+      const deferredUrl = res.data.queryV1.url;
+      let status = JobStatus.IN_PROGRESS;
+      let statusFile;
+      let startTimeInMs = Date.now();
+      do {
+        if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
+          throw new Error(
+            `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT /
+              1000} seconds.`
+          );
+        }
+        await sleep(200);
+        statusFile = await fetch(deferredUrl).then(res => res.json());
+        status = statusFile.status;
+      } while (status === JobStatus.IN_PROGRESS);
+
+      let result;
+      if (status === JobStatus.COMPLETED) {
+        result = await fetch(statusFile.url).then(res => res.json());
+      } else {
+        // JobStatus.FAILED
+        throw new Error(
+          statusFile.error || "Job failed without an error message."
+        );
+      }
+
+      const { data } = result;
 
       // data will assume tree shape if you specify 'return tree' in J1QL
       const isTree = data.vertices && data.edges;
@@ -442,6 +483,28 @@ const UPSERT_ENTITY_RAW_DATA = gql`
       rawData: $rawData
     ) {
       status
+    }
+  }
+`;
+
+const QUERY_V1 = gql`
+  query QueryLanguageV1(
+    $query: String!
+    $variables: JSON
+    $includeDeleted: Boolean
+    $deferredResponse: DeferredResponseOption
+    $deferredFormat: DeferredResponseFormat
+  ) {
+    queryV1(
+      query: $query
+      variables: $variables
+      includeDeleted: $includeDeleted
+      deferredResponse: $deferredResponse
+      deferredFormat: $deferredFormat
+    ) {
+      type
+      data
+      url
     }
   }
 `;
