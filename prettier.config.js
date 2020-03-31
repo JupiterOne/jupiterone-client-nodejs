@@ -1,4 +1,5 @@
 module.exports = {
   trailingComma: "all",
-  proseWrap: "always"
+  proseWrap: "always",
+  singleQuote: true
 };
