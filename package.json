@@ -19,7 +19,8 @@
     "env": "export $(grep -v '^#' .env | xargs);",
     "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "type-check": "tsc --noEmit",
-    "pretest": "yarn type-check",
+    "lint": "eslint . --cache --fix --ext .ts,.tsx",
+    "pretest": "yarn lint && yarn type-check",
     "test": "jest",
     "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
     "prepare": "tsc --declaration"
@@ -35,6 +36,7 @@
     "apollo-link-batch-http": "^1.2.13",
     "apollo-link-retry": "^2.2.13",
     "commander": "^2.14.1",
+    "eslint-config-prettier": "^6.10.1",
     "file-set": "^2.0.0",
     "fs-extra": "^5.0.0",
     "graphql": "^14.6.0",
@@ -57,7 +59,11 @@
   "devDependencies": {
     "@types/jest": "^25.1.4",
     "@types/node": "^13.9.8",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
     "dotenv": "^7.0.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-jest": "^23.8.2",
     "husky": "^2.4.0",
     "jest": "^25.2.4",
     "lint-staged": "^8.2.0",
@@ -75,6 +81,33 @@
       "ts-jest": {
         "isolatedModules": true
       }
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:jest/recommended",
+      "prettier",
+      "prettier/@typescript-eslint"
+    ],
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "@typescript-eslint/no-use-before-define": [
+        "error",
+        {
+          "functions": false
+        }
+      ],
+      "@typescript-eslint/no-var-requires": [
+        "warn"
+      ]
     }
   },
   "prettier": {
