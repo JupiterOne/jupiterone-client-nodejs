@@ -1,29 +1,29 @@
 ---
 - id: managed-question-asset-inventory-count
   title: Are my assets tracked? How many entities are there?
-  description: 
-    "Returns the current count of total assets/entities tracked in JupiterOne
-    - either automatically ingested via integrations or manually entered through
-    the Asset Inventory app or API."
+  description:
+    'Returns the current count of total assets/entities tracked in JupiterOne -
+    either automatically ingested via integrations or manually entered through
+    the Asset Inventory app or API.'
   queries:
-  - name: entityCount
-    query: Find * as e return count(e)
+    - name: entityCount
+      query: Find * as e return count(e)
   tags:
-  - compliance
-  - CIS Controls
-  - HIPAA
-  - HITRUST CSF
-  - PCI DSS
+    - compliance
+    - CIS Controls
+    - HIPAA
+    - HITRUST CSF
+    - PCI DSS
   compliance:
-  - standard: CIS Controls
-    requirements: ['1.1', '1.2', '1.4', '1.5', '2.1', '2.3', '2.4', '2.5']
-  - standard: HITRUST CSF
-    requirements: [07.a]
-  - standard: HITRUST CSF
-    requirements: ['2.4']
+    - standard: CIS Controls
+      requirements: ['1.1', '1.2', '1.4', '1.5', '2.1', '2.3', '2.4', '2.5']
+    - standard: HITRUST CSF
+      requirements: [07.a]
+    - standard: HITRUST CSF
+      requirements: ['2.4']
 
 - title: A Short Question
   queries:
-  - query: Find Person with lastName='Jones'
+    - query: Find Person with lastName='Jones'
   tags:
-  - Test
+    - Test
