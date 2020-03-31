@@ -1,15 +1,14 @@
-'use strict';
+import { JupiterOneClient } from './j1client';
+import path from 'path';
+import inquirer from 'inquirer';
+import * as error from './util/error';
+import fs from 'fs';
+import util from 'util';
+import yaml from 'js-yaml';
+import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
+import pAll from 'p-all';
 
-const path = require('path');
-const JupiterOneClient = require('./j1client');
-const { prompt } = require('inquirer');
 const program = require('commander');
-const error = require('./util/error');
-const fs = require('fs');
-const util = require('util');
-const yaml = require('js-yaml');
-const { defaultAlertSettings } = require('@jupiterone/jupiterone-alert-rules');
-const pAll = require('p-all');
 
 const writeFile = util.promisify(fs.writeFile);
 
@@ -199,7 +198,7 @@ function jParse(filePath) {
 // e.g. if lastpass is installed:
 // lpass show MyJ1Password | psp publish -u my.user@domain.tld -a myaccount
 async function gatherPassword() {
-  const answer = await prompt([
+  const answer = await inquirer.prompt([
     {
       type: 'password',
       name: 'password',
@@ -219,7 +218,7 @@ async function initializeJ1Client() {
     clientId: J1_CLIENT_ID,
     accessToken: program.key || J1_API_TOKEN,
     dev: !!J1_DEV_ENABLED,
-  }).init(program.alert);
+  }).init();
   console.log('OK');
   return j1Client;
 }
@@ -292,7 +291,7 @@ async function mutateEntities(j1Client, entities, operation) {
             );
             continue;
           }
-          entityIds = res.map(r => r.entity._id);
+          entityIds = res.map((r) => r.entity._id);
         }
       }
 
