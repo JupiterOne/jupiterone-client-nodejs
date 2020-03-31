@@ -29,12 +29,6 @@ const mockS3ResponsePass = {
   url: "https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1"
 };
 
-const mockS3ResponseFail = {
-  status: "FAILED",
-  error: "There was an error",
-  url: null
-};
-
 let polly;
 let j1Client;
 let attempts = 0;
@@ -62,10 +56,9 @@ beforeEach(async () => {
   polly.server
     .any("https://jqs-deferred.s3.amazonaws.com/deferred/1")
     .intercept((req, res) => {
-      const s3ResponsePass = true;
-
-      res.status(s3ResponsePass ? 401 : 200);
-      res.json(s3ResponsePass ? mockS3ResponsePass : mockS3ResponseFail);
+      // assume deferred response passes.
+      res.status(200);
+      res.json(mockS3ResponsePass);
     });
 
   polly.server

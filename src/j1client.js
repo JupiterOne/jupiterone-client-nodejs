@@ -123,15 +123,15 @@ class JupiterOneClient {
       let statusFile;
       let startTimeInMs = Date.now();
       do {
-        await sleep(200);
-        statusFile = await fetch(deferredUrl).then(res => res.json());
-        status = statusFile.status;
         if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
           throw new Error(
             `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT /
               1000} seconds.`
           );
         }
+        await sleep(200);
+        statusFile = await fetch(deferredUrl).then(res => res.json());
+        status = statusFile.status;
       } while (status === JobStatus.IN_PROGRESS);
 
       let result;
