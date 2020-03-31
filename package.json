@@ -35,7 +35,7 @@
     "apollo-link": "^1.2.11",
     "apollo-link-batch-http": "^1.2.13",
     "apollo-link-retry": "^2.2.13",
-    "commander": "^2.14.1",
+    "commander": "^5.0.0",
     "eslint-config-prettier": "^6.10.1",
     "file-set": "^2.0.0",
     "fs-extra": "^5.0.0",

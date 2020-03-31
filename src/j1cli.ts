@@ -8,7 +8,7 @@ import yaml from 'js-yaml';
 import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
 import pAll from 'p-all';
 
-const program = require('commander');
+import { program } from 'commander';
 
 const writeFile = util.promisify(fs.writeFile);
 
