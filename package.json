@@ -18,6 +18,7 @@
     "env": "export $(grep -v '^#' .env | xargs);",
     "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "type-check": "tsc --noEmit",
+    "pretest": "yarn type-check",
     "test": "jest",
     "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml"
   },
@@ -56,10 +57,23 @@
     "@types/node": "^13.9.8",
     "dotenv": "^7.0.0",
     "husky": "^2.4.0",
-    "jest": "^24.9.0",
+    "jest": "^25.2.4",
     "lint-staged": "^8.2.0",
     "prettier": "^2.0.2",
+    "ts-jest": "^25.3.0",
     "typescript": "^3.8.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testPathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/node_modules/"
+    ],
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true
+      }
+    }
   },
   "prettier": {
     "trailingComma": "all",
