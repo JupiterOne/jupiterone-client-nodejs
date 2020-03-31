@@ -5,6 +5,7 @@ import util from 'util';
 import yaml from 'js-yaml';
 import pAll from 'p-all';
 import inquirer from 'inquirer';
+
 import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
 
 import { JupiterOneClient } from './j1client';
