@@ -97,7 +97,9 @@ Updated entity 12345678-e75f-40d6-858e-123456abcdef.
 Done!
 ```
 
-NOTE: the `create` operation will also update an existing entity, if an entity matching the provided Key, Type, and Class already exists in JupiterOne. The `update` operation will fail unless that entity Id already exists.
+NOTE: the `create` operation will also update an existing entity, if an entity
+matching the provided Key, Type, and Class already exists in JupiterOne. The
+`update` operation will fail unless that entity Id already exists.
 
 The input JSON file is a single entity or an array of entities. For example:
 
@@ -202,5 +204,5 @@ file path to the `rule-pack.json` file:
 j1 -a <j1AccountId> -u <j1Username> -o provision-alert-rule-pack --alert -f path/to/your/rule-pack.json
 ```
 
-For more details about the rules and rule packs, see the `jupiterone-alert-rules`
-project.
+For more details about the rules and rule packs, see the
+`jupiterone-alert-rules` project.

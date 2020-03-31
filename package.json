@@ -15,7 +15,7 @@
   },
   "scripts": {
     "env": "export $(grep -v '^#' .env | xargs);",
-    "format": "yarn prettier --write '**/*.{ts,js,json,md}'",
+    "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "test": "jest",
     "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml"
   },
@@ -55,7 +55,12 @@
     "husky": "^2.4.0",
     "jest": "^24.9.0",
     "lint-staged": "^8.2.0",
-    "prettier": "^1.18.2"
+    "prettier": "^2.0.2"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "proseWrap": "always",
+    "singleQuote": true
   },
   "husky": {
     "hooks": {
@@ -64,7 +69,7 @@
   },
   "lint-staged": {
     "linters": {
-      "*.{ts,tsx,js,jsx,json,css,md}": [
+      "*.{ts,js,json,css,md,yml}": [
         "yarn format",
         "git add"
       ]

@@ -1,4 +1,4 @@
-declare module "@jupiterone/jupiterone-client-nodejs" {
+declare module '@jupiterone/jupiterone-client-nodejs' {
   export interface JupiterOneClientOptions {
     account: string;
     username?: string;
@@ -23,10 +23,10 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
     _accountId: string;
     _deleted: boolean;
     _source:
-      | "api"
-      | "integration-managed"
-      | "powerup-managed"
-      | "system-mapper";
+      | 'api'
+      | 'integration-managed'
+      | 'powerup-managed'
+      | 'system-mapper';
     _id: string;
     _key: string;
     _class: string[];
@@ -65,19 +65,19 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
 
     ingestEntities(
       integrationInstanceId: string,
-      entities: object[]
+      entities: object[],
     ): Promise<IngestionResults>;
 
     ingestCommitRange(
       integrationInstanceId: string,
-      commitRange: CommitRange
+      commitRange: CommitRange,
     ): Promise<IngestionResults>;
 
     createEntity(
       key: string,
       type: string,
       classLabels: string[],
-      properties: any
+      properties: any,
     ): Promise<object>;
 
     updateEntity(entityId: string, properties: any): Promise<object>;
@@ -88,7 +88,7 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
       entityId: string,
       name: string,
       contentType: string,
-      data: any
+      data: any,
     ): Promise<string>;
 
     createRelationship(
@@ -97,7 +97,7 @@ declare module "@jupiterone/jupiterone-client-nodejs" {
       relationshipClas: string,
       fromEntityId: string,
       toEntityId: string,
-      properties?: any
+      properties?: any,
     ): Promise<object>;
   }
 }
