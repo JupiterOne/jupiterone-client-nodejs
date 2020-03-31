@@ -2,13 +2,14 @@
   "name": "@jupiterone/jupiterone-client-nodejs",
   "version": "0.21.1",
   "description": "A node.js client wrapper for JupiterOne public API",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
   "author": "JupiterOne <dev@jupiterone.io>",
   "license": "MIT",
   "files": [
-    "src",
+    "dist",
+    "!dist/**.test.*",
     "bin"
   ],
   "bin": {
@@ -20,7 +21,8 @@
     "type-check": "tsc --noEmit",
     "pretest": "yarn type-check",
     "test": "jest",
-    "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml"
+    "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
+    "prepare": "tsc --declaration"
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.3.0",
