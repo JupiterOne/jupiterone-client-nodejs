@@ -8,14 +8,14 @@ const { BatchHttpLink } = require('apollo-link-batch-http');
 const gql = require('graphql-tag');
 const fetch = require('node-fetch').default;
 
-const J1_USER_POOL_ID_PROD = "us-east-2_9fnMVHuxD";
-const J1_CLIENT_ID_PROD = "1hcv141pqth5f49df7o28ngq1u";
+const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
+const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
 const QUERY_RESULTS_TIMEOUT = 1000 * 60 * 5; // Poll s3 location for 5 minutes before timeout.
 
 const JobStatus = {
-  IN_PROGRESS: "IN_PROGRESS",
-  COMPLETED: "COMPLETED",
-  FAILED: "FAILED"
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
 };
 
 function sleep(ms) {
@@ -110,8 +110,8 @@ class JupiterOneClient {
         query: QUERY_V1,
         variables: {
           query: j1qlForPage,
-          deferredResponse: "FORCE"
-        }
+          deferredResponse: 'FORCE',
+        },
       });
       page++;
       if (res.errors) {
@@ -126,7 +126,7 @@ class JupiterOneClient {
         if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
           throw new Error(
             `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT /
-              1000} seconds.`
+              1000} seconds.`,
           );
         }
         await sleep(200);
@@ -140,7 +140,7 @@ class JupiterOneClient {
       } else {
         // JobStatus.FAILED
         throw new Error(
-          statusFile.error || "Job failed without an error message."
+          statusFile.error || 'Job failed without an error message.',
         );
       }
 

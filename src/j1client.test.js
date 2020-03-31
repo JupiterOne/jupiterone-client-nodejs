@@ -7,26 +7,26 @@ Polly.register(NodeHTTPAdapter);
 const FAKE_ACCOUNT = 'johndoe';
 const FAKE_KEY = 'abc123';
 
-const j1qlString = "Find jupiterone_account";
+const j1qlString = 'Find jupiterone_account';
 const mockDeferredResponse = {
   data: {
     queryV1: {
       data: null,
-      type: "deferred",
-      url: "https://jqs-deferred.s3.amazonaws.com/deferred/1",
-      __typename: "QueryV1Response"
-    }
-  }
+      type: 'deferred',
+      url: 'https://jqs-deferred.s3.amazonaws.com/deferred/1',
+      __typename: 'QueryV1Response',
+    },
+  },
 };
 
 const mockQueryV1Response = {
-  data: []
+  data: [],
 };
 
 const mockS3ResponsePass = {
-  status: "COMPLETED",
+  status: 'COMPLETED',
   error: null,
-  url: "https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1"
+  url: 'https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1',
 };
 
 let polly;
@@ -47,14 +47,14 @@ beforeEach(async () => {
   });
 
   polly.server
-    .any("https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1")
+    .any('https://jqs-deferred.s3.amazonaws.com/s3-deferred-pass/1')
     .intercept((req, res) => {
       res.status(200);
       res.json(mockQueryV1Response);
     });
 
   polly.server
-    .any("https://jqs-deferred.s3.amazonaws.com/deferred/1")
+    .any('https://jqs-deferred.s3.amazonaws.com/deferred/1')
     .intercept((req, res) => {
       // assume deferred response passes.
       res.status(200);
@@ -62,7 +62,7 @@ beforeEach(async () => {
     });
 
   polly.server
-    .post("https://api.us.jupiterone.io/graphql")
+    .post('https://api.us.jupiterone.io/graphql')
     .intercept((req, res) => {
       attempts++;
       const shouldFailThisTime = attempts <= attemptsToFail;
