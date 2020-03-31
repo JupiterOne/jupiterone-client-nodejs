@@ -57,6 +57,11 @@
     "lint-staged": "^8.2.0",
     "prettier": "^2.0.2"
   },
+  "prettier": {
+    "trailingComma": "all",
+    "proseWrap": "always",
+    "singleQuote": true
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
