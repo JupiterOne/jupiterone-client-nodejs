@@ -1,12 +1,14 @@
-import { JupiterOneClient } from './j1client';
-import path from 'path';
-import inquirer from 'inquirer';
-import * as error from './util/error';
 import fs from 'fs';
+import path from 'path';
 import util from 'util';
+
 import yaml from 'js-yaml';
-import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
 import pAll from 'p-all';
+import inquirer from 'inquirer';
+import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
+
+import { JupiterOneClient } from './j1client';
+import * as error from './util/error';
 
 const program = require('commander');
 
