@@ -15,7 +15,7 @@
   },
   "scripts": {
     "env": "export $(grep -v '^#' .env | xargs);",
-    "format": "yarn prettier --write '**/*.{ts,tsx,js,jsx,json,css,md,yml}'",
+    "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "test": "jest",
     "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml"
   },
@@ -69,7 +69,7 @@
   },
   "lint-staged": {
     "linters": {
-      "*.{ts,tsx,js,jsx,json,css,md,yml}": [
+      "*.{ts,js,json,css,md,yml}": [
         "yarn format",
         "git add"
       ]

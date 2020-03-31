@@ -292,7 +292,7 @@ async function mutateEntities(j1Client, entities, operation) {
             );
             continue;
           }
-          entityIds = res.map((r) => r.entity._id);
+          entityIds = res.map(r => r.entity._id);
         }
       }
 

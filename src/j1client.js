@@ -89,8 +89,8 @@ class JupiterOneClient {
 
     const result = await new Promise((resolve, reject) => {
       User.authenticateUser(authenticationDetails, {
-        onSuccess: (result) => resolve(result),
-        onFailure: (err) => reject(err),
+        onSuccess: result => resolve(result),
+        onFailure: err => reject(err),
       });
     });
 
@@ -180,7 +180,7 @@ class JupiterOneClient {
         'Content-Type': 'application/json',
         ...this.headers,
       },
-    }).then((res) => res.json());
+    }).then(res => res.json());
   }
 
   async ingestCommitRange(integrationInstanceId, commitRange) {
@@ -195,7 +195,7 @@ class JupiterOneClient {
         ...this.headers,
       },
       timeout: 10000,
-    }).then((res) => res.json());
+    }).then(res => res.json());
   }
 
   async mutateAlertRule(rule, update) {
