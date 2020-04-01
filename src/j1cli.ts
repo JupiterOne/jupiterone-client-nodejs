@@ -11,7 +11,7 @@ import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
 import { JupiterOneClient } from './j1client';
 import * as error from './util/error';
 
-const program = require('commander');
+import { program } from 'commander';
 
 const writeFile = util.promisify(fs.writeFile);
 
