@@ -1,12 +1,12 @@
-const Cognito = require('amazon-cognito-identity-js-node');
+import Cognito from 'amazon-cognito-identity-js-node';
 
-const { ApolloClient } = require('apollo-client');
-const { InMemoryCache } = require('apollo-cache-inmemory');
-const { ApolloLink } = require('apollo-link');
-const { RetryLink } = require('apollo-link-retry');
-const { BatchHttpLink } = require('apollo-link-batch-http');
-const gql = require('graphql-tag');
-const fetch = require('node-fetch').default;
+import { ApolloClient } from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloLink } from 'apollo-link';
+import { RetryLink } from 'apollo-link-retry';
+import { BatchHttpLink } from 'apollo-link-batch-http';
+import gql from 'graphql-tag';
+import fetch from 'node-fetch';
 
 const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
 const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
@@ -18,13 +18,79 @@ const JobStatus = {
   FAILED: 'FAILED',
 };
 
-function sleep(ms) {
-  return new Promise(function(resolve) {
+function sleep(ms: number) {
+  return new Promise(function (resolve) {
     return setTimeout(resolve, ms);
   });
 }
 
-class JupiterOneClient {
+export interface JupiterOneEntityMetadata {
+  _rawDataHashes?: string;
+  _integrationDefinitionId?: string;
+  _integrationInstanceId?: string;
+  _integrationClass?: string | string[];
+  _integrationType?: string;
+  _integrationName?: string;
+  _createdOn: number;
+  _beginOn: number;
+  _version: number;
+  _accountId: string;
+  _deleted: boolean;
+  _source: 'api' | 'integration-managed' | 'powerup-managed' | 'system-mapper';
+  _id: string;
+  _key: string;
+  _class: string[];
+  _type: string | string[];
+  displayName?: string;
+}
+
+export interface JupiterOneEntity {
+  entity: JupiterOneEntityMetadata;
+  properties: any;
+}
+
+export interface CommitRange {
+  account_uuid: string;
+  repo_uuid: string;
+  source: string;
+  destination: string;
+}
+
+export interface IngestionResults {
+  entities: object[];
+}
+
+export interface QueryResult {
+  id: string;
+  entity: object;
+  properties: object;
+}
+
+export interface JupiterOneClientOptions {
+  account: string;
+  username?: string;
+  password?: string;
+  poolId?: string;
+  clientId?: string;
+  accessToken?: string;
+  dev?: boolean;
+  useRulesEndpoint?: boolean;
+}
+
+export class JupiterOneClient {
+  graphClient?: ApolloClient<any>;
+  headers?: Record<string, string>;
+  account: string;
+  username: string;
+  password: string;
+  poolId: string;
+  clientId: string;
+  accessToken: string;
+  useRulesEndpoint: boolean;
+  apiUrl: string;
+  queryEndpoint: string;
+  rulesEndpoint: string;
+
   constructor({
     account,
     username,
@@ -34,7 +100,7 @@ class JupiterOneClient {
     accessToken,
     dev = false,
     useRulesEndpoint = false,
-  }) {
+  }: JupiterOneClientOptions) {
     this.account = account;
     this.username = username;
     this.password = password;
@@ -50,7 +116,7 @@ class JupiterOneClient {
     this.rulesEndpoint = this.apiUrl + '/rules/graphql';
   }
 
-  async init() {
+  async init(): Promise<JupiterOneClient> {
     const token = this.accessToken
       ? this.accessToken
       : await this.authenticateUser();
@@ -87,24 +153,25 @@ class JupiterOneClient {
     });
     const User = new Cognito.CognitoUser({ Username: this.username, Pool });
 
-    const result = await new Promise((resolve, reject) => {
+    const result: any = await new Promise((resolve, reject) => {
       User.authenticateUser(authenticationDetails, {
-        onSuccess: result => resolve(result),
-        onFailure: err => reject(err),
+        onSuccess: (result) => resolve(result),
+        onFailure: (err) => reject(err),
       });
     });
 
     return result.getAccessToken().getJwtToken();
   }
 
-  async queryV1(j1ql) {
+  async queryV1(j1ql: string) {
     let complete = false;
     let page = 0;
     let results = [];
 
     while (!complete) {
-      let j1qlForPage = `${j1ql} SKIP ${page *
-        J1QL_SKIP_COUNT} LIMIT ${J1QL_LIMIT_COUNT}`;
+      let j1qlForPage = `${j1ql} SKIP ${
+        page * J1QL_SKIP_COUNT
+      } LIMIT ${J1QL_LIMIT_COUNT}`;
 
       const res = await this.graphClient.query({
         query: QUERY_V1,
@@ -125,18 +192,19 @@ class JupiterOneClient {
       do {
         if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
           throw new Error(
-            `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT /
-              1000} seconds.`,
+            `Exceeded request timeout of ${
+              QUERY_RESULTS_TIMEOUT / 1000
+            } seconds.`,
           );
         }
         await sleep(200);
-        statusFile = await fetch(deferredUrl).then(res => res.json());
+        statusFile = await fetch(deferredUrl).then((res) => res.json());
         status = statusFile.status;
       } while (status === JobStatus.IN_PROGRESS);
 
       let result;
       if (status === JobStatus.COMPLETED) {
-        result = await fetch(statusFile.url).then(res => res.json());
+        result = await fetch(statusFile.url).then((res) => res.json());
       } else {
         // JobStatus.FAILED
         throw new Error(
@@ -163,7 +231,7 @@ class JupiterOneClient {
     return results;
   }
 
-  async queryGraphQL(query) {
+  async queryGraphQL(query: any) {
     const res = await this.graphClient.query({ query });
     if (res.errors) {
       console.log(res.errors);
@@ -172,7 +240,10 @@ class JupiterOneClient {
     return res;
   }
 
-  async ingestEntities(integrationInstanceId, entities) {
+  async ingestEntities(
+    integrationInstanceId: string,
+    entities: any[],
+  ): Promise<IngestionResults> {
     return fetch(this.apiUrl + '/integrations/ingest', {
       method: 'POST',
       body: JSON.stringify({ integrationInstanceId, entities }),
@@ -180,10 +251,13 @@ class JupiterOneClient {
         'Content-Type': 'application/json',
         ...this.headers,
       },
-    }).then(res => res.json());
+    }).then((res) => res.json());
   }
 
-  async ingestCommitRange(integrationInstanceId, commitRange) {
+  async ingestCommitRange(
+    integrationInstanceId: string,
+    commitRange: CommitRange,
+  ): Promise<IngestionResults> {
     return fetch(this.apiUrl + '/integrations/action', {
       method: 'POST',
       body: JSON.stringify({
@@ -195,10 +269,10 @@ class JupiterOneClient {
         ...this.headers,
       },
       timeout: 10000,
-    }).then(res => res.json());
+    }).then((res) => res.json());
   }
 
-  async mutateAlertRule(rule, update) {
+  async mutateAlertRule(rule: any, update: any) {
     const res = await this.graphClient.mutate({
       mutation: update ? UPDATE_ALERT_RULE : CREATE_ALERT_RULE,
       variables: {
@@ -215,7 +289,12 @@ class JupiterOneClient {
       : res.data.createQuestionRuleInstance;
   }
 
-  async createEntity(key, type, classLabels, properties) {
+  async createEntity(
+    key: string,
+    type: string,
+    classLabels: string[],
+    properties: any,
+  ): Promise<object> {
     const res = await this.graphClient.mutate({
       mutation: CREATE_ENTITY,
       variables: {
@@ -233,7 +312,7 @@ class JupiterOneClient {
     return res.data.createEntity;
   }
 
-  async updateEntity(entityId, properties) {
+  async updateEntity(entityId: string, properties: any): Promise<object> {
     let res;
     try {
       res = await this.graphClient.mutate({
@@ -258,7 +337,7 @@ class JupiterOneClient {
     return res.data.updateEntity;
   }
 
-  async deleteEntity(entityId, hardDelete) {
+  async deleteEntity(entityId: string, hardDelete?: boolean): Promise<object> {
     let res;
     try {
       res = await this.graphClient.mutate({
@@ -277,27 +356,39 @@ class JupiterOneClient {
     return res.data.deleteEntity;
   }
 
-  async createRelationship(key, type, klass, fromId, toId, properties) {
+  async createRelationship(
+    relationshipKey: string,
+    relationshipType: string,
+    relationshipClass: string,
+    fromEntityId: string,
+    toEntityId: string,
+    properties: any,
+  ): Promise<object> {
     const res = await this.graphClient.mutate({
       mutation: CREATE_RELATIONSHIP,
       variables: {
-        relationshipKey: key,
-        relationshipType: type,
-        relationshipClass: klass,
-        fromEntityId: fromId,
-        toEntityId: toId,
+        relationshipKey,
+        relationshipType,
+        relationshipClass,
+        fromEntityId,
+        toEntityId,
         properties,
       },
     });
     if (res.errors) {
       throw new Error(
-        `JupiterOne returned error(s) creating relationship with key: '${key}'`,
+        `JupiterOne returned error(s) creating relationship with key: '${relationshipKey}'`,
       );
     }
     return res.data.createRelationship;
   }
 
-  async upsertEntityRawData(entityId, name, contentType, data) {
+  async upsertEntityRawData(
+    entityId: string,
+    name: string,
+    contentType: string,
+    data: any,
+  ): Promise<string> {
     const operation = {
       mutation: UPSERT_ENTITY_RAW_DATA,
       variables: {
@@ -328,7 +419,7 @@ class JupiterOneClient {
     return res.data.upsertEntityRawData.status;
   }
 
-  async createQuestion(question) {
+  async createQuestion(question: any) {
     const res = await this.graphClient.mutate({
       mutation: CREATE_QUESTION,
       variables: { question },
@@ -341,7 +432,7 @@ class JupiterOneClient {
     return res.data.createQuestion;
   }
 
-  async updateQuestion(question) {
+  async updateQuestion(question: any) {
     const { id, ...update } = question;
     const res = await this.graphClient.mutate({
       mutation: UPDATE_QUESTION,
@@ -358,7 +449,7 @@ class JupiterOneClient {
     return res.data.updateQuestion;
   }
 
-  async deleteQuestion(questionId) {
+  async deleteQuestion(questionId: string) {
     const res = await this.graphClient.mutate({
       mutation: DELETE_QUESTION,
       variables: { id: questionId },
@@ -627,5 +718,3 @@ const DELETE_QUESTION = gql`
     }
   }
 `;
-
-module.exports = JupiterOneClient;

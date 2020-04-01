@@ -1,6 +1,6 @@
+import { JupiterOneClient } from './j1client';
 const { Polly } = require('@pollyjs/core');
 const NodeHTTPAdapter = require('@pollyjs/adapter-node-http');
-const JupiterOneClient = require('./j1client');
 
 Polly.register(NodeHTTPAdapter);
 
