@@ -68,6 +68,7 @@ async function main() {
   try {
     const data = await validateInputs();
     const j1Client = await initializeJ1Client();
+
     if (program.query) {
       const res = await j1Client.queryV1(program.query);
       const result = JSON.stringify(res, null, 2);

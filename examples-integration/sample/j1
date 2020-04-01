@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+/**
+ * Only separate from the j1cli for easier prototyping for now
+ */
+const { program } = require('commander');
+const { buildIntegrationCommand } = require('../../dist/integration/cli');
+
+(async () => {
+  program
+    .version('0.0.0')
+    .usage('[options]')
+    .addCommand(buildIntegrationCommand())
+
+  await program.parseAsync(process.argv)
+})();
