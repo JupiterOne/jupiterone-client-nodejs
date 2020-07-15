@@ -47,7 +47,6 @@
     "node-fetch": "^2.6.0",
     "p-all": "^2.1.0",
     "p-map": "^1.2.0",
-    "papaparse": "^4.6.3",
     "pluralize": "^7.0.0",
     "progress": "^2.0.3",
     "request": "^2.87.0",
