@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.3.0",
+    "@lifeomic/attempt": "^3.0.0",
     "@pollyjs/adapter-node-http": "^2.7.0",
     "@pollyjs/core": "^2.6.3",
     "amazon-cognito-identity-js-node": "^0.0.3",

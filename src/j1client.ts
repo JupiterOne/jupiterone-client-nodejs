@@ -5,7 +5,10 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloLink } from 'apollo-link';
 import { RetryLink } from 'apollo-link-retry';
 import { BatchHttpLink } from 'apollo-link-batch-http';
-import fetch from 'node-fetch';
+import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
+import { retry } from '@lifeomic/attempt';
+
+import { EntityForSync, RelationshipForSync } from './types';
 
 import {
   CREATE_ENTITY,
@@ -37,6 +40,79 @@ function sleep(ms: number) {
   return new Promise(function (resolve) {
     return setTimeout(resolve, ms);
   });
+}
+
+class FetchError extends Error {
+  httpStatusCode: number;
+
+  constructor(options: {
+    responseBody: string;
+    response: FetchResponse;
+    method: string;
+    url: string;
+    nameForLogging?: string;
+  }) {
+    super(
+      `JupiterOne API error. Response not OK (requestName=${
+        options.nameForLogging || '(none)'
+      }, status=${status}, url=${options.url}, method=${
+        options.method
+      }). Response: ${options.responseBody}`,
+    );
+    this.httpStatusCode = options.response.status;
+  }
+}
+
+async function makeFetchRequest(
+  url: string,
+  options: RequestInit,
+  nameForLogging?: string,
+) {
+  return retry(
+    async () => {
+      const response = await fetch(url, options);
+      const { status } = response;
+      if (status < 200 || status >= 300) {
+        const responseBody = await response.text();
+        throw new FetchError({
+          method: options.method!,
+          response,
+          responseBody,
+          url,
+          nameForLogging,
+        });
+      }
+      return response;
+    },
+    {
+      maxAttempts: 5,
+      delay: 1000,
+      handleError(err, context, options) {
+        const possibleFetchError = err as Partial<FetchError>;
+        const { httpStatusCode } = possibleFetchError;
+        if (httpStatusCode !== undefined) {
+          if (httpStatusCode < 500) {
+            context.abort();
+          }
+        }
+      },
+    },
+  );
+}
+
+async function validateSyncJobResponse(response: FetchResponse) {
+  const rawBody = await response.json();
+  const body = rawBody as Partial<SyncJobResonse>;
+  if (!body.job) {
+    throw new Error(
+      `JupiterOne API error. Sync job response did not return job. Response: ${JSON.stringify(
+        rawBody,
+        null,
+        2,
+      )}`,
+    );
+  }
+  return body as SyncJobResonse;
 }
 
 export interface JupiterOneEntityMetadata {
@@ -92,6 +168,67 @@ export interface JupiterOneClientOptions {
   useRulesEndpoint?: boolean;
 }
 
+export enum SyncJobStatus {
+  AWAITING_UPLOADS = 'AWAITING_UPLOADS',
+  FINALIZE_PENDING = 'FINALIZE_PENDING',
+  FINALIZING_ENTITIES = 'FINALIZING_ENTITIES',
+  FINALIZING_RELATIONSHIPS = 'FINALIZING_RELATIONSHIPS',
+  ABORTED = 'ABORTED',
+  FINISHED = 'FINISHED',
+  UNKNOWN = 'UNKNOWN',
+  ERROR_BAD_DATA = 'ERROR_BAD_DATA',
+  ERROR_UNEXPECTED_FAILURE = 'ERROR_UNEXPECTED_FAILURE',
+}
+
+export type SyncJob = {
+  source: string;
+  scope: string;
+  accountId: string;
+  id: string;
+  status: SyncJobStatus;
+  done: boolean;
+  startTimestamp: number;
+  numEntitiesUploaded: number;
+  numEntitiesCreated: number;
+  numEntitiesUpdated: number;
+  numEntitiesDeleted: number;
+  numEntityCreateErrors: number;
+  numEntityUpdateErrors: number;
+  numEntityDeleteErrors: number;
+  numEntityRawDataEntriesUploaded: number;
+  numEntityRawDataEntriesCreated: number;
+  numEntityRawDataEntriesUpdated: number;
+  numEntityRawDataEntriesDeleted: number;
+  numEntityRawDataEntryCreateErrors: number;
+  numEntityRawDataEntryUpdateErrors: number;
+  numEntityRawDataEntryDeleteErrors: number;
+  numRelationshipsUploaded: number;
+  numRelationshipsCreated: number;
+  numRelationshipsUpdated: number;
+  numRelationshipsDeleted: number;
+  numRelationshipCreateErrors: number;
+  numRelationshipUpdateErrors: number;
+  numRelationshipDeleteErrors: number;
+  numRelationshipRawDataEntriesUploaded: number;
+  numRelationshipRawDataEntriesCreated: number;
+  numRelationshipRawDataEntriesUpdated: number;
+  numRelationshipRawDataEntriesDeleted: number;
+  numRelationshipRawDataEntryCreateErrors: number;
+  numRelationshipRawDataEntryUpdateErrors: number;
+  numRelationshipRawDataEntryDeleteErrors: number;
+  numMappedRelationshipsCreated: number;
+  numMappedRelationshipsUpdated: number;
+  numMappedRelationshipsDeleted: number;
+  numMappedRelationshipCreateErrors: number;
+  numMappedRelationshipUpdateErrors: number;
+  numMappedRelationshipDeleteErrors: number;
+  syncMode: 'DIFF' | 'CREATE_OR_UPDATE';
+};
+
+export type SyncJobResonse = {
+  job: SyncJob;
+};
+
 export class JupiterOneClient {
   graphClient?: ApolloClient<any>;
   headers?: Record<string, string>;
@@ -138,6 +275,7 @@ export class JupiterOneClient {
     this.headers = {
       Authorization: `Bearer ${token}`,
       'LifeOmic-Account': this.account,
+      'Content-Type': 'application/json',
     };
 
     const uri = this.useRulesEndpoint ? this.rulesEndpoint : this.queryEndpoint;
@@ -475,5 +613,92 @@ export class JupiterOneClient {
       );
     }
     return res.data.deleteQuestion;
+  }
+
+  async startSyncJob(options: { source: 'api'; scope: string }) {
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(options),
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
+  async uploadGraphObjectsForSyncJob(options: {
+    syncJobId: string;
+    entities?: EntityForSync[];
+    relationships?: RelationshipForSync[];
+  }) {
+    const { syncJobId, entities, relationships } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/upload`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          entities,
+          relationships,
+        }),
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
+  async finalizeSyncJob(options: { syncJobId: string }) {
+    const { syncJobId } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/finalize`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({}),
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
+  async fetchSyncJobStatus(options: { syncJobId: string }) {
+    const { syncJobId } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}`,
+      {
+        method: 'GET',
+        headers,
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
+  async bulkUpload(data: {
+    scope: string;
+    entities?: EntityForSync[];
+    relationships?: RelationshipForSync[];
+  }) {
+    if (data.entities || data.relationships) {
+      const { job: syncJob } = await this.startSyncJob({
+        source: 'api',
+        scope: data.scope,
+      });
+      const syncJobId = syncJob.id;
+      await this.uploadGraphObjectsForSyncJob({
+        syncJobId,
+        entities: data.entities,
+        relationships: data.relationships,
+      });
+      const finalizeResult = await this.finalizeSyncJob({ syncJobId });
+      return {
+        syncJobId,
+        finalizeResult,
+      };
+    } else {
+      console.log('No entities or relationships to upload.');
+    }
   }
 }
