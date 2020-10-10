@@ -55,7 +55,7 @@ class FetchError extends Error {
     super(
       `JupiterOne API error. Response not OK (requestName=${
         options.nameForLogging || '(none)'
-      }, status=${status}, url=${options.url}, method=${
+      }, status=${options.response.status}, url=${options.url}, method=${
         options.method
       }). Response: ${options.responseBody}`,
     );
