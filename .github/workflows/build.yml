@@ -1,0 +1,70 @@
+name: Build
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+
+      - name: Check out source code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Execute Tests
+        run: yarn test
+
+      - name: Verify that NPM module builds
+        run: yarn prepare
+
+  npm:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Initialize Output
+        run: echo "::set-output name=didpublishnpm::false"
+
+      - name: Check out source code
+        uses: actions/checkout@v2
+
+      - name: Fetch tags
+        run: |
+          git fetch --tags
+          if git describe --exact-match --match "v*.*.*" HEAD^2
+          then
+            echo "Found version commit tag. Publishing."
+            echo "::set-env name=npmpublish::true"
+          else
+            echo "Version commit tag not found. Not publishing."
+          fi
+
+      - name: Setup Node
+        if: env.npmpublish
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        if: env.npmpublish
+        run: yarn
+
+      - name: Bundle module (create ./dist dir)
+        if: env.npmpublish
+        run: yarn prepare
+
+      - name: Publish
+        if: env.npmpublish
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
+          npm publish --access public ./dist
+          echo "::set-output name=didpublishnpm::true"
