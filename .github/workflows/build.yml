@@ -21,7 +21,7 @@ jobs:
         run: yarn test
 
       - name: Verify that NPM module builds
-        run: yarn prepare
+        run: yarn bundle
 
   npm:
     if: github.ref == 'refs/heads/master'
@@ -58,7 +58,7 @@ jobs:
 
       - name: Bundle module (create ./dist dir)
         if: env.npmpublish
-        run: yarn prepare
+        run: yarn bundle
 
       - name: Publish
         if: env.npmpublish
