@@ -8,9 +8,13 @@
   "author": "JupiterOne <dev@jupiterone.io>",
   "license": "MIT",
   "files": [
+    "LICENSE",
     "dist",
     "bin"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "j1": "bin/j1"
   },
@@ -22,11 +26,11 @@
     "pretest": "yarn lint && yarn type-check",
     "test": "jest",
     "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
-    "prebundle": "[ -d ./dist ] && rm -r ./dist || exit 0",
-    "bundle": "yarn compile && yarn copydist && yarn distpackage",
     "copydist": "cp -R LICENSE *.md yarn.lock package.json ./dist/",
     "distpackage": "(cd ./dist && sed -ibak -e 's#dist/inde[x]#index#g' package.json && rm package.jsonbak)",
-    "compile": "tsc -p tsconfig.dist.json --declaration && cp -R ./bin ./dist/"
+    "prebuild": "yarn test",
+    "build": "tsc -p tsconfig.dist.json --declaration",
+    "prepack": "yarn build"
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.3.0",

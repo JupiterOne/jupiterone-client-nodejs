@@ -3,68 +3,69 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [12.x]
+        os: [ubuntu-latest]
 
     steps:
-      - name: Setup Node
+      - id: setup-node
+        name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: '14'
+          node-version: ${{ matrix.node-version }}
 
-      - name: Check out source code
+      - name: Check out code repository source code
         uses: actions/checkout@v2
 
       - name: Install dependencies
         run: yarn
 
-      - name: Execute Tests
-        run: yarn test
+      - name: Run build
+        run: yarn build
 
-      - name: Verify that NPM module builds
-        run: yarn bundle
-
-  npm:
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
+  # Publishing is done in a separate job to allow
+  # for all matrix builds to complete.
+  release:
     needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [12]
 
     steps:
-      - name: Initialize Output
-        run: echo "::set-output name=didpublishnpm::false"
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
 
-      - name: Check out source code
+      - name: Check out repo
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
-      - name: Fetch tags
+      - name: Check if publish needed
         run: |
-          git fetch --tags
-          if git describe --exact-match --match "v*.*.*" HEAD^2
+          name="$(jq -r .name package.json)"
+          npmver="$(npm show $name version || echo v0.0.0)"
+          pkgver="$(jq -r .version package.json)"
+          if [ "$npmver" = "$pkgver" ]
           then
-            echo "Found version commit tag. Publishing."
-            echo "::set-env name=npmpublish::true"
+            echo "Package version ($pkgver) is the same as last published NPM version ($npmver), skipping publish."
           else
-            echo "Version commit tag not found. Not publishing."
+            echo "Package version ($pkgver) is different from latest NPM version ($npmver), publishing!"
+            echo "::set-env name=publish::true"
           fi
 
-      - name: Setup Node
-        if: env.npmpublish
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14'
-
-      - name: Install dependencies
-        if: env.npmpublish
-        run: yarn
-
-      - name: Bundle module (create ./dist dir)
-        if: env.npmpublish
-        run: yarn bundle
-
       - name: Publish
-        if: env.npmpublish
+        if: env.publish == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
-          npm publish --access public ./dist
-          echo "::set-output name=didpublishnpm::true"
+          yarn
+          npm publish
