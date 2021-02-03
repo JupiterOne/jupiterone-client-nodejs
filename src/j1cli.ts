@@ -8,7 +8,7 @@ import inquirer from 'inquirer';
 
 import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
 
-import { JupiterOneClient } from './j1client';
+import { JupiterOneClient } from '.';
 import * as error from './util/error';
 
 import { program } from 'commander';
