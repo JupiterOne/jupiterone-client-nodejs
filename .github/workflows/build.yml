@@ -58,7 +58,7 @@ jobs:
             echo "Package version ($pkgver) is the same as last published NPM version ($npmver), skipping publish."
           else
             echo "Package version ($pkgver) is different from latest NPM version ($npmver), publishing!"
-            echo "::set-env name=publish::true"
+            echo "publish=true" >> $GITHUB_ENV
           fi
 
       - name: Publish
