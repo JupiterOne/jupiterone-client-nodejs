@@ -35,8 +35,6 @@
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.3.0",
     "@lifeomic/attempt": "^3.0.0",
-    "@pollyjs/adapter-node-http": "^2.7.0",
-    "@pollyjs/core": "^2.6.3",
     "amazon-cognito-identity-js-node": "^0.0.3",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-client": "^2.5.1",
@@ -64,6 +62,8 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
+    "@pollyjs/adapter-node-http": "^2.7.0",
+    "@pollyjs/core": "^2.6.3",
     "@types/jest": "^25.1.4",
     "@types/node": "^13.9.8",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
