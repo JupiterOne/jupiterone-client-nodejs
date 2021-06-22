@@ -27,6 +27,7 @@ const SUPPORTED_OPERATIONS = [
   'update',
   'upsert', // only works on entities
   'delete',
+  'bulk-delete',
   'provision-alert-rule-pack',
 ];
 
@@ -81,17 +82,31 @@ async function main() {
     } else {
       const update = program.operation === 'update';
       if (program.entity) {
-        await mutateEntities(
-          j1Client,
-          Array.isArray(data) ? data : [data],
-          program.operation,
-        );
+        if (program.operation === 'bulk-delete') {
+          await bulkDelete({
+            client: j1Client,
+            entities: data,
+          });
+        } else {
+          await mutateEntities(
+            j1Client,
+            Array.isArray(data) ? data : [data],
+            program.operation,
+          );
+        }
       } else if (program.relationship) {
-        await mutateRelationships(
-          j1Client,
-          Array.isArray(data) ? data : [data],
-          update,
-        );
+        if (program.operation === 'bulk-delete') {
+          await bulkDelete({
+            client: j1Client,
+            relationships: data,
+          });
+        } else {
+          await mutateRelationships(
+            j1Client,
+            Array.isArray(data) ? data : [data],
+            update,
+          );
+        }
       } else if (program.alert) {
         if (program.operation === 'provision-alert-rule-pack') {
           await provisionRulePackAlerts(j1Client, data, defaultAlertSettings);
@@ -262,6 +277,13 @@ async function updateEntity(j1Client, entityId, properties) {
 async function deleteEntity(j1Client, entityId, hardDelete) {
   await j1Client.deleteEntity(entityId, hardDelete);
   return entityId;
+}
+
+async function bulkDelete(options) {
+  return options.client.bulkDelete({
+    entities: options.entities,
+    relationships: options.relationships,
+  });
 }
 
 async function mutateEntities(j1Client, entities, operation) {
