@@ -8,7 +8,12 @@ import { BatchHttpLink } from 'apollo-link-batch-http';
 import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
 
-import { EntityForSync, RelationshipForSync } from './types';
+import {
+  Entity,
+  EntityForSync,
+  Relationship,
+  RelationshipForSync,
+} from './types';
 
 import {
   CREATE_ENTITY,
@@ -102,7 +107,7 @@ async function makeFetchRequest(
 
 async function validateSyncJobResponse(response: FetchResponse) {
   const rawBody = await response.json();
-  const body = rawBody as Partial<SyncJobResonse>;
+  const body = rawBody as Partial<SyncJobResponse>;
   if (!body.job) {
     throw new Error(
       `JupiterOne API error. Sync job response did not return job. Response: ${JSON.stringify(
@@ -112,7 +117,7 @@ async function validateSyncJobResponse(response: FetchResponse) {
       )}`,
     );
   }
-  return body as SyncJobResonse;
+  return body as SyncJobResponse;
 }
 
 export interface JupiterOneEntityMetadata {
@@ -225,8 +230,28 @@ export type SyncJob = {
   syncMode: 'DIFF' | 'CREATE_OR_UPDATE';
 };
 
-export type SyncJobResonse = {
+export type SyncJobOptions = {
+  source?: string;
+  scope?: string;
+  syncMode?: string;
+};
+
+export type SyncJobResponse = {
   job: SyncJob;
+};
+
+export type ObjectDeletion = {
+  _id: string;
+};
+
+export type GraphObjectDeletionPayload = {
+  deleteEntities: ObjectDeletion[];
+  deleteRelationships: ObjectDeletion[];
+};
+
+export type SyncJobResult = {
+  syncJobId: string;
+  finalizeResult: SyncJobResponse;
 };
 
 export class JupiterOneClient {
@@ -615,7 +640,15 @@ export class JupiterOneClient {
     return res.data.deleteQuestion;
   }
 
-  async startSyncJob(options: { source: 'api'; scope: string }) {
+  async startSyncJob(options: SyncJobOptions) {
+    if (!options.source) {
+      options.source = 'api';
+    }
+    if (options.syncMode === 'DIFF' && !options.scope) {
+      throw new Error(
+        'You must specify a scope when starting a sync job in DIFF mode.',
+      );
+    }
     const headers = this.headers;
     const response = await makeFetchRequest(
       this.apiUrl + `/persister/synchronization/jobs`,
@@ -623,6 +656,37 @@ export class JupiterOneClient {
         method: 'POST',
         headers,
         body: JSON.stringify(options),
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
+  async uploadGraphObjectsForDeleteSyncJob(options: {
+    syncJobId: string;
+    entities?: Entity[];
+    relationships?: Relationship[];
+  }): Promise<SyncJobResponse> {
+    const upload: GraphObjectDeletionPayload = {
+      deleteEntities: [],
+      deleteRelationships: [],
+    };
+    for (const e of options.entities || []) {
+      upload.deleteEntities.push({ _id: e.entity['_id'] });
+    }
+
+    for (const r of options.relationships || []) {
+      upload.deleteEntities.push({ _id: r.relationship['_id'] });
+    }
+
+    console.log('uploading deletion sync job with: ' + JSON.stringify(upload));
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl +
+        `/persister/synchronization/jobs/${options.syncJobId}/upload`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(upload),
       },
     );
     return validateSyncJobResponse(response);
@@ -680,7 +744,7 @@ export class JupiterOneClient {
     scope: string;
     entities?: EntityForSync[];
     relationships?: RelationshipForSync[];
-  }) {
+  }): Promise<SyncJobResult> {
     if (data.entities || data.relationships) {
       const { job: syncJob } = await this.startSyncJob({
         source: 'api',
@@ -688,6 +752,31 @@ export class JupiterOneClient {
       });
       const syncJobId = syncJob.id;
       await this.uploadGraphObjectsForSyncJob({
+        syncJobId,
+        entities: data.entities,
+        relationships: data.relationships,
+      });
+      const finalizeResult = await this.finalizeSyncJob({ syncJobId });
+      return {
+        syncJobId,
+        finalizeResult,
+      };
+    } else {
+      console.log('No entities or relationships to upload.');
+    }
+  }
+
+  async bulkDelete(data: {
+    entities?: Entity[];
+    relationships?: Relationship[];
+  }): Promise<SyncJobResult> {
+    if (data.entities || data.relationships) {
+      const { job: syncJob } = await this.startSyncJob({
+        source: 'api',
+        syncMode: 'CREATE_OR_UPDATE',
+      });
+      const syncJobId = syncJob.id;
+      await this.uploadGraphObjectsForDeleteSyncJob({
         syncJobId,
         entities: data.entities,
         relationships: data.relationships,
