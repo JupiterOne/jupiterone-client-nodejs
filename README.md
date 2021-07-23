@@ -32,7 +32,7 @@ Options:
   -u, --user <email>        JupiterOne user email.
   -k, --key <apiToken>      JupiterOne API access token.
   -q, --query <j1ql>        Execute a query.
-  -o, --operation <action>  Supported operations: create, update, provision-alert-rule-pack
+  -o, --operation <action>  Supported operations: create, update, upsert, delete, bulk-delete, provision-alert-rule-pack
   --entity                  Specifies entity operations.
   --relationship            Specifies relationship operations.
   --alert                   Specifies alert rule operations.
@@ -40,9 +40,9 @@ Options:
   -h, --help                output usage information
 ```
 
-### Examples
+## Examples
 
-**Run a J1QL query:**
+### Run a J1QL query
 
 ```bash
 j1 -a j1dev -q 'Find jupiterone_account'
@@ -79,7 +79,7 @@ Authenticating with JupiterOne... OK
 Done!
 ```
 
-**Create or update entities from a JSON input file:**
+### Create or update entities from a JSON input file
 
 ```bash
 j1 -o create --entity -a j1dev -f ./local/entities.json
@@ -97,7 +97,7 @@ Updated entity 12345678-e75f-40d6-858e-123456abcdef.
 Done!
 ```
 
-NOTE: the `create` operation will also update an existing entity, if an entity
+**NOTE:** the `create` operation will also update an existing entity, if an entity
 matching the provided Key, Type, and Class already exists in JupiterOne. The
 `update` operation will fail unless that entity Id already exists.
 
@@ -130,7 +130,7 @@ The input JSON file is a single entity or an array of entities. For example:
 
 The `entityId` property is only necessary for `update` operations.
 
-**Create or update alert rules from a JSON input file:**
+### Create or update alert rules from a JSON input file
 
 ```bash
 j1 -o create --alert -a j1dev -f ./local/alerts.json
@@ -187,6 +187,16 @@ an example of a single alert rule instance:
 ```
 
 Add `"id": "<uuid>"` property to the instance JSON when updating an alert rule.
+
+### Bulk Delete
+
+```bash
+j1 -q 'Find SomeDataClass with someProp="some value"'
+j1 -e -o bulk-delete -f ./results.json
+```
+
+The first CLI command queries data using a J1QL query and saves the data locally to `results.json`.
+The second CLI command takes `results.json` as input and bulk deletes all the entities in the file.
 
 ### Provision Alert Rules from Rule Pack
 
