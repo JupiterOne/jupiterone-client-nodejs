@@ -40,7 +40,7 @@ Options:
   -h, --help                output usage information
 ```
 
-### Examples
+## Examples
 
 ### Run a J1QL query
 
