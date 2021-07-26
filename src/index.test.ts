@@ -98,3 +98,18 @@ describe('failing 5 times', () => {
     );
   }, 100000);
 });
+
+describe('sad path', () => {
+  beforeEach(() => {
+    attemptsToFail = 0;
+  });
+
+  test('receives undefined for options', async () => {
+    const res = await j1Client.queryV1(j1qlString, undefined);
+    expect(res).toEqual([]);
+  });
+  test('receives null for options', async () => {
+    const res = await j1Client.queryV1(j1qlString, null);
+    expect(res).toEqual([]);
+  });
+});
