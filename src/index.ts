@@ -80,7 +80,7 @@ async function makeFetchRequest(
       if (status < 200 || status >= 300) {
         const responseBody = await response.text();
         throw new FetchError({
-          method: options.method!,
+          method: options?.method,
           response,
           responseBody,
           url,
