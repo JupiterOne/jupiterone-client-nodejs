@@ -79,6 +79,27 @@ Authenticating with JupiterOne... OK
 Done!
 ```
 
+#### Advanced Node Usage
+
+You are able to pass in Apollo Query Options into the `queryV1` method. This is
+beneficial when you need to change how the cache behaves, for example. More
+information about what data you can provide found here:
+https://www.apollographql.com/docs/react/data/queries/#setting-a-fetch-policy
+
+To do so:
+
+```
+
+  // Pass in options like shown below:
+
+  const options = {
+    'fetchPolicy': 'network-only'
+  }
+
+  j1.queryV1('FIND jupiterone_account', options)
+
+```
+
 ### Create or update entities from a JSON input file
 
 ```bash
@@ -97,9 +118,9 @@ Updated entity 12345678-e75f-40d6-858e-123456abcdef.
 Done!
 ```
 
-**NOTE:** the `create` operation will also update an existing entity, if an entity
-matching the provided Key, Type, and Class already exists in JupiterOne. The
-`update` operation will fail unless that entity Id already exists.
+**NOTE:** the `create` operation will also update an existing entity, if an
+entity matching the provided Key, Type, and Class already exists in JupiterOne.
+The `update` operation will fail unless that entity Id already exists.
 
 The input JSON file is a single entity or an array of entities. For example:
 
@@ -195,8 +216,9 @@ j1 -q 'Find SomeDataClass with someProp="some value"'
 j1 -e -o bulk-delete -f ./results.json
 ```
 
-The first CLI command queries data using a J1QL query and saves the data locally to `results.json`.
-The second CLI command takes `results.json` as input and bulk deletes all the entities in the file.
+The first CLI command queries data using a J1QL query and saves the data locally
+to `results.json`. The second CLI command takes `results.json` as input and bulk
+deletes all the entities in the file.
 
 ### Provision Alert Rules from Rule Pack
 
