@@ -1,6 +1,6 @@
 import Cognito from 'amazon-cognito-identity-js-node';
 
-import { ApolloClient } from 'apollo-client';
+import { ApolloClient, QueryOptions } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloLink } from 'apollo-link';
 import { RetryLink } from 'apollo-link-retry';
@@ -341,7 +341,7 @@ export class JupiterOneClient {
     return result.getAccessToken().getJwtToken();
   }
 
-  async queryV1(j1ql: string) {
+  async queryV1(j1ql: string, options: QueryOptions) {
     let complete = false;
     let page = 0;
     let results = [];
@@ -357,6 +357,7 @@ export class JupiterOneClient {
           query: j1qlForPage,
           deferredResponse: 'FORCE',
         },
+        ...options,
       });
       page++;
       if (res.errors) {
