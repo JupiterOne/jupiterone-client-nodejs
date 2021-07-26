@@ -341,7 +341,7 @@ export class JupiterOneClient {
     return result.getAccessToken().getJwtToken();
   }
 
-  async queryV1(j1ql: string, options: QueryOptions) {
+  async queryV1(j1ql: string, options?: QueryOptions) {
     let complete = false;
     let page = 0;
     let results = [];
