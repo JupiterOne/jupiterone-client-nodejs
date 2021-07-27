@@ -40,6 +40,10 @@ Options:
   -h, --help                output usage information
 ```
 
+#### Relevant Environment Variables
+
+J1_DEV_ENABLED - Alters the base url. Valid values: 'true' | 'false' (string)
+
 ## Examples
 
 ### Run a J1QL query
