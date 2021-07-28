@@ -1,33 +1,30 @@
-import Cognito from 'amazon-cognito-identity-js-node';
-
-import { ApolloClient, QueryOptions } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloLink } from 'apollo-link';
-import { RetryLink } from 'apollo-link-retry';
-import { BatchHttpLink } from 'apollo-link-batch-http';
-import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
-
+import Cognito from 'amazon-cognito-identity-js-node';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloClient, QueryOptions } from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
+import { BatchHttpLink } from 'apollo-link-batch-http';
+import { RetryLink } from 'apollo-link-retry';
+import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
+import {
+  CREATE_ALERT_RULE,
+  CREATE_ENTITY,
+  CREATE_QUESTION,
+  CREATE_RELATIONSHIP,
+  DELETE_ENTITY,
+  DELETE_QUESTION,
+  QUERY_V1,
+  UPDATE_ALERT_RULE,
+  UPDATE_ENTITY,
+  UPDATE_QUESTION,
+  UPSERT_ENTITY_RAW_DATA,
+} from './queries';
 import {
   Entity,
   EntityForSync,
   Relationship,
   RelationshipForSync,
 } from './types';
-
-import {
-  CREATE_ENTITY,
-  UPDATE_ENTITY,
-  DELETE_ENTITY,
-  CREATE_RELATIONSHIP,
-  UPSERT_ENTITY_RAW_DATA,
-  QUERY_V1,
-  CREATE_ALERT_RULE,
-  UPDATE_ALERT_RULE,
-  CREATE_QUESTION,
-  UPDATE_QUESTION,
-  DELETE_QUESTION,
-} from './queries';
 
 const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
 const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
@@ -419,7 +416,7 @@ export class JupiterOneClient {
     return res;
   }
 
-  async ingestEntities(
+  ingestEntities(
     integrationInstanceId: string,
     entities: any[],
   ): Promise<IngestionResults> {
@@ -433,7 +430,7 @@ export class JupiterOneClient {
     }).then((res) => res.json());
   }
 
-  async ingestCommitRange(
+  ingestCommitRange(
     integrationInstanceId: string,
     commitRange: CommitRange,
   ): Promise<IngestionResults> {

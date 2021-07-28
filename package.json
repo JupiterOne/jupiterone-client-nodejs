@@ -30,7 +30,9 @@
     "distpackage": "(cd ./dist && sed -ibak -e 's#dist/inde[x]#index#g' package.json && rm package.jsonbak)",
     "prebuild": "yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "prepare": "husky install",
+    "precommit": "echo 'TODO: yarn test'"
   },
   "peerDependencies": {
     "@jupiterone/integration-sdk-core": "^6.0.0"
@@ -74,7 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "dotenv": "^7.0.0",
-    "husky": "^7.0.1",
+    "husky": "^7.0.0",
     "ts-node": "^10.1.0",
     "tsconfig-paths": "^3.10.1",
     "tsconfig-replace-paths": "^0.0.5"

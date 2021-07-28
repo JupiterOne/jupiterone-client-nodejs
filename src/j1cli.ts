@@ -1,17 +1,13 @@
+import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
+import { program } from 'commander';
 import fs from 'fs';
-import path from 'path';
-import util from 'util';
-
+import inquirer from 'inquirer';
 import yaml from 'js-yaml';
 import pAll from 'p-all';
-import inquirer from 'inquirer';
-
-import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
-
+import path from 'path';
+import util from 'util';
 import { JupiterOneClient } from '.';
 import * as error from './util/error';
-
-import { program } from 'commander';
 
 const writeFile = util.promisify(fs.writeFile);
 
@@ -279,7 +275,7 @@ async function deleteEntity(j1Client, entityId, hardDelete) {
   return entityId;
 }
 
-async function bulkDelete(options) {
+function bulkDelete(options) {
   return options.client.bulkDelete({
     entities: options.entities,
     relationships: options.relationships,
@@ -616,4 +612,6 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
   );
 }
 
-main();
+main()
+  .then(() => ({}))
+  .catch(() => ({}));
