@@ -6,6 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@j1_types/*": ["src/version1/types/*"],
       "@j1_config/*": ["src/config/*"],
       "@j1_create_catalog/*": ["src/create-catalog/*"],
       "@j1_utils/*": ["src/utils/*"]
