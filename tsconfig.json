@@ -1,13 +1,26 @@
 {
+  "extends": "./node_modules/@jupiterone/typescript-tools/config/typescript-node12",
   "compilerOptions": {
     "outDir": "dist",
-    "target": "es2018",
-    "lib": ["es2018", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noUnusedLocals": true,
-    "pretty": true,
-    "esModuleInterop": true
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@j1_config/*": ["src/config/*"],
+      "@j1_create_catalog/*": ["src/create-catalog/*"],
+      "@j1_utils/*": ["src/utils/*"]
+     },
+     "lib": ["ES2020"]
   },
-  "exclude": ["dist"]
+  "include": [
+    "src/**/*.ts",
+    "deploy/src/**/*.ts",
+    "test/**/*.ts",
+    "tools/**/*.ts",
+    "jest.*.ts",
+    "jest.*.js",
+    "*.config.js",
+    "webpack-transform.js"
+  ],
+  "exclude": ["**/*.bak/**/*.ts"]
 }

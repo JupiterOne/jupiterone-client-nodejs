@@ -32,6 +32,9 @@
     "build": "tsc -p tsconfig.dist.json --declaration",
     "prepack": "yarn build"
   },
+  "peerDependencies": {
+    "@jupiterone/integration-sdk-core": "^6.0.0"
+  },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.3.0",
     "@lifeomic/attempt": "^3.0.0",
@@ -62,6 +65,8 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
+    "@jupiterone/integration-sdk-dev-tools": "^6.13.0",
+    "@jupiterone/typescript-tools": "^15.0.0",
     "@pollyjs/adapter-node-http": "^2.7.0",
     "@pollyjs/core": "^2.6.3",
     "@types/jest": "^25.1.4",
@@ -69,71 +74,9 @@
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "dotenv": "^7.0.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-jest": "^23.8.2",
-    "husky": "^2.4.0",
-    "jest": "^25.2.4",
-    "lint-staged": "^8.2.0",
-    "prettier": "^2.0.2",
-    "ts-jest": "^25.3.0",
-    "typescript": "^3.8.3"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testPathIgnorePatterns": [
-      "<rootDir>/dist/",
-      "<rootDir>/node_modules/"
-    ],
-    "globals": {
-      "ts-jest": {
-        "isolatedModules": true
-      }
-    }
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:jest/recommended",
-      "prettier",
-      "prettier/@typescript-eslint"
-    ],
-    "env": {
-      "node": true,
-      "es6": true
-    },
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    },
-    "rules": {
-      "@typescript-eslint/no-use-before-define": [
-        "error",
-        {
-          "functions": false
-        }
-      ],
-      "@typescript-eslint/no-var-requires": [
-        "warn"
-      ]
-    }
-  },
-  "prettier": {
-    "trailingComma": "all",
-    "proseWrap": "always",
-    "singleQuote": true
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "linters": {
-      "*.{ts,js,json,css,md,yml}": [
-        "yarn format",
-        "git add"
-      ]
-    },
-    "ignore": []
+    "husky": "^7.0.1",
+    "ts-node": "^10.1.0",
+    "tsconfig-paths": "^3.10.1",
+    "tsconfig-replace-paths": "^0.0.5"
   }
 }
