@@ -676,7 +676,7 @@ export class JupiterOneClient {
     }
 
     for (const r of options.relationships || []) {
-      upload.deleteEntities.push({ _id: r.relationship['_id'] });
+      upload.deleteRelationships.push({ _id: r.relationship['_id'] });
     }
 
     console.log('uploading deletion sync job with: ' + JSON.stringify(upload));
