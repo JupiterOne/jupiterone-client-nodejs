@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.23.4",
+  "version": "0.23.5",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,7 +33,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@jupiterone/jupiterone-alert-rules": "^0.3.0",
+    "@jupiterone/jupiterone-alert-rules": "^0.15.2",
     "@lifeomic/attempt": "^3.0.0",
     "amazon-cognito-identity-js-node": "^0.0.3",
     "apollo-cache-inmemory": "^1.5.1",
