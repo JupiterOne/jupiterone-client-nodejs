@@ -33,7 +33,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@jupiterone/jupiterone-alert-rules": "^0.3.0",
+    "@jupiterone/jupiterone-alert-rules": "^0.15.2",
     "@lifeomic/attempt": "^3.0.0",
     "amazon-cognito-identity-js-node": "^0.0.3",
     "apollo-cache-inmemory": "^1.5.1",
