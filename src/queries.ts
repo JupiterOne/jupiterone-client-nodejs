@@ -45,20 +45,12 @@ export const DELETE_ENTITY = gql`
     $timestamp: Long
     $hardDelete: Boolean
   ) {
-    deleteEntity(
+    deleteEntityV2(
       entityId: $entityId
       timestamp: $timestamp
       hardDelete: $hardDelete
     ) {
-      entity {
-        _id
-        _deleted
-        _endOn
-      }
-      vertex {
-        id
-        properties
-      }
+      entity 
     }
   }
 `;
