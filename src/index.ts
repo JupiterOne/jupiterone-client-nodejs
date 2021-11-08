@@ -255,14 +255,14 @@ export type SyncJobResult = {
 };
 
 export class JupiterOneClient {
-  graphClient?: ApolloClient<any>;
+  graphClient: ApolloClient<any>;
   headers?: Record<string, string>;
   account: string;
-  username: string;
-  password: string;
+  username: string | undefined;
+  password: string | undefined;
   poolId: string;
   clientId: string;
-  accessToken: string;
+  accessToken: string | undefined;
   useRulesEndpoint: boolean;
   apiUrl: string;
   queryEndpoint: string;
@@ -312,7 +312,7 @@ export class JupiterOneClient {
           jitter: true,
         },
       }),
-      new BatchHttpLink({ uri, headers: this.headers, fetch }),
+      new BatchHttpLink({ uri, headers: this.headers, fetch })
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });
@@ -333,8 +333,8 @@ export class JupiterOneClient {
 
     const result: any = await new Promise((resolve, reject) => {
       User.authenticateUser(authenticationDetails, {
-        onSuccess: (result) => resolve(result),
-        onFailure: (err) => reject(err),
+        onSuccess: (result: any) => resolve(result),
+        onFailure: (err: any) => reject(err),
       });
     });
 
@@ -344,7 +344,7 @@ export class JupiterOneClient {
   async queryV1(j1ql: string, options: QueryOptions | {} = {}) {
     let complete = false;
     let page = 0;
-    let results = [];
+    let results: any[] = [];
 
     while (!complete) {
       const j1qlForPage = `${j1ql} SKIP ${
@@ -377,13 +377,13 @@ export class JupiterOneClient {
           );
         }
         await sleep(200);
-        statusFile = await fetch(deferredUrl).then((res) => res.json());
+        statusFile = await fetch(deferredUrl).then((res: any) => res.json());
         status = statusFile.status;
       } while (status === JobStatus.IN_PROGRESS);
 
       let result;
       if (status === JobStatus.COMPLETED) {
-        result = await fetch(statusFile.url).then((res) => res.json());
+        result = await fetch(statusFile.url).then((res: any) => res.json());
       } else {
         // JobStatus.FAILED
         throw new Error(
@@ -430,7 +430,7 @@ export class JupiterOneClient {
         'Content-Type': 'application/json',
         ...this.headers,
       },
-    }).then((res) => res.json());
+    }).then((res: any) => res.json());
   }
 
   async ingestCommitRange(
@@ -448,7 +448,7 @@ export class JupiterOneClient {
         ...this.headers,
       },
       timeout: 10000,
-    }).then((res) => res.json());
+    }).then((res: any) => res.json());
   }
 
   async mutateAlertRule(rule: any, update: any) {
@@ -672,11 +672,11 @@ export class JupiterOneClient {
       deleteRelationships: [],
     };
     for (const e of options.entities || []) {
-      upload.deleteEntities.push({ _id: e.entity['_id'] });
+      upload.deleteEntities.push({ _id: e?.['_id'] });
     }
 
     for (const r of options.relationships || []) {
-      upload.deleteRelationships.push({ _id: r.relationship['_id'] });
+      upload.deleteRelationships.push({ _id: r?.['_id'] });
     }
 
     console.log('uploading deletion sync job with: ' + JSON.stringify(upload));
@@ -745,7 +745,7 @@ export class JupiterOneClient {
     scope: string;
     entities?: EntityForSync[];
     relationships?: RelationshipForSync[];
-  }): Promise<SyncJobResult> {
+  }): Promise<SyncJobResult | undefined> {
     if (data.entities || data.relationships) {
       const { job: syncJob } = await this.startSyncJob({
         source: 'api',
@@ -770,7 +770,7 @@ export class JupiterOneClient {
   async bulkDelete(data: {
     entities?: Entity[];
     relationships?: Relationship[];
-  }): Promise<SyncJobResult> {
+  }): Promise<SyncJobResult | undefined> {
     if (data.entities || data.relationships) {
       const { job: syncJob } = await this.startSyncJob({
         source: 'api',
