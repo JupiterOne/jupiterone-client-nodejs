@@ -18,6 +18,20 @@ To install the client globally:
 npm install @jupiterone/jupiterone-client-nodejs -g
 ```
 
+## Using the Node.js client
+
+```javascript
+const { JupiterOneClient } = require('@jupiterone/jupiterone-client-nodejs');
+
+const j1Client = await new JupiterOneClient({
+  account: 'my-account-id',
+  accessToken: 'my-api-token',
+}).init();
+const integrationInstance = await j1Client.integrationInstances.get(
+  'my-integration-instance-id',
+);
+```
+
 ## Using the J1 CLI
 
 Usage:

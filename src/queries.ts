@@ -50,7 +50,7 @@ export const DELETE_ENTITY = gql`
       timestamp: $timestamp
       hardDelete: $hardDelete
     ) {
-      entity 
+      entity
     }
   }
 `;
