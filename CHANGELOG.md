@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.23.7] - 2021-11-10
+
 ### Added
 
 - Added the following methods to `JupiterOneClient`:
