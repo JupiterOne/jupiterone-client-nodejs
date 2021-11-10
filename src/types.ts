@@ -58,3 +58,38 @@ export type RelationshipForSync = RelationshipAdditionalProperties & {
   _fromEntityKey?: string;
   _toEntityKey?: string;
 };
+
+export enum IntegrationPollingInterval {
+  DISABLED = 'DISABLED',
+  THIRTY_MINUTES = 'THIRTY_MINUTES',
+  ONE_HOUR = 'ONE_HOUR',
+  FOUR_HOURS = 'FOUR_HOURS',
+  EIGHT_HOURS = 'EIGHT_HOURS',
+  TWELVE_HOURS = 'TWELVE_HOURS',
+  ONE_DAY = 'ONE_DAY',
+  ONE_WEEK = 'ONE_WEEK',
+}
+
+export interface IntegrationPollingIntervalCronExpression {
+  /**
+   * UTC day of week. 0-6 (sun-sat)
+   */
+  dayOfWeek?: number;
+  /**
+   * UTC hour, 0-23
+   */
+  hour?: number;
+}
+
+export interface IntegrationInstance<TConfig = any> {
+  id: string;
+  accountId: string;
+
+  config?: TConfig;
+  description?: string;
+  integrationDefinitionId: string;
+  name: string;
+  offsiteComplete?: boolean;
+  pollingInterval?: IntegrationPollingInterval;
+  pollingIntervalCronExpression?: IntegrationPollingIntervalCronExpression;
+}

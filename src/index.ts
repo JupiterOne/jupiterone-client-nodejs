@@ -1,6 +1,6 @@
 import Cognito from 'amazon-cognito-identity-js-node';
 
-import { ApolloClient, QueryOptions } from 'apollo-client';
+import { ApolloClient, ApolloError, QueryOptions } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloLink } from 'apollo-link';
 import { RetryLink } from 'apollo-link-retry';
@@ -11,6 +11,7 @@ import { retry } from '@lifeomic/attempt';
 import {
   Entity,
   EntityForSync,
+  IntegrationInstance,
   Relationship,
   RelationshipForSync,
 } from './types';
@@ -28,6 +29,7 @@ import {
   UPDATE_QUESTION,
   DELETE_QUESTION,
 } from './queries';
+import gql from 'graphql-tag';
 
 const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
 const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
@@ -312,7 +314,7 @@ export class JupiterOneClient {
           jitter: true,
         },
       }),
-      new BatchHttpLink({ uri, headers: this.headers, fetch })
+      new BatchHttpLink({ uri, headers: this.headers, fetch }),
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });
@@ -640,6 +642,231 @@ export class JupiterOneClient {
     }
     return res.data.deleteQuestion;
   }
+
+  integrationInstances = {
+    list: async <TConfig>(options?: {
+      definitionId?: string;
+      cursor?: string;
+    }) => {
+      const res = await this.graphClient.query<{
+        integrationInstances: {
+          instances: IntegrationInstance<TConfig>[];
+          pageInfo: { endCursor?: string; hasNextPage: boolean };
+        };
+      }>({
+        query: gql`
+          query ListIntegrationInstances(
+            $definitionId: String
+            $cursor: String
+          ) {
+            integrationInstances(definitionId: $definitionId, cursor: $cursor) {
+              instances {
+                accountId
+                config
+                description
+                id
+                integrationDefinitionId
+                name
+                pollingInterval
+                pollingIntervalCronExpression {
+                  hour
+                  dayOfWeek
+                }
+              }
+              pageInfo {
+                endCursor
+                hasNextPage
+              }
+            }
+          }
+        `,
+        variables: {
+          definitionId: options.definitionId,
+          cursor: options.cursor,
+        },
+      });
+
+      if (res.errors) {
+        throw new ApolloError({ graphQLErrors: res.errors });
+      }
+
+      return res.data.integrationInstances;
+    },
+
+    get: async <TConfig>(id: string) => {
+      const res = await this.graphClient.query<{
+        integrationInstance: IntegrationInstance<TConfig>;
+      }>({
+        query: gql`
+          query GetIntegrationInstance($id: String!) {
+            integrationInstance(id: $id) {
+              accountId
+              config
+              description
+              id
+              integrationDefinitionId
+              name
+              pollingInterval
+              pollingIntervalCronExpression {
+                hour
+                dayOfWeek
+              }
+            }
+          }
+        `,
+        variables: {
+          id,
+        },
+      });
+
+      if (res.errors) {
+        throw new ApolloError({ graphQLErrors: res.errors });
+      }
+
+      return res.data.integrationInstance;
+    },
+
+    create: async <TConfig>(
+      instance: Omit<IntegrationInstance<TConfig>, 'id' | 'accountId'>,
+    ) => {
+      const res = await this.graphClient.mutate<{
+        createIntegrationInstance: IntegrationInstance<TConfig>;
+      }>({
+        mutation: gql`
+          query CreateIntegrationInstance(
+            $config: JSON
+            $description: String
+            $integrationDefinitionId: String!
+            $name: String!
+            $pollingInterval: IntegrationPollingInterval
+            $pollingIntervalCronExpression: IntegrationPollingIntervalCronExpression
+          ) {
+            createIntegrationInstance(
+              instance: {
+                config: $config
+                description: $description
+                integrationDefinitionId: $integrationDefinitionId
+                name: $name
+                pollingInterval: $pollingInterval
+                pollingIntervalCronExpression: $pollingIntervalCronExpression
+              }
+            ) {
+              accountId
+              config
+              description
+              id
+              integrationDefinitionId
+              name
+              pollingInterval
+              pollingIntervalCronExpression {
+                hour
+                dayOfWeek
+              }
+            }
+          }
+        `,
+        variables: {
+          config: instance.config,
+          description: instance.description,
+          integrationDefinitionId: instance.integrationDefinitionId,
+          name: instance.name,
+          pollingInterval: instance.pollingInterval,
+          pollingIntervalCronExpression: instance.pollingIntervalCronExpression,
+        },
+      });
+
+      if (res.errors) {
+        throw new ApolloError({ graphQLErrors: res.errors });
+      }
+
+      return res.data.createIntegrationInstance;
+    },
+
+    update: async <TConfig>(
+      id: string,
+      update: Partial<
+        Omit<
+          IntegrationInstance<TConfig>,
+          'id' | 'accountId' | 'integrationDefinitionId'
+        >
+      >,
+    ) => {
+      const res = await this.graphClient.mutate<{
+        updateIntegrationInstance: IntegrationInstance<TConfig>;
+      }>({
+        mutation: gql`
+          query UpdateIntegrationInstance(
+            $id: String!
+            $config: JSON
+            $description: String
+            $name: String
+            $pollingInterval: IntegrationPollingInterval
+            $pollingIntervalCronExpression: IntegrationPollingIntervalCronExpression
+          ) {
+            updateIntegrationInstance(
+              id: $id
+              update: {
+                config: $config
+                description: $description
+                name: $name
+                pollingInterval: $pollingInterval
+                pollingIntervalCronExpression: $pollingIntervalCronExpression
+              }
+            ) {
+              accountId
+              config
+              description
+              id
+              integrationDefinitionId
+              name
+              pollingInterval
+              pollingIntervalCronExpression {
+                hour
+                dayOfWeek
+              }
+            }
+          }
+        `,
+        variables: {
+          id,
+          config: update.config,
+          description: update.description,
+          name: update.name,
+          pollingInterval: update.pollingInterval,
+          pollingIntervalCronExpression: update.pollingIntervalCronExpression,
+        },
+      });
+
+      if (res.errors) {
+        throw new ApolloError({ graphQLErrors: res.errors });
+      }
+
+      return res.data.updateIntegrationInstance;
+    },
+
+    delete: async (id: string) => {
+      const res = await this.graphClient.mutate<{
+        deleteIntegrationInstance: { success?: boolean };
+      }>({
+        mutation: gql`
+          query DeleteIntegrationInstance($id: String!) {
+            deleteIntegrationInstance(id: $id) {
+              success
+            }
+          }
+        `,
+        variables: {
+          id,
+        },
+      });
+
+      if (res.errors) {
+        throw new ApolloError({ graphQLErrors: res.errors });
+      }
+
+      return res.data.deleteIntegrationInstance;
+    },
+  };
 
   async startSyncJob(options: SyncJobOptions) {
     if (!options.source) {
