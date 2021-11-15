@@ -23,8 +23,10 @@ import {
   CREATE_RELATIONSHIP,
   UPSERT_ENTITY_RAW_DATA,
   QUERY_V1,
-  CREATE_ALERT_RULE,
-  UPDATE_ALERT_RULE,
+  CREATE_INLINE_ALERT_RULE,
+  CREATE_REFERENCED_ALERT_RULE,
+  UPDATE_INLINE_ALERT_RULE,
+  UPDATE_REFERENCED_ALERT_RULE,
   CREATE_QUESTION,
   UPDATE_QUESTION,
   DELETE_QUESTION,
@@ -454,8 +456,17 @@ export class JupiterOneClient {
   }
 
   async mutateAlertRule(rule: any, update: any) {
+    const inlineQuestion = !!update?.instance?.question;
+    let mutation;
+    if (inlineQuestion) {
+      mutation = update ? UPDATE_INLINE_ALERT_RULE : CREATE_INLINE_ALERT_RULE;
+    } else {
+      mutation = update
+        ? UPDATE_REFERENCED_ALERT_RULE
+        : CREATE_REFERENCED_ALERT_RULE;
+    }
     const res = await this.graphClient.mutate({
-      mutation: update ? UPDATE_ALERT_RULE : CREATE_ALERT_RULE,
+      mutation,
       variables: {
         instance: rule.instance,
       },
