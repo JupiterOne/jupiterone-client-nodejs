@@ -126,22 +126,39 @@ export const QUERY_V1 = gql`
   }
 `;
 
-export const CREATE_ALERT_RULE = gql`
+export const CREATE_INLINE_ALERT_RULE = gql`
   mutation CreateQuestionRuleInstance(
-    $instance: CreateQuestionRuleInstanceInput!
+    $instance: CreateInlineQuestionRuleInstanceInput!
   ) {
-    createQuestionRuleInstance(instance: $instance) {
+    createQuestionRuleInstance: createInlineQuestionRuleInstance(
+      instance: $instance
+    ) {
       id
       name
     }
   }
 `;
 
-export const UPDATE_ALERT_RULE = gql`
-  mutation UpdateQuestionRuleInstance(
-    $instance: UpdateQuestionRuleInstanceInput!
+export const CREATE_REFERENCED_ALERT_RULE = gql`
+  mutation CreateQuestionRuleInstance(
+    $instance: CreateReferencedQuestionRuleInstanceInput!
   ) {
-    updateQuestionRuleInstance(instance: $instance) {
+    createQuestionRuleInstance: createReferencedQuestionRuleInstance(
+      instance: $instance
+    ) {
+      id
+      name
+    }
+  }
+`;
+
+export const UPDATE_INLINE_ALERT_RULE = gql`
+  mutation UpdateQuestionRuleInstance(
+    $instance: UpdateInlineQuestionRuleInstanceInput!
+  ) {
+    updateQuestionRuleInstance: updateInlineQuestionRuleInstance(
+      instance: $instance
+    ) {
       id
       name
       description
@@ -158,6 +175,33 @@ export const UPDATE_ALERT_RULE = gql`
           version
         }
       }
+      operations {
+        when
+        actions
+      }
+      outputs
+    }
+  }
+`;
+
+export const UPDATE_REFERENCED_ALERT_RULE = gql`
+  mutation UpdateQuestionRuleInstance(
+    $instance: UpdateReferencedQuestionRuleInstanceInput!
+  ) {
+    updateQuestionRuleInstance: updateReferencedQuestionRuleInstance(
+      instance: $instance
+    ) {
+      id
+      name
+      description
+      version
+      specVersion
+      latest
+      deleted
+      pollingInterval
+      templates
+      questionId
+      questionName
       operations {
         when
         actions
