@@ -8,6 +8,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.24.0] - 2021-11-15
+
+- Changed GraphQL mutation for creation and update of Question Rule Instances to
+  use new fields.
+- Added automatic logic for referenced question rule instances. Rule instances
+  with a `question` will use old logic. Instances that omit `question` can use
+  `questionName` or `questionId` to reference a question instead.
+
 ## [0.23.7] - 2021-11-10
 
 ### Added
