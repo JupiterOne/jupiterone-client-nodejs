@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
 ## [0.24.0] - 2021-11-15
 
 - Changed GraphQL mutation for creation and update of Question Rule Instances to
