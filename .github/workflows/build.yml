@@ -21,10 +21,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
 
       - name: Run build
-        run: yarn build
+        run: npm run build
 
   # Publishing is done in a separate job to allow
   # for all matrix builds to complete.
@@ -67,5 +67,5 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
-          yarn
+          npm ci
           npm publish
