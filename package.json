@@ -68,6 +68,7 @@
     "@types/jest": "^25.1.4",
     "@types/node": "^13.9.8",
     "@types/node-fetch": "^3.0.3",
+    "@types/js-yaml": "^3.12.5",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
     "dotenv": "^7.0.0",
