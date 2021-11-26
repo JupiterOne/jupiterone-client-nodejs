@@ -70,7 +70,6 @@
     "@types/node-fetch": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "^2.26.0",
     "@typescript-eslint/parser": "^2.26.0",
-    "@yarnpkg/lockfile": "^1.1.0",
     "dotenv": "^7.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^23.8.2",
@@ -80,7 +79,6 @@
     "prettier": "^2.0.2",
     "ts-jest": "^25.3.0",
     "typescript": "^3.8.3",
-    "yarn": "^1.22.17"
   },
   "jest": {
     "preset": "ts-jest",
