@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.24.0",
+  "version": "0.24.1",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,12 +25,14 @@
     "lint": "eslint . --cache --fix --ext .ts,.tsx",
     "pretest": "yarn lint && yarn type-check",
     "test": "jest",
+    "test-coverage": "jest --coverage",
     "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
     "copydist": "cp -R LICENSE *.md yarn.lock package.json ./dist/",
     "distpackage": "(cd ./dist && sed -ibak -e 's#dist/inde[x]#index#g' package.json && rm package.jsonbak)",
     "prebuild": "yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.15.2",
@@ -62,6 +64,7 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
+    "@jupiterone/integration-sdk-dev-tools": "^7.4.1",
     "@pollyjs/adapter-node-http": "^2.7.0",
     "@pollyjs/core": "^2.6.3",
     "@types/jest": "^25.1.4",
@@ -72,7 +75,7 @@
     "dotenv": "^7.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^23.8.2",
-    "husky": "^2.4.0",
+    "husky": "^7.0.0",
     "jest": "^25.2.4",
     "lint-staged": "^8.2.0",
     "prettier": "^2.0.2",
@@ -122,11 +125,6 @@
     "trailingComma": "all",
     "proseWrap": "always",
     "singleQuote": true
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "linters": {

@@ -7,6 +7,7 @@ import { RetryLink } from 'apollo-link-retry';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
+import { networkRequest } from './networkRequest';
 
 import {
   Entity,
@@ -381,13 +382,13 @@ export class JupiterOneClient {
           );
         }
         await sleep(200);
-        statusFile = await fetch(deferredUrl).then((res: any) => res.json());
+        statusFile = await networkRequest(deferredUrl);
         status = statusFile.status;
       } while (status === JobStatus.IN_PROGRESS);
 
       let result;
       if (status === JobStatus.COMPLETED) {
-        result = await fetch(statusFile.url).then((res: any) => res.json());
+        result = await networkRequest(statusFile.url);
       } else {
         // JobStatus.FAILED
         throw new Error(
