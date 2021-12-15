@@ -8,6 +8,27 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.24.2] - 2021-12-15
+
+### Added
+
+- Unit test to check for all exposed properties on the J1 Client
+
+## [0.24.1] - 2021-12-08
+
+### Added
+
+- Upgrade
+- j1 sdk jest configuration
+- j1 sdk prettier configuration
+- code coverage package.json command
+- test for queryV1
+
+### Updated
+
+- husky to v7
+- Abstract fetch calls in queryV1 to helper
+
 ### Added
 
 ## [0.24.0] - 2021-11-15

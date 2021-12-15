@@ -1,0 +1,27 @@
+export const exampleEntity = {
+  id: 'abc',
+  entity: {
+    _class: ['Class'],
+    _type: ['an_example_type'],
+    _key: 'abc',
+    displayName: 'display_name',
+    _integrationType: 'github',
+    _integrationClass: ['ITS', 'SCM', 'VCS', 'VersionControl'],
+    _integrationDefinitionId: 'def',
+    _integrationName: 'JupiterOne',
+    _beginOn: '2021-12-03T01:10:33.604Z',
+    _id: 'ghi',
+    _integrationInstanceId: 'nmi',
+    _version: 11,
+    _accountId: 'an_account',
+    _deleted: false,
+    _source: 'source',
+    _createdOn: '2021-08-20T20:15:09.583Z',
+  },
+  properties: {
+    disabled: false,
+    empty: false,
+    fork: false,
+    forkingAllowed: false,
+  },
+};
