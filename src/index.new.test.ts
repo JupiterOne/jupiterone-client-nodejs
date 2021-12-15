@@ -1,4 +1,6 @@
 import { JupiterOneClient } from '.';
+import { exampleSyncJob } from './example-testing-data/example-sync-job';
+import { exampleEntity } from './example-testing-data/example-entity';
 import { exampleEndResult } from './example-testing-data/example-end-result';
 import exampleDeferredResult from './example-testing-data/example-deferred-result.json';
 import exampleData from './example-testing-data/example-data.json';
@@ -117,6 +119,73 @@ describe('Core Index Tests', () => {
     test('Happy Test', async () => {
       const res = await j1.queryV1('Find github_repo');
       expect(res).toEqual(exampleEndResult.data);
+    });
+  });
+
+  describe('bulkUpload', () => {
+    const setup = (): void => {
+      j1.startSyncJob = jest.fn().mockImplementation(() => {
+        return Promise.resolve(exampleSyncJob);
+      });
+      j1.uploadGraphObjectsForSyncJob = jest.fn().mockImplementation(() => {
+        return Promise.resolve(exampleSyncJob);
+      });
+      j1.finalizeSyncJob = jest.fn().mockImplementation(() => {
+        return Promise.resolve(exampleSyncJob);
+      });
+    };
+
+    test('Happy Test - No Entities Should Return Void', async () => {
+      setup();
+
+      const argumentOne = {};
+
+      const res = await j1.bulkUpload(argumentOne);
+      expect(res).toEqual(undefined);
+    });
+
+    test('Happy Test - Default Options', async () => {
+      setup();
+
+      const argumentOne = {
+        entities: [exampleEntity],
+      };
+
+      const res = await j1.bulkUpload(argumentOne);
+      expect(res).toEqual({
+        syncJobId: exampleSyncJob.job.id,
+        finalizeResult: exampleSyncJob,
+      });
+
+      const expectedArgument = { source: 'api', syncMode: 'DIFF' };
+
+      expect(j1.startSyncJob).toHaveBeenCalledWith(expectedArgument);
+    });
+
+    test('Happy Test - User Provided Options', async () => {
+      setup();
+
+      const argumentOne = {
+        syncJobOptions: {
+          scope: 'an_example_scope',
+          syncMode: 'CREATE_OR_UPDATE',
+        },
+        entities: [exampleEntity],
+      };
+
+      const res = await j1.bulkUpload(argumentOne);
+      expect(res).toEqual({
+        syncJobId: exampleSyncJob.job.id,
+        finalizeResult: exampleSyncJob,
+      });
+
+      const expectedArgument = {
+        source: 'api',
+        scope: 'an_example_scope',
+        syncMode: 'CREATE_OR_UPDATE',
+      };
+
+      expect(j1.startSyncJob).toHaveBeenCalledWith(expectedArgument);
     });
   });
 });

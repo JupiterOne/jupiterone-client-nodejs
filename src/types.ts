@@ -36,10 +36,7 @@ export type Relationship = RelationshipAdditionalProperties & {
 
 export type GraphObject = Entity | Relationship;
 
-export type EntityForSync = EntityAdditionalProperties & {
-  _key: string;
-  _class: string | string[];
-  _type: string;
+type RawData = {
   _rawData?: Record<
     string,
     {
@@ -47,6 +44,22 @@ export type EntityForSync = EntityAdditionalProperties & {
       contentType: 'application/json';
     }
   >;
+};
+
+type EntitySource =
+  | 'api'
+  | 'system-internal'
+  | 'system-mapper'
+  | 'integration-managed'
+  | 'integration-external'
+  | 'sample-data'
+  | undefined;
+
+export type EntityForSync = EntityAdditionalProperties & {
+  _key: string;
+  _class: string | string[];
+  _type: string;
+  _rawData?: RawData | undefined;
 };
 
 export type RelationshipForSync = RelationshipAdditionalProperties & {
@@ -57,6 +70,11 @@ export type RelationshipForSync = RelationshipAdditionalProperties & {
   _toEntityId?: string;
   _fromEntityKey?: string;
   _toEntityKey?: string;
+  _fromEntitySource?: EntitySource;
+  _toEntitySource?: EntitySource;
+  _fromEntityScope?: string | undefined;
+  _toEntityScope?: string | undefined;
+  _rawData?: RawData | undefined;
 };
 
 export enum IntegrationPollingInterval {

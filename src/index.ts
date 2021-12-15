@@ -46,7 +46,7 @@ const JobStatus = {
   FAILED: 'FAILED',
 };
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<NodeJS.Timeout> {
   return new Promise(function (resolve) {
     return setTimeout(resolve, ms);
   });
@@ -77,7 +77,7 @@ async function makeFetchRequest(
   url: string,
   options: RequestInit,
   nameForLogging?: string,
-) {
+): Promise<FetchResponse> {
   return retry(
     async () => {
       const response = await fetch(url, options);
@@ -110,7 +110,9 @@ async function makeFetchRequest(
   );
 }
 
-async function validateSyncJobResponse(response: FetchResponse) {
+async function validateSyncJobResponse(
+  response: FetchResponse,
+): Promise<SyncJobResponse> {
   const rawBody = await response.json();
   const body = rawBody as Partial<SyncJobResponse>;
   if (!body.job) {
@@ -880,7 +882,7 @@ export class JupiterOneClient {
     },
   };
 
-  async startSyncJob(options: SyncJobOptions) {
+  async startSyncJob(options: SyncJobOptions): Promise<SyncJobResponse> {
     if (!options.source) {
       options.source = 'api';
     }
@@ -936,7 +938,7 @@ export class JupiterOneClient {
     syncJobId: string;
     entities?: EntityForSync[];
     relationships?: RelationshipForSync[];
-  }) {
+  }): Promise<SyncJobResponse> {
     const { syncJobId, entities, relationships } = options;
     const headers = this.headers;
     const response = await makeFetchRequest(
@@ -953,7 +955,9 @@ export class JupiterOneClient {
     return validateSyncJobResponse(response);
   }
 
-  async finalizeSyncJob(options: { syncJobId: string }) {
+  async finalizeSyncJob(options: {
+    syncJobId: string;
+  }): Promise<SyncJobResponse> {
     const { syncJobId } = options;
     const headers = this.headers;
     const response = await makeFetchRequest(
@@ -967,7 +971,9 @@ export class JupiterOneClient {
     return validateSyncJobResponse(response);
   }
 
-  async fetchSyncJobStatus(options: { syncJobId: string }) {
+  async fetchSyncJobStatus(options: {
+    syncJobId: string;
+  }): Promise<SyncJobResponse> {
     const { syncJobId } = options;
     const headers = this.headers;
     const response = await makeFetchRequest(
@@ -981,29 +987,34 @@ export class JupiterOneClient {
   }
 
   async bulkUpload(data: {
-    scope: string;
+    syncJobOptions: SyncJobOptions;
     entities?: EntityForSync[];
     relationships?: RelationshipForSync[];
   }): Promise<SyncJobResult | undefined> {
-    if (data.entities || data.relationships) {
-      const { job: syncJob } = await this.startSyncJob({
-        source: 'api',
-        scope: data.scope,
-      });
-      const syncJobId = syncJob.id;
-      await this.uploadGraphObjectsForSyncJob({
-        syncJobId,
-        entities: data.entities,
-        relationships: data.relationships,
-      });
-      const finalizeResult = await this.finalizeSyncJob({ syncJobId });
-      return {
-        syncJobId,
-        finalizeResult,
-      };
-    } else {
+    if (!data?.entities && !data?.relationships) {
       console.log('No entities or relationships to upload.');
+      return;
     }
+
+    const defaultOptions = {
+      source: 'api',
+      syncMode: 'DIFF',
+    };
+
+    const options = { ...defaultOptions, ...(data.syncJobOptions ?? {}) };
+
+    const { job: syncJob } = await this.startSyncJob(options);
+    const syncJobId = syncJob.id;
+    await this.uploadGraphObjectsForSyncJob({
+      syncJobId,
+      entities: data.entities,
+      relationships: data.relationships,
+    });
+    const finalizeResult = await this.finalizeSyncJob({ syncJobId });
+    return {
+      syncJobId,
+      finalizeResult,
+    };
   }
 
   async bulkDelete(data: {

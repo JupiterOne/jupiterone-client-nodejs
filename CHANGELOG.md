@@ -8,6 +8,16 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.0] - 2021-12-15
+
+### Added
+
+- bulkUpload unit tests
+
+### Updated
+
+- bulkUpload method signature
+
 ## [0.24.2] - 2021-12-15
 
 ### Added
