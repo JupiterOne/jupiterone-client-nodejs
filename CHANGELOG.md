@@ -8,6 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.0] - 2021-12-15
+
+### Added
+
+- bulkUpload unit tests
+
+### Updated
+
+- bulkUpload method signature
+
+### Added
+
+- Unit test to check for all exposed properties on the J1 Client
+
 ## [0.24.2] - 2021-12-15
 
 ### Added
