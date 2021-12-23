@@ -43,6 +43,7 @@
     "apollo-link": "^1.2.11",
     "apollo-link-batch-http": "^1.2.13",
     "apollo-link-retry": "^2.2.13",
+    "aws-sdk": "^2.1048.0",
     "commander": "^5.0.0",
     "eslint-config-prettier": "^6.10.1",
     "file-set": "^2.0.0",
@@ -58,8 +59,6 @@
     "p-map": "^1.2.0",
     "pluralize": "^7.0.0",
     "progress": "^2.0.3",
-    "request": "^2.87.0",
-    "request-promise": "^4.2.2",
     "strip-ansi": "^4.0.0",
     "valid-url": "^1.0.9"
   },
