@@ -1,0 +1,15 @@
+{
+  "id": "an_id",
+  "name": "custom",
+  "type": "managed_lambda",
+  "title": "Custom",
+  "offsiteUrl": null,
+  "offsiteButtonTitle": null,
+  "offsiteStatusQuery": null,
+  "integrationType": "an_integration_type",
+  "integrationClass": [],
+  "beta": false,
+  "repoWebLink": null,
+  "invocationPaused": null,
+  "__typename": "IntegrationDefinition"
+}

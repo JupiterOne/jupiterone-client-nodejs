@@ -241,7 +241,17 @@ export type SyncJobOptions = {
   source?: string;
   scope?: string;
   syncMode?: string;
+  integrationInstanceId?: string;
 };
+
+export enum SyncJobSources {
+  API = 'api',
+  INTEGRATION_MANAGED = 'integration-managed',
+}
+
+export enum SyncJobModes {
+  DIFF = 'DIFF',
+}
 
 export type SyncJobResponse = {
   job: SyncJob;
@@ -348,7 +358,10 @@ export class JupiterOneClient {
     return result.getAccessToken().getJwtToken();
   }
 
-  async queryV1(j1ql: string, options: QueryOptions | {} = {}) {
+  async queryV1(
+    j1ql: string,
+    options: QueryOptions | Record<string, unknown> = {},
+  ) {
     let complete = false;
     let page = 0;
     let results: any[] = [];
@@ -657,6 +670,62 @@ export class JupiterOneClient {
     return res.data.deleteQuestion;
   }
 
+  integrationDefinitions = {
+    list: async () => {
+      let allDefinitions = [];
+
+      const query = async (cursor: null | string): Promise<void> => {
+        const res = await this.graphClient.query({
+          query: gql`
+            query ListIntegrationDefinitions($cursor: String) {
+              integrationDefinitions(cursor: $cursor) {
+                definitions {
+                  id
+                  name
+                  type
+                  title
+                  offsiteUrl
+                  offsiteButtonTitle
+                  offsiteStatusQuery
+                  integrationType
+                  integrationClass
+                  beta
+                  repoWebLink
+                  invocationPaused
+                }
+                pageInfo {
+                  endCursor
+                  hasNextPage
+                }
+              }
+            }
+          `,
+          variables: {
+            cursor,
+          },
+        });
+
+        if (res.errors) {
+          throw new ApolloError({ graphQLErrors: res.errors });
+        }
+
+        const { definitions, pageInfo } =
+          res?.data?.integrationDefinitions ?? {};
+
+        if (definitions && Array.isArray(definitions)) {
+          allDefinitions = [...allDefinitions, ...definitions];
+        }
+
+        if (pageInfo?.hasNextPage) {
+          return query(pageInfo.endCursor);
+        }
+      };
+
+      await query(null);
+      return allDefinitions;
+    },
+  };
+
   integrationInstances = {
     list: async <TConfig>(options?: {
       definitionId?: string;
@@ -747,13 +816,13 @@ export class JupiterOneClient {
         createIntegrationInstance: IntegrationInstance<TConfig>;
       }>({
         mutation: gql`
-          query CreateIntegrationInstance(
+          mutation CreateIntegrationInstance(
             $config: JSON
             $description: String
             $integrationDefinitionId: String!
             $name: String!
             $pollingInterval: IntegrationPollingInterval
-            $pollingIntervalCronExpression: IntegrationPollingIntervalCronExpression
+            $pollingIntervalCronExpression: IntegrationPollingIntervalCronExpressionInput
           ) {
             createIntegrationInstance(
               instance: {
@@ -883,14 +952,6 @@ export class JupiterOneClient {
   };
 
   async startSyncJob(options: SyncJobOptions): Promise<SyncJobResponse> {
-    if (!options.source) {
-      options.source = 'api';
-    }
-    if (options.syncMode === 'DIFF' && !options.scope) {
-      throw new Error(
-        'You must specify a scope when starting a sync job in DIFF mode.',
-      );
-    }
     const headers = this.headers;
     const response = await makeFetchRequest(
       this.apiUrl + `/persister/synchronization/jobs`,
@@ -986,6 +1047,21 @@ export class JupiterOneClient {
     return validateSyncJobResponse(response);
   }
 
+  private areValidSyncJobOptions(options: SyncJobOptions) {
+    if (
+      options.source === SyncJobSources.API &&
+      options.syncMode === SyncJobModes.DIFF &&
+      !options.scope
+    ) {
+      console.error(
+        'You must specify a scope when starting a sync job in DIFF mode.',
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   async bulkUpload(data: {
     syncJobOptions: SyncJobOptions;
     entities?: EntityForSync[];
@@ -997,11 +1073,13 @@ export class JupiterOneClient {
     }
 
     const defaultOptions = {
-      source: 'api',
-      syncMode: 'DIFF',
+      source: SyncJobSources.API,
+      syncMode: SyncJobModes.DIFF,
     };
 
-    const options = { ...defaultOptions, ...(data.syncJobOptions ?? {}) };
+    const options = { ...defaultOptions, ...(data?.syncJobOptions ?? {}) };
+
+    if (this.areValidSyncJobOptions(options) === false) return;
 
     const { job: syncJob } = await this.startSyncJob(options);
     const syncJobId = syncJob.id;
