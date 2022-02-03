@@ -1,9 +1,11 @@
-import { JupiterOneClient } from '.';
+import { JupiterOneClient, SyncJobModes, SyncJobSources } from '.';
 import { exampleSyncJob } from './example-testing-data/example-sync-job';
 import { exampleEntity } from './example-testing-data/example-entity';
 import { exampleEndResult } from './example-testing-data/example-end-result';
 import exampleDeferredResult from './example-testing-data/example-deferred-result.json';
 import exampleData from './example-testing-data/example-data.json';
+import exampleDefinition from './example-testing-data/example-definition.json';
+import { ApolloError } from 'apollo-client';
 
 jest.mock('./networkRequest', () => ({
   networkRequest: jest
@@ -24,7 +26,7 @@ describe('Core Index Tests', () => {
       account: '',
     });
 
-    const baseQuery = (): {} => {
+    const baseQuery = (): Record<string, unknown> => {
       return exampleData;
     };
 
@@ -122,6 +124,41 @@ describe('Core Index Tests', () => {
     });
   });
 
+  describe('listIntegrationDefinitions', () => {
+    const setup = (): void => {
+      j1.graphClient.query = jest.fn().mockImplementation(() => {
+        return Promise.resolve({
+          data: {
+            integrationDefinitions: {
+              definitions: [exampleDefinition],
+            },
+          },
+        });
+      });
+    };
+
+    beforeEach(() => {
+      setup();
+    });
+
+    test('Sad Test - Query Fails', async () => {
+      j1.graphClient.query = jest.fn().mockImplementation(() => {
+        return {
+          errors: 'A Problem',
+        };
+      });
+
+      await expect(
+        async () => await j1.integrationDefinitions.list(),
+      ).rejects.toThrow(ApolloError);
+    });
+
+    test('Happy Test - Returns Definitions', async () => {
+      const res = await j1.integrationDefinitions.list();
+      expect(res).toEqual([exampleDefinition]);
+    });
+  });
+
   describe('bulkUpload', () => {
     const setup = (): void => {
       j1.startSyncJob = jest.fn().mockImplementation(() => {
@@ -135,9 +172,29 @@ describe('Core Index Tests', () => {
       });
     };
 
-    test('Happy Test - No Entities Should Return Void', async () => {
+    beforeEach(() => {
       setup();
+    });
 
+    test('Sad Test - Using Sync Mode `DIFF` and Source `API` Without Scope Returns Early', async () => {
+      const areValidSyncJobOptionsSpy = jest.spyOn(
+        j1,
+        'areValidSyncJobOptions',
+      );
+      const argumentOne = {
+        syncJobOptions: {
+          source: SyncJobSources.API,
+          syncMode: SyncJobModes.DIFF,
+        },
+        entities: [exampleEntity],
+      };
+
+      const res = await j1.bulkUpload(argumentOne);
+      expect(res).toEqual(undefined);
+      expect(areValidSyncJobOptionsSpy).toReturnWith(false);
+    });
+
+    test('Happy Test - No Entities/Relationships Should Return Early', async () => {
       const argumentOne = {};
 
       const res = await j1.bulkUpload(argumentOne);
@@ -145,9 +202,12 @@ describe('Core Index Tests', () => {
     });
 
     test('Happy Test - Default Options', async () => {
-      setup();
+      const targetScope = 'test-scope';
 
       const argumentOne = {
+        syncJobOptions: {
+          scope: targetScope,
+        },
         entities: [exampleEntity],
       };
 
@@ -157,14 +217,16 @@ describe('Core Index Tests', () => {
         finalizeResult: exampleSyncJob,
       });
 
-      const expectedArgument = { source: 'api', syncMode: 'DIFF' };
+      const expectedArgument = {
+        source: 'api',
+        syncMode: 'DIFF',
+        scope: targetScope,
+      };
 
       expect(j1.startSyncJob).toHaveBeenCalledWith(expectedArgument);
     });
 
     test('Happy Test - User Provided Options', async () => {
-      setup();
-
       const argumentOne = {
         syncJobOptions: {
           scope: 'an_example_scope',
