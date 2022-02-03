@@ -8,6 +8,18 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.1] - 2022-02-03
+
+### Added
+
+- IntegrationDefinitions list method
+
+### Updated
+
+- {} types with Record<string, unknown>
+- Packages that had vulnerabilities
+- Replace jest config in package.json with additional config in jest.config.js
+
 ## [0.25.0] - 2021-12-15
 
 ### Added

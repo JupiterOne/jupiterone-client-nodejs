@@ -1,3 +1,4 @@
+import { ApolloError } from 'apollo-client';
 import { JupiterOneClient, SyncJobModes, SyncJobSources } from '.';
 import { exampleSyncJob } from './example-testing-data/example-sync-job';
 import { exampleEntity } from './example-testing-data/example-entity';
@@ -5,7 +6,6 @@ import { exampleEndResult } from './example-testing-data/example-end-result';
 import exampleDeferredResult from './example-testing-data/example-deferred-result.json';
 import exampleData from './example-testing-data/example-data.json';
 import exampleDefinition from './example-testing-data/example-definition.json';
-import { ApolloError } from 'apollo-client';
 
 jest.mock('./networkRequest', () => ({
   networkRequest: jest
