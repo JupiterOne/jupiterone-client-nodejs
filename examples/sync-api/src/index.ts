@@ -1,70 +1,107 @@
-import chalk from 'chalk';
-import { authenticate } from './utils/authenticate';
-import { targetQuery } from './utils/target-query';
 import {
+  successLog,
+  logger,
+  handleInvalidEnum,
+  authenticate,
+  cleanup,
   generateRelationships,
-  RelationshipTypes,
-} from './utils/generate-relationships';
+  waitForGraphResults,
+  getIntegrationDefinition,
+  getAllIntegrationInstances,
+  queries,
+  mapProp,
+  createScope,
+} from './utils';
+import { RelationshipTypes } from './utils/generate-relationships';
 import codeModules from './data/code-modules.json';
+import codeRepos from './data/code-repos.json';
 
-const codeRepoNames = [
-  "'graph-veracode'",
-  "'graph-knowbe4'",
-  "'graph-azure'",
-  "'graph-wazuh'",
-  "'graph-enrichment-examples'",
-  "'graph-whois'",
-  "'graph-zeit'",
-];
+const codeModulesForUpload = mapProp(codeModules, 'entity');
+const codeReposForUpload = mapProp(codeRepos, 'entity');
 
-const codeModulesForUpload = codeModules.map((codeModule) => codeModule.entity);
+const INTEGRATION_INSTANCE_TARGET =
+  'Relationships Between Differences in Owned Entities';
+const INTEGRATION_DEFINITION_TARGET = 'Custom';
 
 const main = async (): Promise<void> => {
   const action = process.argv[2];
-
-  if (!Object.values(RelationshipTypes).includes(action)) {
-    console.log(chalk.red('Invalid action!', action));
-    console.log(
-      chalk.red(
-        'Valid actions are:',
-        JSON.stringify(
-          Object.values(RelationshipTypes).filter(
-            (rt) => typeof rt === 'string',
-          ),
-          null,
-          4,
-        ),
-      ),
-    );
-    return;
-  }
+  if (handleInvalidEnum(RelationshipTypes, action) === false) return;
 
   const j1 = await authenticate();
-  const targetQueryResult = await j1.queryV1(targetQuery);
-  const targetQueryBulkDelete = targetQueryResult.map(
-    (codeModule) => codeModule.entity,
+
+  // Integrations begin with a definition. We'll start there
+  // and progress down in the hierarchy to find an integration
+  // instance
+  const integrationDefinition = await getIntegrationDefinition(
+    j1,
+    INTEGRATION_DEFINITION_TARGET,
+  );
+  if (integrationDefinition === null) return;
+
+  // Get all the integration instances underneath a definition
+  // so we can start looking for the instance we're interested in
+  const allIntegrationInstances = await getAllIntegrationInstances(
+    j1,
+    integrationDefinition,
   );
 
-  await j1.bulkDelete({
-    entities: targetQueryBulkDelete,
-  });
+  // GET or CREATE the Integration Instance
+  let targetIntegrationInstance =
+    (allIntegrationInstances.find(
+      (integrationInstance) =>
+        integrationInstance.name.toLowerCase() ===
+        INTEGRATION_INSTANCE_TARGET.toLowerCase(),
+    ) ??
+      []) ||
+    (await j1.integrationInstances.create({
+      name: INTEGRATION_INSTANCE_TARGET,
+      integrationDefinitionId: integrationDefinition?.id,
+    }));
 
-  const codeRepoQuery = `
-    FIND github_repo
-        WITH displayName = (${codeRepoNames.join(' OR ')})
-`;
-
-  const type = RelationshipTypes[action];
-  const codeRepos = await j1.queryV1(codeRepoQuery);
-  const relationships = generateRelationships(codeRepos, codeModules, type);
+  // Cleanup data from our last execution
+  await cleanup(j1, targetIntegrationInstance.id);
 
   await j1.bulkUpload({
     syncJobOptions: {
-      scope: 'form-relationships-test',
+      source: 'integration-managed',
+      integrationInstanceId: targetIntegrationInstance.id,
+    },
+    entities: codeReposForUpload,
+  });
+
+  const codeReposFromGraph = await waitForGraphResults(
+    j1,
+    queries.codeRepoByIntegrationId(targetIntegrationInstance.id),
+  )(1);
+
+  if (!codeReposFromGraph) {
+    logger('Cannot find results in J1... exiting.');
+    return;
+  }
+
+  const relationshipConnection = RelationshipTypes[action];
+  const scope = createScope();
+
+  const bulkUPayload = {
+    syncJobOptions: {
+      scope,
     },
     entities: codeModulesForUpload,
-    relationships,
-  });
+    relationships: generateRelationships(
+      codeReposFromGraph,
+      codeModules,
+      relationshipConnection,
+    ),
+  };
+
+  await j1.bulkUpload(bulkUPayload);
+
+  successLog(`
+    If you did not use KEY_TO_KEY, you should be able to use this query to find your results in the graph:
+
+    ${queries.codeModuleUsesCodeRepo}
+    RETURN TREE
+  `);
 };
 
 main().catch(console.error);

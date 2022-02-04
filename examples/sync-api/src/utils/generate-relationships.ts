@@ -66,8 +66,6 @@ export const generateRelationships = (
     const entityTo = entitiesTo[i];
     const version = chance.semver();
 
-    console.log('relationshipType :>> ', relationshipType);
-
     return {
       _key: `${entityTo.entity.displayName}:USES:${entityFrom.entity.displayName}`,
       _type: 'code_repo:USES:npm_package',

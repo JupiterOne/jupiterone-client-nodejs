@@ -1,10 +1,10 @@
 # TL;DR
 
-If you want to form a relationship with a `_key`, you must include the `_source`
-and `_scope` of the entity that already exists in the graph.
+If you want to form a relationship using a `_key`, you must include the
+`_source` and `_scope` of the entity that already exists in the graph.
 
 Assuming that the entity you are uploading is the `to` and the entity that you
-are forming a relationship already exists in the graph and therefore is the
+are forming a relationship with already exists in the graph and therefore is the
 `from`:
 
 This will _NOT_ work:
@@ -27,13 +27,27 @@ This will work:
 }
 ```
 
-# Creating Relationship Between Entities You Own With Entities You Do Not
+# Creating Relationships Between Entities You Own And Entities You Do Not
 
 Our goal here is to create relationships from one entity to another that you
-might not own. Ownership is a concept in JupiterOne
+might not own.
 
 While this appears trivial, without knowing the details around how to form
 relationships, you might wonder why your data doesn't appear in the graph.
+
+This is due to the concept of ownership with the JupiterOne software. When we
+look at the graph in JupiterOne, it magically appears before us. We don’t have
+to worry about where the graph starts or where it might end. We type in a query
+and view the results. What’s not obvious from viewing the graph is that the
+graph we see is the aggregation of many subgraphs. There are subgraphs for the
+AWS integration and the system mapper and API ingested data amongst everything
+else. All of these different subgraphs come together to give us our cohesive set
+of results. These "Sub-graphs" are what denote “ownership”. When we say that
+Sub-graph 1 “owns” entity A, we mean that entity A is in Sub-graph 1. Ownership
+is important because it is how the software understands the state of the world.
+
+When interacting with entities that owned by various sources, we must be
+specific in our interactions so the end graph looks how we expect it to.
 
 At the end of this experiment, we should be able to run this query:
 
@@ -75,7 +89,7 @@ FIND github_repo
 
 Sweet! We have `CodeRepos` that we're going to form relationships with.
 
-Here's an example payload:
+Here's an example query response payload:
 
 ```
 {
@@ -129,10 +143,10 @@ We can form the relationship in the following ways:
 
 Remember the comment from earlier: we do not have the `CodeModule` `_id` yet!
 This is important because these two options are _NOT_ equal in how they behave.
-If you were to form a relationship between the `_id` of the `CodeRepo` with the
-`_key` of the CodeModule, this will work. This works because the `_id` is unique
-amongst all of the data in your account. The `_key` value is _NOT_ globally
-unique (i.e. two entities can have the same `_key`).
+Forming a relationship using the `_id` of the `CodeRepo` and the `_key` of the
+CodeModule will work because the `_id` is unique amongst all of the data in your
+account. The `_key` value is _NOT_ globally unique (i.e. two entities can have
+the same `_key`).
 
 When you form a relationship with two `_key` values and you do not specify the
 `source` and the `scope` of the data that already exists in the graph, the
@@ -159,7 +173,7 @@ This:
 - `CodeRepo` `_key` -> `CodeModule` `_key`
 - `CodeRepo` `_id` -> `CodeModule` `_key`
 
-Becomes this:
+Must actually be:
 
 - `CodeRepo` `_key`, `_source`, `_scope` -> `CodeModule` `_key`
 - `CodeRepo` `_id` -> `CodeModule` `_key`
