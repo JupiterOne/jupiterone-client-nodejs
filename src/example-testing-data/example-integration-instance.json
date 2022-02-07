@@ -1,0 +1,15 @@
+{
+  "accountId": "a-j1-account",
+  "config": {
+    "@tag": { "AccountName": "Test" },
+    "apiUser": "an-api-user@jupiterone.com",
+    "apiToken": "***masked***"
+  },
+  "description": "An example integration instance",
+  "id": "abc",
+  "integrationDefinitionId": "def",
+  "name": "Test",
+  "pollingInterval": "ONE_WEEK",
+  "pollingIntervalCronExpression": null,
+  "__typename": "IntegrationInstance"
+}

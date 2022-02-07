@@ -99,7 +99,17 @@ export interface IntegrationPollingIntervalCronExpression {
   hour?: number;
 }
 
-export interface IntegrationInstance<TConfig = any> {
+interface IntegrationInstanceTag {
+  AccountName: string;
+}
+
+export interface IntegrationInstanceConfig {
+  '@tag': IntegrationInstanceTag;
+  apiUser: string;
+  apiToken: string;
+}
+
+export interface IntegrationInstance<TConfig = unknown> {
   id: string;
   accountId: string;
 
@@ -110,4 +120,19 @@ export interface IntegrationInstance<TConfig = any> {
   offsiteComplete?: boolean;
   pollingInterval?: IntegrationPollingInterval;
   pollingIntervalCronExpression?: IntegrationPollingIntervalCronExpression;
+}
+
+export interface ListIntegrationInstancesOptions {
+  definitionId?: string;
+  cursor?: string;
+}
+
+export interface PageInfo {
+  endCursor?: string;
+  hasNextPage: boolean;
+}
+
+export interface ListIntegrationInstances {
+  instances: IntegrationInstance<IntegrationInstanceConfig>[];
+  pageInfo: PageInfo;
 }

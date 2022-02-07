@@ -288,3 +288,27 @@ export const DELETE_QUESTION = gql`
     }
   }
 `;
+
+export const LIST_INTEGRATION_INSTANCES = gql`
+  query ListIntegrationInstances($definitionId: String, $cursor: String) {
+    integrationInstances(definitionId: $definitionId, cursor: $cursor) {
+      instances {
+        accountId
+        config
+        description
+        id
+        integrationDefinitionId
+        name
+        pollingInterval
+        pollingIntervalCronExpression {
+          hour
+          dayOfWeek
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+`;
