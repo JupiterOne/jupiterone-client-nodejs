@@ -8,6 +8,17 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.25.2] - 2022-02-07
+
+### Added
+
+- Helper function to easily query GraphQL queries with a cursor
+- IntegrationInstances.list unit tests
+
+### Updated
+
+- Resolve TypeError when calling integrationInstances.list without an argument
+
 ## [0.25.1] - 2022-02-03
 
 ### Added
