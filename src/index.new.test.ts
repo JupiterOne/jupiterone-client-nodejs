@@ -6,6 +6,7 @@ import { exampleEndResult } from './example-testing-data/example-end-result';
 import exampleDeferredResult from './example-testing-data/example-deferred-result.json';
 import exampleData from './example-testing-data/example-data.json';
 import exampleDefinition from './example-testing-data/example-definition.json';
+import exampleIntegrationInstance from './example-testing-data/example-integration-instance.json';
 
 jest.mock('./networkRequest', () => ({
   networkRequest: jest
@@ -31,7 +32,7 @@ describe('Core Index Tests', () => {
     };
 
     jupiterOneClient.init = jest.fn(() => {
-      (jupiterOneClient.graphClient as any) = {
+      (jupiterOneClient.graphClient as unknown) = {
         query: jest.fn().mockImplementationOnce(baseQuery),
       };
       return Promise.resolve(jupiterOneClient);
@@ -121,6 +122,43 @@ describe('Core Index Tests', () => {
     test('Happy Test', async () => {
       const res = await j1.queryV1('Find github_repo');
       expect(res).toEqual(exampleEndResult.data);
+    });
+  });
+
+  describe('listIntegrationInstances', () => {
+    const setup = (): void => {
+      j1.graphClient.query = jest.fn().mockImplementation(() => {
+        return Promise.resolve({
+          data: {
+            integrationInstances: {
+              instances: [exampleIntegrationInstance],
+            },
+          },
+        });
+      });
+    };
+
+    beforeEach(() => {
+      setup();
+    });
+
+    test('Sad Test - Query Fails', async () => {
+      j1.graphClient.query = jest.fn().mockImplementation(() => {
+        return {
+          errors: [{ message: 'A Problem' }],
+        };
+      });
+
+      const expectedValue = { data: [], errors: [{ message: 'A Problem' }] };
+      const test = await j1.integrationInstances.list();
+      await expect(test).toEqual(expectedValue);
+    });
+
+    test('Happy Test - Returns Instances', async () => {
+      const res = await j1.integrationInstances.list({
+        definitionId: 'abc',
+      });
+      expect(res.data).toEqual([exampleIntegrationInstance]);
     });
   });
 

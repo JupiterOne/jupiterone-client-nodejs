@@ -7,6 +7,8 @@ import { RetryLink } from 'apollo-link-retry';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
+import gql from 'graphql-tag';
+
 import { networkRequest } from './networkRequest';
 
 import {
@@ -15,6 +17,8 @@ import {
   IntegrationInstance,
   Relationship,
   RelationshipForSync,
+  ListIntegrationInstances,
+  ListIntegrationInstancesOptions,
 } from './types';
 
 import {
@@ -31,8 +35,9 @@ import {
   CREATE_QUESTION,
   UPDATE_QUESTION,
   DELETE_QUESTION,
+  LIST_INTEGRATION_INSTANCES,
 } from './queries';
-import gql from 'graphql-tag';
+import { query, QueryTypes } from './util/query';
 
 const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
 const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
@@ -727,53 +732,22 @@ export class JupiterOneClient {
   };
 
   integrationInstances = {
-    list: async <TConfig>(options?: {
-      definitionId?: string;
-      cursor?: string;
-    }) => {
-      const res = await this.graphClient.query<{
-        integrationInstances: {
-          instances: IntegrationInstance<TConfig>[];
-          pageInfo: { endCursor?: string; hasNextPage: boolean };
-        };
-      }>({
-        query: gql`
-          query ListIntegrationInstances(
-            $definitionId: String
-            $cursor: String
-          ) {
-            integrationInstances(definitionId: $definitionId, cursor: $cursor) {
-              instances {
-                accountId
-                config
-                description
-                id
-                integrationDefinitionId
-                name
-                pollingInterval
-                pollingIntervalCronExpression {
-                  hour
-                  dayOfWeek
-                }
-              }
-              pageInfo {
-                endCursor
-                hasNextPage
-              }
-            }
-          }
-        `,
-        variables: {
-          definitionId: options.definitionId,
-          cursor: options.cursor,
-        },
+    list: async <TConfig>(
+      options?: ListIntegrationInstancesOptions,
+    ): Promise<QueryTypes.QueryResults<IntegrationInstance>> => {
+      const fn: QueryTypes.QueryFunction<ListIntegrationInstances> = (
+        optionsOverride,
+      ) =>
+        this.graphClient.query<ListIntegrationInstances>({
+          errorPolicy: 'all',
+          query: LIST_INTEGRATION_INSTANCES,
+          variables: { ...(options ?? {}), ...optionsOverride },
+        });
+
+      return query<ListIntegrationInstances, IntegrationInstance<TConfig>>(fn, {
+        dataPath: 'data.integrationInstances.instances',
+        cursorPath: 'data.integrationInstances.pageInfo',
       });
-
-      if (res.errors) {
-        throw new ApolloError({ graphQLErrors: res.errors });
-      }
-
-      return res.data.integrationInstances;
     },
 
     get: async <TConfig>(id: string) => {
@@ -1047,7 +1021,7 @@ export class JupiterOneClient {
     return validateSyncJobResponse(response);
   }
 
-  private areValidSyncJobOptions(options: SyncJobOptions) {
+  private areValidSyncJobOptions(options: SyncJobOptions): boolean {
     if (
       options.source === SyncJobSources.API &&
       options.syncMode === SyncJobModes.DIFF &&
