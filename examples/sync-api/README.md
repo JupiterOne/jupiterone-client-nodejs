@@ -197,6 +197,12 @@ behavior of different scenarios.
 To run:
 
 ```
+Ensure your environment variables are set:
+
+J1_API_TOKEN=
+J1_ACCOUNT=
+J1_DEV_ENABLED=false
+
 Syntax: ts-node src/index.ts <relationship_connection>
 
 relationship_connection values:
@@ -206,4 +212,9 @@ relationship_connection values:
 
 
 $ ts-node src/index.ts ID_TO_KEY
+
+or compile to JavaScript and run with JavaScript:
+
+$ npm run build
+$ node dist/index.js
 ```

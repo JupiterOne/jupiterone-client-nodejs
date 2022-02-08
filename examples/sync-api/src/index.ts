@@ -20,7 +20,7 @@ const codeModulesForUpload = mapProp(codeModules, 'entity');
 const codeReposForUpload = mapProp(codeRepos, 'entity');
 
 const INTEGRATION_INSTANCE_TARGET =
-  'Relationships Between Differences in Owned Entities';
+  'Relationships Between Entities Under Different Ownership';
 const INTEGRATION_DEFINITION_TARGET = 'Custom';
 
 const main = async (): Promise<void> => {
@@ -46,17 +46,21 @@ const main = async (): Promise<void> => {
   );
 
   // GET or CREATE the Integration Instance
-  let targetIntegrationInstance =
-    (allIntegrationInstances.find(
+  const targetIntegrationInstance =
+    allIntegrationInstances.find(
       (integrationInstance) =>
         integrationInstance.name.toLowerCase() ===
         INTEGRATION_INSTANCE_TARGET.toLowerCase(),
     ) ??
-      []) ||
     (await j1.integrationInstances.create({
       name: INTEGRATION_INSTANCE_TARGET,
-      integrationDefinitionId: integrationDefinition?.id,
+      integrationDefinitionId: integrationDefinition.id,
     }));
+
+  if (!targetIntegrationInstance) {
+    logger('Unable to acquire integration instance... exiting.');
+    return;
+  }
 
   // Cleanup data from our last execution
   await cleanup(j1, targetIntegrationInstance.id);
