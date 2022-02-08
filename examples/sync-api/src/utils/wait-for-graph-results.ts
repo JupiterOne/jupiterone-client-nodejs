@@ -1,13 +1,13 @@
-import { sleep } from '.';
+import { sleep, logger } from '.';
 
 export const waitForGraphResults = (j1, j1Query) => {
   const repeat = async (counter: number = 1) => {
     counter = +counter;
     if (isNaN(counter)) {
-      'Counter is not a number... exiting.';
+      logger('Counter is not a number... exiting.');
       return null;
     }
-    if (counter > 5) return [];
+    if (counter > 5) return null;
 
     const results = await j1.queryV1(j1Query, { fetchPolicy: 'no-cache' });
 
