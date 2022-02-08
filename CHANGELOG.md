@@ -8,6 +8,35 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.26.0] - 2022-02-07
+
+### Breaking Change
+
+The `integrationDefinitions.list` return data structure changed from:
+
+```
+{
+  definitions: [{...}, ...],
+  pageInfo: { key: value }
+}
+```
+
+to:
+
+```
+{
+  data: [{...}, ...],
+  errors: [{...}, ...]
+}
+```
+
+### Updated
+
+- Re-named get-prop.ts to getProp.ts
+- Updated integrationDefinitions.list to use standardized query function
+  - Added necessary types
+  - Updated related tests
+
 ## [0.25.2] - 2022-02-07
 
 ### Added
