@@ -14,9 +14,11 @@ import { networkRequest } from './networkRequest';
 import {
   Entity,
   EntityForSync,
-  IntegrationInstance,
   Relationship,
   RelationshipForSync,
+  IntegrationDefinition,
+  ListIntegrationDefinitions,
+  IntegrationInstance,
   ListIntegrationInstances,
   ListIntegrationInstancesOptions,
 } from './types';
@@ -36,6 +38,7 @@ import {
   UPDATE_QUESTION,
   DELETE_QUESTION,
   LIST_INTEGRATION_INSTANCES,
+  LIST_INTEGRATION_DEFINITIONS,
 } from './queries';
 import { query, QueryTypes } from './util/query';
 
@@ -676,58 +679,20 @@ export class JupiterOneClient {
   }
 
   integrationDefinitions = {
-    list: async () => {
-      let allDefinitions = [];
-
-      const query = async (cursor: null | string): Promise<void> => {
-        const res = await this.graphClient.query({
-          query: gql`
-            query ListIntegrationDefinitions($cursor: String) {
-              integrationDefinitions(cursor: $cursor) {
-                definitions {
-                  id
-                  name
-                  type
-                  title
-                  offsiteUrl
-                  offsiteButtonTitle
-                  offsiteStatusQuery
-                  integrationType
-                  integrationClass
-                  beta
-                  repoWebLink
-                  invocationPaused
-                }
-                pageInfo {
-                  endCursor
-                  hasNextPage
-                }
-              }
-            }
-          `,
-          variables: {
-            cursor,
-          },
+    list: async (): Promise<QueryTypes.QueryResults<IntegrationDefinition>> => {
+      const fn: QueryTypes.QueryFunction<ListIntegrationDefinitions> = (
+        optionsOverride,
+      ) =>
+        this.graphClient.query<ListIntegrationDefinitions>({
+          errorPolicy: 'all',
+          query: LIST_INTEGRATION_DEFINITIONS,
+          variables: { ...optionsOverride },
         });
 
-        if (res.errors) {
-          throw new ApolloError({ graphQLErrors: res.errors });
-        }
-
-        const { definitions, pageInfo } =
-          res?.data?.integrationDefinitions ?? {};
-
-        if (definitions && Array.isArray(definitions)) {
-          allDefinitions = [...allDefinitions, ...definitions];
-        }
-
-        if (pageInfo?.hasNextPage) {
-          return query(pageInfo.endCursor);
-        }
-      };
-
-      await query(null);
-      return allDefinitions;
+      return query<ListIntegrationDefinitions, IntegrationDefinition>(fn, {
+        dataPath: 'data.integrationDefinitions.definitions',
+        cursorPath: 'data.integrationDefinitions.pageInfo',
+      });
     },
   };
 
