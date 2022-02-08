@@ -109,6 +109,27 @@ export interface IntegrationInstanceConfig {
   apiToken: string;
 }
 
+export interface IntegrationDefinition {
+  id: string;
+  name: string;
+  type: string;
+  title: string;
+  offsiteUrl: string | null;
+  offsiteButtonTitle: string | null;
+  offsiteStatusQuery: string | null;
+  integrationType: string | null;
+  integrationClass: string[];
+  beta: boolean;
+  repoWebLink: string | null;
+  invocationPaused: boolean | null;
+  __typename: string;
+}
+
+export interface ListIntegrationDefinitions {
+  instances: IntegrationDefinition[];
+  pageInfo: PageInfo;
+}
+
 export interface IntegrationInstance<TConfig = unknown> {
   id: string;
   accountId: string;

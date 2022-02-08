@@ -1,7 +1,7 @@
 import { ApolloQueryResult } from 'apollo-client';
 import { QueryTypes } from './';
 import { PageInfo } from '../../types';
-import { getProp } from '../get-prop';
+import { getProp } from '../getProp';
 
 export const query = async <T, V>(
   fn: QueryTypes.QueryFunction<T>,

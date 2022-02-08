@@ -289,6 +289,31 @@ export const DELETE_QUESTION = gql`
   }
 `;
 
+export const LIST_INTEGRATION_DEFINITIONS = gql`
+  query ListIntegrationDefinitions($cursor: String) {
+    integrationDefinitions(cursor: $cursor) {
+      definitions {
+        id
+        name
+        type
+        title
+        offsiteUrl
+        offsiteButtonTitle
+        offsiteStatusQuery
+        integrationType
+        integrationClass
+        beta
+        repoWebLink
+        invocationPaused
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+`;
+
 export const LIST_INTEGRATION_INSTANCES = gql`
   query ListIntegrationInstances($definitionId: String, $cursor: String) {
     integrationInstances(definitionId: $definitionId, cursor: $cursor) {

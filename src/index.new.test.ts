@@ -1,4 +1,3 @@
-import { ApolloError } from 'apollo-client';
 import { JupiterOneClient, SyncJobModes, SyncJobSources } from '.';
 import { exampleSyncJob } from './example-testing-data/example-sync-job';
 import { exampleEntity } from './example-testing-data/example-entity';
@@ -182,18 +181,18 @@ describe('Core Index Tests', () => {
     test('Sad Test - Query Fails', async () => {
       j1.graphClient.query = jest.fn().mockImplementation(() => {
         return {
-          errors: 'A Problem',
+          errors: [{ message: 'A Problem' }],
         };
       });
 
-      await expect(
-        async () => await j1.integrationDefinitions.list(),
-      ).rejects.toThrow(ApolloError);
+      const expectedValue = { data: [], errors: [{ message: 'A Problem' }] };
+      const test = await j1.integrationDefinitions.list();
+      await expect(test).toEqual(expectedValue);
     });
 
     test('Happy Test - Returns Definitions', async () => {
-      const res = await j1.integrationDefinitions.list();
-      expect(res).toEqual([exampleDefinition]);
+      const test = await j1.integrationDefinitions.list();
+      expect(test).toEqual({ data: [exampleDefinition], errors: [] });
     });
   });
 
