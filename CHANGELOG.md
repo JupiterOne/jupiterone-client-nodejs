@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.26.1] - 2022-02-17
+
+### Updated
+
+- Fix detection of inline question rule bodies when creating/updating alert rules
+
 ## [0.26.0] - 2022-02-07
 
 ### Breaking Change
