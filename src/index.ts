@@ -480,7 +480,7 @@ export class JupiterOneClient {
   }
 
   async mutateAlertRule(rule: any, update: any) {
-    const inlineQuestion = !!update?.instance?.question;
+    const inlineQuestion = !!(rule.instance?.question);
     let mutation;
     if (inlineQuestion) {
       mutation = update ? UPDATE_INLINE_ALERT_RULE : CREATE_INLINE_ALERT_RULE;
