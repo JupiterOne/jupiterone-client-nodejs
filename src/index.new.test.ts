@@ -115,6 +115,21 @@ describe('Core Index Tests', () => {
     test('bulkDelete', () => {
       expect(j1).toHaveProperty('bulkDelete');
     });
+
+    test('--api-base-url properly sets URLs', () => {
+      const jupiterOneCustomURLClient = new JupiterOneClient({
+        account: '',
+        apiBaseUrl: 'https://api.test.jupiterone.io',
+      });
+      expect(jupiterOneCustomURLClient).toHaveProperty(
+        'queryEndpoint',
+        'https://api.test.jupiterone.io/graphql',
+      );
+      expect(jupiterOneCustomURLClient).toHaveProperty(
+        'rulesEndpoint',
+        'https://api.test.jupiterone.io/rules/graphql',
+      );
+    });
   });
 
   describe('queryV1', () => {
