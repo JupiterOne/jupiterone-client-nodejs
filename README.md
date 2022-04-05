@@ -26,6 +26,7 @@ const { JupiterOneClient } = require('@jupiterone/jupiterone-client-nodejs');
 const j1Client = await new JupiterOneClient({
   account: 'my-account-id',
   accessToken: 'my-api-token',
+  apiBaseUrl: 'https://api.us.jupiterone.io' // Optional parameter 
 }).init();
 const integrationInstance = await j1Client.integrationInstances.get(
   'my-integration-instance-id',
@@ -51,6 +52,7 @@ Options:
   --relationship            Specifies relationship operations.
   --alert                   Specifies alert rule operations.
   -f, --file <dir>          Input JSON file. Or the filename of the alert rule pack.
+  --api-base-url <url>      Optionally specify base URL to use during execution. (defaults to `https://api.us.jupiterone.io`)
   -h, --help                output usage information
 ```
 

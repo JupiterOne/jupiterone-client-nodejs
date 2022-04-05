@@ -186,6 +186,7 @@ export interface JupiterOneClientOptions {
   accessToken?: string;
   dev?: boolean;
   useRulesEndpoint?: boolean;
+  apiBaseUrl?: string;
 }
 
 export enum SyncJobStatus {
@@ -302,6 +303,7 @@ export class JupiterOneClient {
     accessToken,
     dev = false,
     useRulesEndpoint = false,
+    apiBaseUrl = undefined,
   }: JupiterOneClientOptions) {
     this.account = account;
     this.username = username;
@@ -314,6 +316,7 @@ export class JupiterOneClient {
     this.apiUrl = dev
       ? 'https://api.dev.jupiterone.io'
       : 'https://api.us.jupiterone.io';
+    this.apiUrl = apiBaseUrl || this.apiUrl;
     this.queryEndpoint = this.apiUrl + '/graphql';
     this.rulesEndpoint = this.apiUrl + '/rules/graphql';
   }
@@ -480,7 +483,7 @@ export class JupiterOneClient {
   }
 
   async mutateAlertRule(rule: any, update: any) {
-    const inlineQuestion = !!(rule.instance?.question);
+    const inlineQuestion = !!rule.instance?.question;
     let mutation;
     if (inlineQuestion) {
       mutation = update ? UPDATE_INLINE_ALERT_RULE : CREATE_INLINE_ALERT_RULE;
