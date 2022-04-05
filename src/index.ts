@@ -316,7 +316,7 @@ export class JupiterOneClient {
     this.apiUrl = dev
       ? 'https://api.dev.jupiterone.io'
       : 'https://api.us.jupiterone.io';
-    this.apiUrl = apiBaseUrl ? apiBaseUrl : this.apiUrl;
+    this.apiUrl = apiBaseUrl || this.apiUrl;
     this.queryEndpoint = this.apiUrl + '/graphql';
     this.rulesEndpoint = this.apiUrl + '/rules/graphql';
   }

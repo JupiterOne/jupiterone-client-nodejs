@@ -26,6 +26,7 @@ const { JupiterOneClient } = require('@jupiterone/jupiterone-client-nodejs');
 const j1Client = await new JupiterOneClient({
   account: 'my-account-id',
   accessToken: 'my-api-token',
+  apiBaseUrl: 'https://api.us.jupiterone.io' // Optional parameter 
 }).init();
 const integrationInstance = await j1Client.integrationInstances.get(
   'my-integration-instance-id',
