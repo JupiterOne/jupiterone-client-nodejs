@@ -67,6 +67,10 @@ async function main() {
       'Writes query result to specified output file, or results.json by default',
       'results.json',
     )
+    .option(
+      '--api-base-url <url>',
+      'Optionally specify base URL to use during execution. (defaults to `https://api.us.jupiterone.io`)',
+    )
     .parse(process.argv);
 
   try {
@@ -236,6 +240,7 @@ async function initializeJ1Client() {
     clientId: J1_CLIENT_ID,
     accessToken: program.key || J1_API_TOKEN,
     dev: J1_DEV_ENABLED === 'true',
+    apiBaseUrl: program.apiBaseUrl,
   }).init();
   console.log('OK');
   return j1Client;
