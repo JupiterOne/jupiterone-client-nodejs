@@ -8,11 +8,19 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.26.2] - 2022-04-05
+
+### Added
+
+- Both the CLI and the `JupiterOneClient` constructor now accept an optional
+  parameter that allows users to specify a base URL to use during execution.
+
 ## [0.26.1] - 2022-02-17
 
 ### Updated
 
-- Fix detection of inline question rule bodies when creating/updating alert rules
+- Fix detection of inline question rule bodies when creating/updating alert
+  rules
 
 ## [0.26.0] - 2022-02-07
 
