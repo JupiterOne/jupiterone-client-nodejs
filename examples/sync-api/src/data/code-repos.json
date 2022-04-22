@@ -1,63 +1,63 @@
 [
   {
     "entity": {
-      "_key": "github_repository:ibzibid",
+      "_key": "github_repo:ibzibid",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "ibzibid",
       "from": "testing"
     }
   },
   {
     "entity": {
-      "_key": "github_repository:os",
+      "_key": "github_repo:os",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "os",
       "from": "testing"
     }
   },
   {
     "entity": {
-      "_key": "github_repository:ot",
+      "_key": "github_repo:ot",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "ot",
       "from": "testing"
     }
   },
   {
     "entity": {
-      "_key": "github_repository:leh",
+      "_key": "github_repo:leh",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "leh",
       "from": "testing"
     }
   },
   {
     "entity": {
-      "_key": "github_repository:codmuz",
+      "_key": "github_repo:codmuz",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "codmuz",
       "from": "testing"
     }
   },
   {
     "entity": {
-      "_key": "github_repository:hacu",
+      "_key": "github_repo:hacu",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "hacu",
       "from": "testing"
     }
   },
   {
     "entity": {
-      "_key": "github_repository:haz",
+      "_key": "github_repo:haz",
       "_class": "CodeRepo",
-      "_type": "github_repository",
+      "_type": "github_repo",
       "displayName": "haz",
       "from": "testing"
     }
