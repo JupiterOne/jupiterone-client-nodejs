@@ -57,7 +57,7 @@ Options:
 ```
 
 #### Relevant Environment Variables
-
+J1_API_TOKEN - Sets the JupiterOne API access token as environment variable instead of passing it through -k parameter
 J1_DEV_ENABLED - Alters the base url. Valid values: 'true' | 'false' (string)
 
 ## Examples
