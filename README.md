@@ -43,7 +43,7 @@ Usage: j1 [options]
 
 Options:
   -v, --version             output the version number
-  -a, --account <name>      JupiterOne account name.
+  -a, --account <id>        JupiterOne account ID.
   -u, --user <email>        JupiterOne user email.
   -k, --key <apiToken>      JupiterOne API access token.
   -q, --query <j1ql>        Execute a query.
@@ -58,6 +58,7 @@ Options:
 
 #### Relevant Environment Variables
 J1_API_TOKEN - Sets the JupiterOne API access token as environment variable instead of passing it through -k parameter
+
 J1_DEV_ENABLED - Alters the base url. Valid values: 'true' | 'false' (string)
 
 ## Examples
