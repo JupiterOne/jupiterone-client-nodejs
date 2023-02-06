@@ -46,7 +46,7 @@ type RawData = {
   >;
 };
 
-type EntitySource =
+export type EntitySource =
   | 'api'
   | 'system-internal'
   | 'system-mapper'

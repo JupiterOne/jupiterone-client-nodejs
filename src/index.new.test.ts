@@ -270,8 +270,8 @@ describe('Core Index Tests', () => {
       });
 
       const expectedArgument = {
-        source: 'api',
-        syncMode: 'DIFF',
+        source: SyncJobSources.API,
+        syncMode: SyncJobModes.DIFF,
         scope: targetScope,
       };
 
@@ -282,7 +282,7 @@ describe('Core Index Tests', () => {
       const argumentOne = {
         syncJobOptions: {
           scope: 'an_example_scope',
-          syncMode: 'CREATE_OR_UPDATE',
+          syncMode: SyncJobModes.CREATE_OR_UPDATE,
         },
         entities: [exampleEntity],
       };
@@ -294,9 +294,9 @@ describe('Core Index Tests', () => {
       });
 
       const expectedArgument = {
-        source: 'api',
+        source: SyncJobSources.API,
         scope: 'an_example_scope',
-        syncMode: 'CREATE_OR_UPDATE',
+        syncMode: SyncJobModes.CREATE_OR_UPDATE,
       };
 
       expect(j1.startSyncJob).toHaveBeenCalledWith(expectedArgument);

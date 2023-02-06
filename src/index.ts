@@ -21,6 +21,7 @@ import {
   IntegrationInstance,
   ListIntegrationInstances,
   ListIntegrationInstancesOptions,
+  EntitySource,
 } from './types';
 
 import {
@@ -147,7 +148,7 @@ export interface JupiterOneEntityMetadata {
   _version: number;
   _accountId: string;
   _deleted: boolean;
-  _source: 'api' | 'integration-managed' | 'powerup-managed' | 'system-mapper';
+  _source: EntitySource;
   _id: string;
   _key: string;
   _class: string[];
@@ -202,7 +203,7 @@ export enum SyncJobStatus {
 }
 
 export type SyncJob = {
-  source: string;
+  source: SyncJobSources;
   scope: string;
   accountId: string;
   id: string;
@@ -243,11 +244,11 @@ export type SyncJob = {
   numMappedRelationshipCreateErrors: number;
   numMappedRelationshipUpdateErrors: number;
   numMappedRelationshipDeleteErrors: number;
-  syncMode: 'DIFF' | 'CREATE_OR_UPDATE';
+  syncMode: SyncJobModes;
 };
 
 export type SyncJobOptions = {
-  source?: string;
+  source?: SyncJobSources;
   scope?: string;
   syncMode?: string;
   integrationInstanceId?: string;
@@ -260,6 +261,7 @@ export enum SyncJobSources {
 
 export enum SyncJobModes {
   DIFF = 'DIFF',
+  CREATE_OR_UPDATE = 'CREATE_OR_UPDATE',
 }
 
 export type SyncJobResponse = {
@@ -1043,8 +1045,8 @@ export class JupiterOneClient {
   }): Promise<SyncJobResult | undefined> {
     if (data.entities || data.relationships) {
       const { job: syncJob } = await this.startSyncJob({
-        source: 'api',
-        syncMode: 'CREATE_OR_UPDATE',
+        source: SyncJobSources.API,
+        syncMode: SyncJobModes.CREATE_OR_UPDATE,
       });
       const syncJobId = syncJob.id;
       await this.uploadGraphObjectsForDeleteSyncJob({
