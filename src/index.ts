@@ -21,6 +21,7 @@ import {
   IntegrationInstance,
   ListIntegrationInstances,
   ListIntegrationInstancesOptions,
+  EntitySource,
 } from './types';
 
 import {
@@ -147,7 +148,7 @@ export interface JupiterOneEntityMetadata {
   _version: number;
   _accountId: string;
   _deleted: boolean;
-  _source: 'api' | 'integration-managed' | 'powerup-managed' | 'system-mapper';
+  _source: EntitySource;
   _id: string;
   _key: string;
   _class: string[];

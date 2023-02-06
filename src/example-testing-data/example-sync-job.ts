@@ -1,3 +1,5 @@
+import { SyncJobModes } from '..';
+
 export const exampleSyncJob = {
   job: {
     source: 'a_source',
@@ -41,6 +43,6 @@ export const exampleSyncJob = {
     numMappedRelationshipCreateErrors: 0,
     numMappedRelationshipUpdateErrors: 0,
     numMappedRelationshipDeleteErrors: 0,
-    syncMode: 'DIFF',
+    syncMode: SyncJobModes.DIFF,
   },
 };
