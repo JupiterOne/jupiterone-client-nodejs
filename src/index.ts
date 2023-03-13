@@ -942,9 +942,8 @@ export class JupiterOneClient {
       upload.deleteRelationships.push({ _id: r?.['_id'] });
     }
 
-    this.logger.info(
-      'uploading deletion sync job with: ' + JSON.stringify(upload),
-    );
+    this.logger.trace(upload, 'Full upload of deletion sync job');
+    this.logger.info('uploading deletion sync job');
     const headers = this.headers;
     const response = await makeFetchRequest(
       this.apiUrl +
