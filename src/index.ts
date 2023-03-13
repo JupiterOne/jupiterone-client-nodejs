@@ -9,6 +9,8 @@ import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
 import gql from 'graphql-tag';
 
+import Logger, { createLogger } from 'bunyan-category';
+
 import { networkRequest } from './networkRequest';
 
 import {
@@ -188,6 +190,7 @@ export interface JupiterOneClientOptions {
   dev?: boolean;
   useRulesEndpoint?: boolean;
   apiBaseUrl?: string;
+  logger?: Logger;
 }
 
 export enum SyncJobStatus {
@@ -295,6 +298,7 @@ export class JupiterOneClient {
   apiUrl: string;
   queryEndpoint: string;
   rulesEndpoint: string;
+  logger: Logger;
 
   constructor({
     account,
@@ -306,6 +310,7 @@ export class JupiterOneClient {
     dev = false,
     useRulesEndpoint = false,
     apiBaseUrl = undefined,
+    logger = undefined,
   }: JupiterOneClientOptions) {
     this.account = account;
     this.username = username;
@@ -321,6 +326,13 @@ export class JupiterOneClient {
     this.apiUrl = apiBaseUrl || this.apiUrl;
     this.queryEndpoint = this.apiUrl + '/graphql';
     this.rulesEndpoint = this.apiUrl + '/rules/graphql';
+
+    this.logger =
+      logger ||
+      createLogger({
+        name: 'jupiterone-client-nodejs',
+        level: 'info',
+      });
   }
 
   async init(): Promise<JupiterOneClient> {
@@ -409,6 +421,7 @@ export class JupiterOneClient {
             } seconds.`,
           );
         }
+        this.logger.trace('Sleeping to wait for JobCompletion');
         await sleep(200);
         statusFile = await networkRequest(deferredUrl);
         status = statusFile.status;
@@ -439,6 +452,10 @@ export class JupiterOneClient {
         }
         results = results.concat(data);
       }
+      this.logger.debug(
+        { resultsCount: results.length, pageCount: data.length },
+        'Query received page of results',
+      );
     }
     return results;
   }
@@ -446,7 +463,7 @@ export class JupiterOneClient {
   async queryGraphQL(query: any) {
     const res = await this.graphClient.query({ query });
     if (res.errors) {
-      console.log(res.errors);
+      this.logger.info(res.errors);
       throw new Error(`JupiterOne returned error(s) for query: '${query}'`);
     }
     return res;
@@ -549,7 +566,7 @@ export class JupiterOneClient {
         );
       }
     } catch (err) {
-      console.log(
+      this.logger.info(
         { err: err.stack || err.toString(), entityId, properties },
         'error updating entity',
       );
@@ -571,7 +588,7 @@ export class JupiterOneClient {
         );
       }
     } catch (err) {
-      console.log({ err, entityId, res }, 'error deleting entity');
+      this.logger.info({ err, entityId, res }, 'error deleting entity');
       throw err;
     }
     return res.data.deleteEntity;
@@ -925,7 +942,9 @@ export class JupiterOneClient {
       upload.deleteRelationships.push({ _id: r?.['_id'] });
     }
 
-    console.log('uploading deletion sync job with: ' + JSON.stringify(upload));
+    this.logger.info(
+      'uploading deletion sync job with: ' + JSON.stringify(upload),
+    );
     const headers = this.headers;
     const response = await makeFetchRequest(
       this.apiUrl +
@@ -997,7 +1016,7 @@ export class JupiterOneClient {
       options.syncMode === SyncJobModes.DIFF &&
       !options.scope
     ) {
-      console.error(
+      this.logger.error(
         'You must specify a scope when starting a sync job in DIFF mode.',
       );
       return false;
@@ -1012,7 +1031,7 @@ export class JupiterOneClient {
     relationships?: RelationshipForSync[];
   }): Promise<SyncJobResult | undefined> {
     if (!data?.entities && !data?.relationships) {
-      console.log('No entities or relationships to upload.');
+      this.logger.info('No entities or relationships to upload.');
       return;
     }
 
@@ -1060,7 +1079,7 @@ export class JupiterOneClient {
         finalizeResult,
       };
     } else {
-      console.log('No entities or relationships to upload.');
+      this.logger.info('No entities or relationships to upload.');
     }
   }
 }
