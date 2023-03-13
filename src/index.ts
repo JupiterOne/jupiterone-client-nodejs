@@ -386,12 +386,15 @@ export class JupiterOneClient {
   async queryV1(
     j1ql: string,
     options: QueryOptions | Record<string, unknown> = {},
+    /** because this method queries repeatedly with its own LIMIT,
+     * this limits the looping to stop after at least {stopAfter} results are found */
+    stopAfter = Number.MAX_SAFE_INTEGER,
   ) {
     let complete = false;
     let page = 0;
     let results: any[] = [];
 
-    while (!complete) {
+    while (!complete && results.length < stopAfter) {
       const j1qlForPage = `${j1ql} SKIP ${
         page * J1QL_SKIP_COUNT
       } LIMIT ${J1QL_LIMIT_COUNT}`;
