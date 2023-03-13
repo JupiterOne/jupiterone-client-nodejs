@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.26.2",
+  "version": "0.27.0",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
