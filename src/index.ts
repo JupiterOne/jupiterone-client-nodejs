@@ -389,9 +389,13 @@ export class JupiterOneClient {
     /** because this method queries repeatedly with its own LIMIT,
      * this limits the looping to stop after at least {stopAfter} results are found */
     stopAfter = Number.MAX_SAFE_INTEGER,
+    /** same as above, this gives more fine-grained control over the starting point of the query,
+     * since this method controls the `SKIP` clause in the query
+     */
+    startPage = 0,
   ) {
     let complete = false;
-    let page = 0;
+    let page = startPage;
     let results: any[] = [];
 
     while (!complete && results.length < stopAfter) {
