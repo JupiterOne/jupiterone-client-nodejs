@@ -32,7 +32,8 @@
     "prebuild": "yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
     "prepack": "yarn build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "audit:fix": "npm_config_yes=true npx yarn-audit-fix"
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.15.2",
