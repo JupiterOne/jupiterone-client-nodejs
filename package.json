@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,7 +32,8 @@
     "prebuild": "yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
     "prepack": "yarn build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "audit:fix": "npm_config_yes=true npx yarn-audit-fix"
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.15.2",
