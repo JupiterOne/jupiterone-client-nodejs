@@ -38,7 +38,6 @@
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.15.2",
     "@lifeomic/attempt": "^3.0.0",
-    "amazon-cognito-identity-js-node": "^0.0.3",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-client": "^2.5.1",
     "apollo-link": "^1.2.11",
@@ -55,7 +54,7 @@
     "js-yaml": "^3.13.1",
     "moment": "^2.22.2",
     "mustache": "^2.3.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "p-all": "^2.1.0",
     "p-map": "^1.2.0",
     "pluralize": "^7.0.0",
@@ -64,7 +63,6 @@
     "valid-url": "^1.0.9"
   },
   "devDependencies": {
-    "@jupiterone/integration-sdk-dev-tools": "^7.4.1",
     "@pollyjs/adapter-node-http": "^2.7.0",
     "@pollyjs/core": "^2.6.3",
     "@types/bunyan": "^1.8.8",

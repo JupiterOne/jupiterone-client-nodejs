@@ -1,1 +1,5 @@
-module.exports = require("@jupiterone/integration-sdk-dev-tools/config/prettier");
+module.exports = {
+    proseWrap: 'always',
+    singleQuote: true,
+  };
+  

@@ -1,12 +1,22 @@
-const integrationConfig = require('@jupiterone/integration-sdk-dev-tools/config/jest');
-
 module.exports = {
-  ...integrationConfig,
   preset: 'ts-jest',
-  testPathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/node_modules/'],
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
+  clearMocks: true,
+  restoreMocks: true,
+  testMatch: [
+    '<rootDir>/**/*.test.ts',
+    '!**/node_modules/*',
+    '!**/dist/*',
+    '!**/*.bak/*',
+  ],
+  collectCoverage: false,
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        isolatedModules: true,
+      },
+    ],
   },
+  testEnvironment: 'node',
+  testPathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/node_modules/'],
 };

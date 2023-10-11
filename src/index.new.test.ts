@@ -41,9 +41,6 @@ describe('Core Index Tests', () => {
   });
 
   describe('Ensure JupiterOneClient Has Correct Props', () => {
-    test('authenticateUser', () => {
-      expect(j1).toHaveProperty('authenticateUser');
-    });
     test('queryV1', () => {
       expect(j1).toHaveProperty('queryV1');
     });
