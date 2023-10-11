@@ -43,8 +43,6 @@ import {
 } from './queries';
 import { query, QueryTypes } from './util/query';
 
-const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
-const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
 const QUERY_RESULTS_TIMEOUT = 1000 * 60 * 5; // Poll s3 location for 5 minutes before timeout.
 const J1QL_SKIP_COUNT = 250;
 const J1QL_LIMIT_COUNT = 250;
@@ -180,10 +178,6 @@ export interface QueryResult {
 
 export interface JupiterOneClientOptions {
   account: string;
-  username?: string;
-  password?: string;
-  poolId?: string;
-  clientId?: string;
   accessToken?: string;
   dev?: boolean;
   useRulesEndpoint?: boolean;
@@ -287,10 +281,6 @@ export class JupiterOneClient {
   graphClient: ApolloClient<any>;
   headers?: Record<string, string>;
   account: string;
-  username: string | undefined;
-  password: string | undefined;
-  poolId: string;
-  clientId: string;
   accessToken: string;
   useRulesEndpoint: boolean;
   apiUrl: string;
@@ -300,10 +290,6 @@ export class JupiterOneClient {
 
   constructor({
     account,
-    username,
-    password,
-    poolId = J1_USER_POOL_ID_PROD,
-    clientId = J1_CLIENT_ID_PROD,
     accessToken,
     dev = false,
     useRulesEndpoint = false,
@@ -311,10 +297,6 @@ export class JupiterOneClient {
     logger = undefined,
   }: JupiterOneClientOptions) {
     this.account = account;
-    this.username = username;
-    this.password = password;
-    this.poolId = poolId;
-    this.clientId = clientId;
     this.accessToken = accessToken;
     this.useRulesEndpoint = useRulesEndpoint;
 
@@ -334,7 +316,7 @@ export class JupiterOneClient {
   }
 
   async init(): Promise<JupiterOneClient> {
-    const token = this.accessToken
+    const token = this.accessToken;
     this.headers = {
       Authorization: `Bearer ${token}`,
       'LifeOmic-Account': this.account,
@@ -358,7 +340,6 @@ export class JupiterOneClient {
     return this;
   }
 
-  
   async queryV1(
     j1ql: string,
     options: QueryOptions | Record<string, unknown> = {},
