@@ -2,11 +2,14 @@
   "name": "@jupiterone/jupiterone-client-nodejs",
   "version": "0.29.0",
   "description": "A node.js client wrapper for JupiterOne public API",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JupiterOne/jupiterone-client-nodejs"
+  },
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:JupiterOne/jupiterone-client-nodejs.git",
   "author": "JupiterOne <dev@jupiterone.io>",
-  "license": "MIT",
   "files": [
     "LICENSE",
     "dist",

@@ -1,0 +1,12 @@
+openapi: 3.0.1
+info:
+  title: '@jupiterone/jupiterone-client-nodejs'
+  description: A node.js client wrapper for JupiterOne public API
+  x-cortex-git:
+    github:
+      repository: JupiterOne/jupiterone-client-nodejs
+  x-cortex-owners:
+    - type: group
+      name: JupiterOne/integrations
+  x-cortex-service-groups: tier-4
+  x-cortex-tag: '@jupiterone/jupiterone-client-nodejs'
