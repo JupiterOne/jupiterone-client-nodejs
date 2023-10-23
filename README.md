@@ -26,7 +26,7 @@ const { JupiterOneClient } = require('@jupiterone/jupiterone-client-nodejs');
 const j1Client = await new JupiterOneClient({
   account: 'my-account-id',
   accessToken: 'my-api-token',
-  apiBaseUrl: 'https://api.us.jupiterone.io' // Optional parameter 
+  apiBaseUrl: 'https://api.us.jupiterone.io', // Optional parameter
 }).init();
 const integrationInstance = await j1Client.integrationInstances.get(
   'my-integration-instance-id',
@@ -57,7 +57,9 @@ Options:
 ```
 
 #### Relevant Environment Variables
-J1_API_TOKEN - Sets the JupiterOne API access token as environment variable instead of passing it through -k parameter
+
+J1_API_TOKEN - Sets the JupiterOne API access token as environment variable
+instead of passing it through -k parameter
 
 J1_DEV_ENABLED - Alters the base url. Valid values: 'true' | 'false' (string)
 

@@ -1,15 +1,14 @@
 {
-    "compilerOptions": {
-      "outDir": "dist",
-      "target": "es2018",
-      "lib": ["es2018", "dom"],
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "noUnusedLocals": true,
-      "pretty": true,
-      "esModuleInterop": true,
-      "resolveJsonModule": true
-    },
-    "exclude": ["dist"]
-  }
-  
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "es2018",
+    "lib": ["es2018", "dom"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "pretty": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "exclude": ["dist"]
+}

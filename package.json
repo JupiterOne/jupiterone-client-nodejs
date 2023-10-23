@@ -52,7 +52,7 @@
     "js-yaml": "^3.13.1",
     "node-fetch": "^2.6.7",
     "p-all": "^2.1.0",
-    "chalk":"^4.1.2"
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
     "@pollyjs/adapter-node-http": "^2.7.0",
