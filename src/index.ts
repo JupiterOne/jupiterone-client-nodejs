@@ -1,5 +1,3 @@
-import Cognito from 'amazon-cognito-identity-js-node';
-
 import { ApolloClient, ApolloError, QueryOptions } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloLink } from 'apollo-link';
@@ -45,8 +43,6 @@ import {
 } from './queries';
 import { query, QueryTypes } from './util/query';
 
-const J1_USER_POOL_ID_PROD = 'us-east-2_9fnMVHuxD';
-const J1_CLIENT_ID_PROD = '1hcv141pqth5f49df7o28ngq1u';
 const QUERY_RESULTS_TIMEOUT = 1000 * 60 * 5; // Poll s3 location for 5 minutes before timeout.
 const J1QL_SKIP_COUNT = 250;
 const J1QL_LIMIT_COUNT = 250;
@@ -182,10 +178,6 @@ export interface QueryResult {
 
 export interface JupiterOneClientOptions {
   account: string;
-  username?: string;
-  password?: string;
-  poolId?: string;
-  clientId?: string;
   accessToken?: string;
   dev?: boolean;
   useRulesEndpoint?: boolean;
@@ -289,11 +281,7 @@ export class JupiterOneClient {
   graphClient: ApolloClient<any>;
   headers?: Record<string, string>;
   account: string;
-  username: string | undefined;
-  password: string | undefined;
-  poolId: string;
-  clientId: string;
-  accessToken: string | undefined;
+  accessToken: string;
   useRulesEndpoint: boolean;
   apiUrl: string;
   queryEndpoint: string;
@@ -302,10 +290,6 @@ export class JupiterOneClient {
 
   constructor({
     account,
-    username,
-    password,
-    poolId = J1_USER_POOL_ID_PROD,
-    clientId = J1_CLIENT_ID_PROD,
     accessToken,
     dev = false,
     useRulesEndpoint = false,
@@ -313,10 +297,6 @@ export class JupiterOneClient {
     logger = undefined,
   }: JupiterOneClientOptions) {
     this.account = account;
-    this.username = username;
-    this.password = password;
-    this.poolId = poolId;
-    this.clientId = clientId;
     this.accessToken = accessToken;
     this.useRulesEndpoint = useRulesEndpoint;
 
@@ -336,9 +316,7 @@ export class JupiterOneClient {
   }
 
   async init(): Promise<JupiterOneClient> {
-    const token = this.accessToken
-      ? this.accessToken
-      : await this.authenticateUser();
+    const token = this.accessToken;
     this.headers = {
       Authorization: `Bearer ${token}`,
       'LifeOmic-Account': this.account,
@@ -360,27 +338,6 @@ export class JupiterOneClient {
     this.graphClient = new ApolloClient({ link, cache });
 
     return this;
-  }
-
-  async authenticateUser() {
-    const authenticationDetails = new Cognito.AuthenticationDetails({
-      Username: this.username,
-      Password: this.password,
-    });
-    const Pool = new Cognito.CognitoUserPool({
-      UserPoolId: this.poolId,
-      ClientId: this.clientId,
-    });
-    const User = new Cognito.CognitoUser({ Username: this.username, Pool });
-
-    const result: any = await new Promise((resolve, reject) => {
-      User.authenticateUser(authenticationDetails, {
-        onSuccess: (result: any) => resolve(result),
-        onFailure: (err: any) => reject(err),
-      });
-    });
-
-    return result.getAccessToken().getJwtToken();
   }
 
   async queryV1(

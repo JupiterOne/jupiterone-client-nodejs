@@ -15,8 +15,6 @@ import { program } from 'commander';
 
 const writeFile = util.promisify(fs.writeFile);
 
-const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID;
-const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
 const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const J1_DEV_ENABLED = process.env.J1_DEV_ENABLED;
 const EUSAGEERROR = 126;
@@ -234,10 +232,6 @@ async function initializeJ1Client() {
   process.stdout.write('Authenticating with JupiterOne... ');
   const j1Client = await new JupiterOneClient({
     account: program.account,
-    username: program.user,
-    password: program.password,
-    poolId: J1_USER_POOL_ID,
-    clientId: J1_CLIENT_ID,
     accessToken: program.key || J1_API_TOKEN,
     dev: J1_DEV_ENABLED === 'true',
     apiBaseUrl: program.apiBaseUrl,
