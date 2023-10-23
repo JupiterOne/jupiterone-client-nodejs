@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiterone-client-nodejs",
-  "version": "0.29.0",
+  "version": "1.0.0",
   "description": "A node.js client wrapper for JupiterOne public API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,6 +44,7 @@
     "apollo-link-batch-http": "^1.2.13",
     "apollo-link-retry": "^2.2.13",
     "bunyan-category": "^0.4.0",
+    "chalk": "^4.1.2",
     "commander": "^5.0.0",
     "eslint-config-prettier": "^6.10.1",
     "graphql": "^14.6.0",
@@ -51,8 +52,7 @@
     "inquirer": "^8.2.0",
     "js-yaml": "^3.13.1",
     "node-fetch": "^2.6.7",
-    "p-all": "^2.1.0",
-    "chalk": "^4.1.2"
+    "p-all": "^2.1.0"
   },
   "devDependencies": {
     "@pollyjs/adapter-node-http": "^2.7.0",
