@@ -273,6 +273,15 @@ export type SyncJobResponse = {
   job: SyncJob;
 };
 
+export type PublishEventsResponse = {
+  events: Array<{
+    id: string;
+    name: string;
+    description: string;
+    createDate: number;
+  }>;
+};
+
 export type ObjectDeletion = {
   _id: string;
 };
@@ -983,6 +992,23 @@ export class JupiterOneClient {
       },
     );
     return validateSyncJobResponse(response);
+  }
+
+  async publishEvents(options: {
+    syncJobId: string;
+    events: Array<{ name: string; description: string }>;
+  }): Promise<PublishEventsResponse> {
+    const { syncJobId, events } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/events`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ events }),
+      },
+    );
+    return response.json();
   }
 
   async fetchSyncJobStatus(options: {
