@@ -968,6 +968,23 @@ export class JupiterOneClient {
     return validateSyncJobResponse(response);
   }
 
+  async abortSyncJob(options: {
+    syncJobId: string;
+    reason: string;
+  }): Promise<SyncJobResponse> {
+    const { syncJobId, reason } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/abort`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ reason }),
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
   async fetchSyncJobStatus(options: {
     syncJobId: string;
   }): Promise<SyncJobResponse> {
