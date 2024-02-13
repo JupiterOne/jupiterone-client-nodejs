@@ -59,8 +59,13 @@ function sleep(ms: number): Promise<NodeJS.Timeout> {
   });
 }
 
-class FetchError extends Error {
+export class FetchError extends Error {
   httpStatusCode: number;
+  responseBody: string;
+  response: FetchResponse;
+  method: string;
+  url: string;
+  nameForLogging?: string;
 
   constructor(options: {
     responseBody: string;
@@ -77,6 +82,11 @@ class FetchError extends Error {
       }). Response: ${options.responseBody}`,
     );
     this.httpStatusCode = options.response.status;
+    this.responseBody = options.responseBody;
+    this.response = options.response;
+    this.method = options.method;
+    this.url = options.url;
+    this.nameForLogging = options.nameForLogging;
   }
 }
 
