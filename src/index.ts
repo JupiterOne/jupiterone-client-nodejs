@@ -59,8 +59,13 @@ function sleep(ms: number): Promise<NodeJS.Timeout> {
   });
 }
 
-class FetchError extends Error {
+export class FetchError extends Error {
   httpStatusCode: number;
+  responseBody: string;
+  response: FetchResponse;
+  method: string;
+  url: string;
+  nameForLogging?: string;
 
   constructor(options: {
     responseBody: string;
@@ -77,6 +82,11 @@ class FetchError extends Error {
       }). Response: ${options.responseBody}`,
     );
     this.httpStatusCode = options.response.status;
+    this.responseBody = options.responseBody;
+    this.response = options.response;
+    this.method = options.method;
+    this.url = options.url;
+    this.nameForLogging = options.nameForLogging;
   }
 }
 
@@ -261,6 +271,15 @@ export enum SyncJobModes {
 
 export type SyncJobResponse = {
   job: SyncJob;
+};
+
+export type PublishEventsResponse = {
+  events: Array<{
+    id: string;
+    name: string;
+    description: string;
+    createDate: number;
+  }>;
 };
 
 export type ObjectDeletion = {
@@ -956,6 +975,40 @@ export class JupiterOneClient {
       },
     );
     return validateSyncJobResponse(response);
+  }
+
+  async abortSyncJob(options: {
+    syncJobId: string;
+    reason: string;
+  }): Promise<SyncJobResponse> {
+    const { syncJobId, reason } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/abort`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ reason }),
+      },
+    );
+    return validateSyncJobResponse(response);
+  }
+
+  async publishEvents(options: {
+    syncJobId: string;
+    events: Array<{ name: string; description: string }>;
+  }): Promise<PublishEventsResponse> {
+    const { syncJobId, events } = options;
+    const headers = this.headers;
+    const response = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/events`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ events }),
+      },
+    );
+    return response.json();
   }
 
   async fetchSyncJobStatus(options: {
