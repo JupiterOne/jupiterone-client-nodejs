@@ -169,17 +169,6 @@ export interface JupiterOneEntity {
   properties: any;
 }
 
-export interface CommitRange {
-  account_uuid: string;
-  repo_uuid: string;
-  source: string;
-  destination: string;
-}
-
-export interface IngestionResults {
-  entities: object[];
-}
-
 export interface QueryResult {
   id: string;
   entity: object;
@@ -450,38 +439,6 @@ export class JupiterOneClient {
       throw new Error(`JupiterOne returned error(s) for query: '${query}'`);
     }
     return res;
-  }
-
-  async ingestEntities(
-    integrationInstanceId: string,
-    entities: any[],
-  ): Promise<IngestionResults> {
-    return fetch(this.apiUrl + '/integrations/ingest', {
-      method: 'POST',
-      body: JSON.stringify({ integrationInstanceId, entities }),
-      headers: {
-        'Content-Type': 'application/json',
-        ...this.headers,
-      },
-    }).then((res: any) => res.json());
-  }
-
-  async ingestCommitRange(
-    integrationInstanceId: string,
-    commitRange: CommitRange,
-  ): Promise<IngestionResults> {
-    return fetch(this.apiUrl + '/integrations/action', {
-      method: 'POST',
-      body: JSON.stringify({
-        integrationInstanceId,
-        action: { name: 'INGEST', commitRange },
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        ...this.headers,
-      },
-      timeout: 10000,
-    }).then((res: any) => res.json());
   }
 
   async mutateAlertRule(rule: any, update: any) {
