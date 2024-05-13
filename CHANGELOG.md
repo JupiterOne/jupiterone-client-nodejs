@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.0] - 2024-05-13
+
+- Removed the `ingestEntities` and `ingestCommitRange` methods
+
+## [1.1.0] - 2024-02-15
+
+- Added `abortSyncJob` and `publishEvents` methods
+
+## [1.0.1] - 2023-10-26
+
+- Improved error handling when calling `networkRequest`
+  
+## [1.0.0] - 2023-10-23
+
+- Removed Cognito `authenticateUser` method
+
 ## [0.26.2] - 2022-04-05
 
 ### Added
