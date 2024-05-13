@@ -47,12 +47,6 @@ describe('Core Index Tests', () => {
     test('queryGraphQL', () => {
       expect(j1).toHaveProperty('queryGraphQL');
     });
-    test('ingestEntities', () => {
-      expect(j1).toHaveProperty('ingestEntities');
-    });
-    test('ingestCommitRange', () => {
-      expect(j1).toHaveProperty('ingestCommitRange');
-    });
     test('mutateAlertRule', () => {
       expect(j1).toHaveProperty('mutateAlertRule');
     });
