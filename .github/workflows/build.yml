@@ -3,19 +3,14 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [18.x]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - id: setup-node
         name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18.x
 
       - name: Check out code repository source code
         uses: actions/checkout@v2
@@ -32,10 +27,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [18]
 
     steps:
       - name: Setup Node
