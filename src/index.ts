@@ -328,7 +328,7 @@ export class JupiterOneClient {
     this.headers = {
       Authorization: `Bearer ${token}`,
       'LifeOmic-Account': this.account,
-      'Content-Type': 'application/json',
+      'content-type': 'application/json',
     };
 
     const uri = this.useRulesEndpoint ? this.rulesEndpoint : this.queryEndpoint;
