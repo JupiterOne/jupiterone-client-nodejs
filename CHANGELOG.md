@@ -8,6 +8,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.0.1] - 2024-07-02
+
+- Converted `Content-Type` request header to lower case. This conforms to https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2. And also addresses an issue where Content-Type and content-type headers were both being added.
+ Thanks SrdjanCosicPrica for the contribution!
+
 ## [2.0.0] - 2024-05-13
 
 - Removed the `ingestEntities` and `ingestCommitRange` methods
