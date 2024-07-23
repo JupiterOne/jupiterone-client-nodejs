@@ -6,6 +6,7 @@ import { BatchHttpLink } from 'apollo-link-batch-http';
 import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
 import gql from 'graphql-tag';
+import cliProgress from 'cli-progress';
 
 import Logger, { createLogger } from 'bunyan-category';
 
@@ -44,8 +45,6 @@ import {
 import { query, QueryTypes } from './util/query';
 
 const QUERY_RESULTS_TIMEOUT = 1000 * 60 * 5; // Poll s3 location for 5 minutes before timeout.
-const J1QL_SKIP_COUNT = 250;
-const J1QL_LIMIT_COUNT = 250;
 
 const JobStatus = {
   IN_PROGRESS: 'IN_PROGRESS',
@@ -75,10 +74,8 @@ export class FetchError extends Error {
     nameForLogging?: string;
   }) {
     super(
-      `JupiterOne API error. Response not OK (requestName=${
-        options.nameForLogging || '(none)'
-      }, status=${options.response.status}, url=${options.url}, method=${
-        options.method
+      `JupiterOne API error. Response not OK (requestName=${options.nameForLogging || '(none)'
+      }, status=${options.response.status}, url=${options.url}, method=${options.method
       }). Response: ${options.responseBody}`,
     );
     this.httpStatusCode = options.response.status;
@@ -327,7 +324,7 @@ export class JupiterOneClient {
     const token = this.accessToken;
     this.headers = {
       Authorization: `Bearer ${token}`,
-      'LifeOmic-Account': this.account,
+      'JupiterOne-Account': this.account,
       'content-type': 'application/json',
     };
 
@@ -351,84 +348,88 @@ export class JupiterOneClient {
   async queryV1(
     j1ql: string,
     options: QueryOptions | Record<string, unknown> = {},
+    /**
+     * include a progress bar to show progress of getting data.
+     */
+    showProgress = false,
     /** because this method queries repeatedly with its own LIMIT,
-     * this limits the looping to stop after at least {stopAfter} results are found */
+     * this limits the looping to stop after at least {stopAfter} results are found
+     * @deprecated This property is no longer supported.
+     */
     stopAfter = Number.MAX_SAFE_INTEGER,
     /** same as above, this gives more fine-grained control over the starting point of the query,
      * since this method controls the `SKIP` clause in the query
+     * @deprecated This property is no longer supported.
      */
     startPage = 0,
   ) {
+
+    let cursor: string;
     let complete = false;
-    let page = startPage;
     let results: any[] = [];
 
-    while (!complete && results.length < stopAfter) {
-      const j1qlForPage = `${j1ql} SKIP ${
-        page * J1QL_SKIP_COUNT
-      } LIMIT ${J1QL_LIMIT_COUNT}`;
+    const limitCheck = j1ql.match(/limit (\d+)/i);
 
+    let progress: any;
+
+    do {
       const res = await this.graphClient.query({
         query: QUERY_V1,
         variables: {
-          query: j1qlForPage,
+          query: j1ql,
           deferredResponse: 'FORCE',
+          flags: {
+            variableResultSize: true
+          },
+          cursor
         },
         ...options,
       });
-      page++;
       if (res.errors) {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
 
       const deferredUrl = res.data.queryV1.url;
       let status = JobStatus.IN_PROGRESS;
-      let statusFile;
+      let statusFile: any;
       const startTimeInMs = Date.now();
       do {
         if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
           throw new Error(
-            `Exceeded request timeout of ${
-              QUERY_RESULTS_TIMEOUT / 1000
+            `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT / 1000
             } seconds.`,
           );
         }
         this.logger.trace('Sleeping to wait for JobCompletion');
-        await sleep(200);
+        await sleep(100);
         statusFile = await networkRequest(deferredUrl);
         status = statusFile.status;
+        cursor = statusFile.cursor;
       } while (status === JobStatus.IN_PROGRESS);
 
-      let result;
-      if (status === JobStatus.COMPLETED) {
-        result = await networkRequest(statusFile.url);
-      } else {
-        // JobStatus.FAILED
-        throw new Error(
-          statusFile.error || 'Job failed without an error message.',
-        );
+      if (status === JobStatus.FAILED) {
+        throw new Error(`JupiterOne returned error(s) for query: '${statusFile.error}'`);
       }
 
-      const { data } = result;
+      const result = statusFile.data;
 
-      // data will assume tree shape if you specify 'return tree' in J1QL
-      const isTree = data.vertices && data.edges;
-
-      if (isTree) {
-        complete = true;
-        results = data;
-      } else {
-        // data is array-shaped, possibly paginated
-        if (data.length < J1QL_SKIP_COUNT) {
-          complete = true;
+      if (showProgress && !limitCheck) {
+        if (results.length === 0) {
+          progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+          progress.start(Number(statusFile.totalCount), 0);
         }
-        results = results.concat(data);
+        progress.update(results.length);
       }
-      this.logger.debug(
-        { resultsCount: results.length, pageCount: data.length },
-        'Query received page of results',
-      );
-    }
+
+      if (result) {
+        results = results.concat(result)
+      }
+
+      if (status === JobStatus.COMPLETED && (cursor == null || limitCheck)) {
+        complete = true;
+      }
+
+    } while (complete === false);
     return results;
   }
 
@@ -887,7 +888,7 @@ export class JupiterOneClient {
     const headers = this.headers;
     const response = await makeFetchRequest(
       this.apiUrl +
-        `/persister/synchronization/jobs/${options.syncJobId}/upload`,
+      `/persister/synchronization/jobs/${options.syncJobId}/upload`,
       {
         method: 'POST',
         headers,

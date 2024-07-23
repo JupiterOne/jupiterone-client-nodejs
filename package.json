@@ -48,6 +48,7 @@
     "apollo-link-retry": "^2.2.13",
     "bunyan-category": "^0.4.0",
     "chalk": "^4.1.2",
+    "cli-progress": "^3.12.0",
     "commander": "^5.0.0",
     "graphql": "^14.6.0",
     "graphql-tag": "^2.10.1",
