@@ -8,6 +8,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.1.0] - 2024-07-23
+
+- Update the `queryv1` function to use cursors instead of the legacy `LIMIT SKIP` pagination approach
+- Add support for a progress bar
+
 ## [2.0.1] - 2024-07-02
 
 - Converted `Content-Type` request header to lower case. This conforms to https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2. And also addresses an issue where Content-Type and content-type headers were both being added.

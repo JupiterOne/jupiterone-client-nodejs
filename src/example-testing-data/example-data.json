@@ -3,8 +3,7 @@
     "queryV1": {
       "type": "deferred",
       "data": null,
-      "url": "https://an-s3-bucket/temp/j1dev/deferred/abc/state.json",
-      "__typename": "QueryV1Response"
+      "url": "https://an-s3-bucket/temp/j1dev/deferred/abc/state.json"
     }
   },
   "loading": false,

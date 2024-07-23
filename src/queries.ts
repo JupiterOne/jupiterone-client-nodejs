@@ -111,6 +111,8 @@ export const QUERY_V1 = gql`
     $includeDeleted: Boolean
     $deferredResponse: DeferredResponseOption
     $deferredFormat: DeferredResponseFormat
+    $cursor: String
+    $flags: QueryV1Flags
   ) {
     queryV1(
       query: $query
@@ -118,6 +120,8 @@ export const QUERY_V1 = gql`
       includeDeleted: $includeDeleted
       deferredResponse: $deferredResponse
       deferredFormat: $deferredFormat
+      cursor: $cursor
+      flags: $flags
     ) {
       type
       data
