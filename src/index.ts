@@ -373,6 +373,7 @@ export class JupiterOneClient {
     let progress: any;
 
     do {
+      this.logger.debug({j1ql}, "Sending query");
       const res = await this.graphClient.query({
         query: QUERY_V1,
         variables: {
@@ -389,6 +390,7 @@ export class JupiterOneClient {
         throw new Error(`JupiterOne returned error(s) for query: '${j1ql}'`);
       }
 
+      this.logger.debug(res.data, "Retrieved response");
       const deferredUrl = res.data.queryV1.url;
       let status = JobStatus.IN_PROGRESS;
       let statusFile: any;
@@ -400,7 +402,7 @@ export class JupiterOneClient {
             } seconds.`,
           );
         }
-        this.logger.trace('Sleeping to wait for JobCompletion');
+        this.logger.debug('Sleeping to wait for JobCompletion');
         await sleep(100);
         statusFile = await networkRequest(deferredUrl);
         status = statusFile.status;
@@ -411,6 +413,7 @@ export class JupiterOneClient {
         throw new Error(`JupiterOne returned error(s) for query: '${statusFile.error}'`);
       }
 
+      this.logger.info("Retrieving query data");
       const result = statusFile.data;
 
       if (showProgress && !limitCheck) {
