@@ -7,7 +7,6 @@ export const networkRequest = async (
   url: string,
 ): Promise<Record<string, unknown>> => {
   const result = await retry(async () => {
-    console.log(`Fetching ${url}`);
     const result = await fetch(url);
     const { status } = result;
 
