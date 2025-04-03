@@ -8,6 +8,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [2.1.2] - 2025-04-03
+
+- Remove potentially unwanted logging of request URLs
+
+## [2.1.1] - 2025-02-17
+
+- Adds a retry for status URL check
+
 ## [2.1.0] - 2024-07-23
 
 - Update the `queryv1` function to use cursors instead of the legacy `LIMIT SKIP` pagination approach
