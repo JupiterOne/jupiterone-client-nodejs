@@ -252,7 +252,6 @@ export enum SyncJobSources {
 
 export enum SyncJobModes {
   DIFF = 'DIFF',
-  CREATE_OR_UPDATE = 'CREATE_OR_UPDATE',
 }
 
 export type SyncJobResponse = {
