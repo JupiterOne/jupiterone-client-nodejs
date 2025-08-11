@@ -877,31 +877,37 @@ export class JupiterOneClient {
   }): Promise<SyncJobResponse> {
     const { syncJobId, entities, relationships } = options;
     const headers = this.headers;
-    const entitiesResponse = await makeFetchRequest(
-      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/entities`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          entities,
-        }),
-      },
-    );
-    validateSyncJobResponse(entitiesResponse);
+    let response: SyncJobResponse | undefined = undefined;
+    if (entities.length) {
+      const entitiesResponse = await makeFetchRequest(
+        this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/entities`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            entities,
+          }),
+        },
+      );
+      response = await validateSyncJobResponse(entitiesResponse);
+    }
 
-    const relationshipsResponse = await makeFetchRequest(
-      this.apiUrl +
-        `/persister/synchronization/jobs/${syncJobId}/relationships`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          relationships,
-        }),
-      },
-    );
+    if (relationships.length) {
+      const relationshipsResponse = await makeFetchRequest(
+        this.apiUrl +
+          `/persister/synchronization/jobs/${syncJobId}/relationships`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            relationships,
+          }),
+        },
+      );
 
-    return validateSyncJobResponse(relationshipsResponse);
+      response = await validateSyncJobResponse(relationshipsResponse);
+    }
+    return response;
   }
 
   async finalizeSyncJob(options: {
