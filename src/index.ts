@@ -13,9 +13,7 @@ import Logger, { createLogger } from 'bunyan-category';
 import { networkRequest } from './networkRequest';
 
 import {
-  Entity,
   EntityForSync,
-  Relationship,
   RelationshipForSync,
   IntegrationDefinition,
   ListIntegrationDefinitions,
@@ -74,8 +72,10 @@ export class FetchError extends Error {
     nameForLogging?: string;
   }) {
     super(
-      `JupiterOne API error. Response not OK (requestName=${options.nameForLogging || '(none)'
-      }, status=${options.response.status}, url=${options.url}, method=${options.method
+      `JupiterOne API error. Response not OK (requestName=${
+        options.nameForLogging || '(none)'
+      }, status=${options.response.status}, url=${options.url}, method=${
+        options.method
       }). Response: ${options.responseBody}`,
     );
     this.httpStatusCode = options.response.status;
@@ -363,7 +363,6 @@ export class JupiterOneClient {
      */
     startPage = 0,
   ) {
-
     let cursor: string;
     let complete = false;
     let results: any[] = [];
@@ -379,9 +378,9 @@ export class JupiterOneClient {
           query: j1ql,
           deferredResponse: 'FORCE',
           flags: {
-            variableResultSize: true
+            variableResultSize: true,
           },
-          cursor
+          cursor,
         },
         ...options,
       });
@@ -396,7 +395,8 @@ export class JupiterOneClient {
       do {
         if (Date.now() - startTimeInMs > QUERY_RESULTS_TIMEOUT) {
           throw new Error(
-            `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT / 1000
+            `Exceeded request timeout of ${
+              QUERY_RESULTS_TIMEOUT / 1000
             } seconds.`,
           );
         }
@@ -408,27 +408,31 @@ export class JupiterOneClient {
       } while (status === JobStatus.IN_PROGRESS);
 
       if (status === JobStatus.FAILED) {
-        throw new Error(`JupiterOne returned error(s) for query: '${statusFile.error}'`);
+        throw new Error(
+          `JupiterOne returned error(s) for query: '${statusFile.error}'`,
+        );
       }
 
       const result = statusFile.data;
 
       if (showProgress && !limitCheck) {
         if (results.length === 0) {
-          progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+          progress = new cliProgress.SingleBar(
+            {},
+            cliProgress.Presets.shades_classic,
+          );
           progress.start(Number(statusFile.totalCount), 0);
         }
         progress.update(results.length);
       }
 
       if (result) {
-        results = results.concat(result)
+        results = results.concat(result);
       }
 
       if (status === JobStatus.COMPLETED && (cursor == null || limitCheck)) {
         complete = true;
       }
-
     } while (complete === false);
     return results;
   }
@@ -866,38 +870,6 @@ export class JupiterOneClient {
     return validateSyncJobResponse(response);
   }
 
-  async uploadGraphObjectsForDeleteSyncJob(options: {
-    syncJobId: string;
-    entities?: Entity[];
-    relationships?: Relationship[];
-  }): Promise<SyncJobResponse> {
-    const upload: GraphObjectDeletionPayload = {
-      deleteEntities: [],
-      deleteRelationships: [],
-    };
-    for (const e of options.entities || []) {
-      upload.deleteEntities.push({ _id: e?.['_id'] });
-    }
-
-    for (const r of options.relationships || []) {
-      upload.deleteRelationships.push({ _id: r?.['_id'] });
-    }
-
-    this.logger.trace(upload, 'Full upload of deletion sync job');
-    this.logger.info('uploading deletion sync job');
-    const headers = this.headers;
-    const response = await makeFetchRequest(
-      this.apiUrl +
-      `/persister/synchronization/jobs/${options.syncJobId}/upload`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(upload),
-      },
-    );
-    return validateSyncJobResponse(response);
-  }
-
   async uploadGraphObjectsForSyncJob(options: {
     syncJobId: string;
     entities?: EntityForSync[];
@@ -905,18 +877,31 @@ export class JupiterOneClient {
   }): Promise<SyncJobResponse> {
     const { syncJobId, entities, relationships } = options;
     const headers = this.headers;
-    const response = await makeFetchRequest(
-      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/upload`,
+    const entitiesResponse = await makeFetchRequest(
+      this.apiUrl + `/persister/synchronization/jobs/${syncJobId}/entities`,
       {
         method: 'POST',
         headers,
         body: JSON.stringify({
           entities,
+        }),
+      },
+    );
+    validateSyncJobResponse(entitiesResponse);
+
+    const relationshipsResponse = await makeFetchRequest(
+      this.apiUrl +
+        `/persister/synchronization/jobs/${syncJobId}/relationships`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
           relationships,
         }),
       },
     );
-    return validateSyncJobResponse(response);
+
+    return validateSyncJobResponse(relationshipsResponse);
   }
 
   async finalizeSyncJob(options: {
@@ -1030,30 +1015,5 @@ export class JupiterOneClient {
       syncJobId,
       finalizeResult,
     };
-  }
-
-  async bulkDelete(data: {
-    entities?: Entity[];
-    relationships?: Relationship[];
-  }): Promise<SyncJobResult | undefined> {
-    if (data.entities || data.relationships) {
-      const { job: syncJob } = await this.startSyncJob({
-        source: SyncJobSources.API,
-        syncMode: SyncJobModes.CREATE_OR_UPDATE,
-      });
-      const syncJobId = syncJob.id;
-      await this.uploadGraphObjectsForDeleteSyncJob({
-        syncJobId,
-        entities: data.entities,
-        relationships: data.relationships,
-      });
-      const finalizeResult = await this.finalizeSyncJob({ syncJobId });
-      return {
-        syncJobId,
-        finalizeResult,
-      };
-    } else {
-      this.logger.info('No entities or relationships to upload.');
-    }
   }
 }

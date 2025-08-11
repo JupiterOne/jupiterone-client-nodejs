@@ -88,9 +88,6 @@ describe('Core Index Tests', () => {
     test('startSyncJob', () => {
       expect(j1).toHaveProperty('startSyncJob');
     });
-    test('uploadGraphObjectsForDeleteSyncJob', () => {
-      expect(j1).toHaveProperty('uploadGraphObjectsForDeleteSyncJob');
-    });
     test('uploadGraphObjectsForSyncJob', () => {
       expect(j1).toHaveProperty('uploadGraphObjectsForSyncJob');
     });
@@ -102,9 +99,6 @@ describe('Core Index Tests', () => {
     });
     test('bulkUpload', () => {
       expect(j1).toHaveProperty('bulkUpload');
-    });
-    test('bulkDelete', () => {
-      expect(j1).toHaveProperty('bulkDelete');
     });
 
     test('--api-base-url properly sets URLs', () => {
