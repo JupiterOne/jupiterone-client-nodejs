@@ -129,7 +129,14 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
 
 1. **Coverage net (nock)** — ✅ **DONE.** `src/index.nock.test.ts`, 38 tests, all 15 graphClient methods (success + error). `index.ts` coverage 41.6% → **64.6%** stmts, funcs 34% → 68%. 72 tests total (34 PollyJS + 38 nock) green. 3 Apollo-4-sensitive behaviors pinned in `PUBLIC-API.md` §6a.
 2. **Migrate yarn → npm** (Section 4a) — ✅ **DONE.** `yarn.lock` removed, `package-lock.json` generated. Scripts/CI/husky/lint-staged swapped. Added `.npmrc` `legacy-peer-deps=true` (bunyan-category's exact `@types/bunyan@1.8.6` peer — removed once Phase 1b lands). CI bumped to Node 22 + setup-node@v4. `npm test` → 72 pass; `npm run build` emits d.ts. npm audit: 322 → **35** (dedup from fresh install).
-3. **Phase 0** — quick wins + transitive resolutions/overrides.
+3. **Phase 0** — ✅ **DONE.** `.nvmrc` (22), `engines: >=22`, `js-yaml 3.13.1 → 4.3.2`
+   (`safeLoad`→`load` at `j1cli.ts:207`; removes the js-yaml high). Contract unchanged,
+   72 tests green, build clean (TS 3.8 intact). **Transitive-vuln `overrides` deferred to
+   Phase 1a** — `npm audit fix` overreached into the dev tree and pulled a modern
+   `@types/babel__traverse` that TS 3.8 can't parse (TS1005). Clean fix requires the TS
+   upgrade first. Residual **prod** vulns (0 critical, 4 high) map to later phases:
+   `lodash`→Phase 2 (apollo), `moment`→Phase 1b (bunyan optionals), `tmp`/`inquirer`/
+   `external-editor`→Phase 1a (inquirer), `brace-expansion`/`minimatch`→Phase 1a overrides.
 4. **Phase 1b** — kill `inflight` chain (TD-9488).
 5. **Phase 2** — Apollo + graphql (TD-9488 core). Verified by step 1's nock tests.
 6. **Phase 1a / Phase 3** — tooling + CLI fleet (follow-up, post-Nov-1 if needed).

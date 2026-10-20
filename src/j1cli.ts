@@ -204,7 +204,7 @@ function jParse(filePath) {
     const data = fs.readFileSync(filePath, 'utf8');
     const fileExtension = path.extname(filePath);
     if (fileExtension === '.yml' || fileExtension === '.yaml') {
-      return yaml.safeLoad(data);
+      return yaml.load(data);
     } else {
       return JSON.parse(data);
     }
