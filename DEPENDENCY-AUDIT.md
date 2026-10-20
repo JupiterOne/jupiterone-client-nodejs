@@ -144,7 +144,15 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
    `legacy-peer-deps` (no longer needed — bunyan-category's `@types/bunyan` peer was the cause).
    Prod vulns 7 → **4**. 72 tests green, build clean.
 5. **Phase 2** — Apollo + graphql (TD-9488 core). Verified by step 1's nock tests.
-6. **Phase 1a / Phase 3** — tooling + CLI fleet (follow-up, post-Nov-1 if needed).
+6. **Phase 1a** — ✅ **DONE** (promoted ahead of Phase 2 — Apollo 3 types need modern TS).
+   `typescript 3.8 → 5.5`, `@types/node 13 → 22`, `jest/ts-jest/@types/jest 27 → 29`,
+   `@typescript-eslint 5 → 8`, `eslint 8.8 → 8.57` (stayed 8.x — no flat-config churn),
+   `eslint-plugin-jest 23 → 28`, `eslint-config-prettier 6 → 9` (dropped removed
+   `prettier/@typescript-eslint`). v8 rules `no-explicit-any` / `no-require-imports` /
+   `no-unused-vars` pinned to `warn` to keep this a mechanical bump. 72 tests green,
+   lint 0 errors, baseline regenerated under TS 5 (emission-style only). Total audit 44 → 35.
+7. **Phase 2** — Apollo 2 → **@apollo/client 3** + graphql 14 → 16 (next).
+8. **Phase 3** — CLI fleet (chalk/node-fetch/inquirer patch) — follow-up, post-Nov-1 if needed.
 
 ### 4a. Yarn → npm migration
 - Delete `yarn.lock`; generate `package-lock.json` (`npm install`).

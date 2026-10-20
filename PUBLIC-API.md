@@ -11,7 +11,9 @@ changelog note.
 > npm run build                                   # emits dist/index.d.ts
 > diff PUBLIC-API.baseline.d.ts dist/index.d.ts   # must be empty, OR every diff consciously approved
 > ```
-> `PUBLIC-API.baseline.d.ts` = the generated `.d.ts` snapshot at v2.1.2 (235 lines).
+> `PUBLIC-API.baseline.d.ts` = the generated `.d.ts` snapshot (regenerated under TS 5 in
+> Phase 1a — emission-style only: `export type` vs `export declare type`, `<TConfig>` vs
+> `<TConfig_1>`, symbolic `Omit<…>` vs TS-3.8's expanded `Pick<…>`. Semantically identical).
 > Expected intentional diffs under the upgrade: the import sources on lines 1-3
 > (`apollo-client`→`@apollo/client`, `node-fetch` type path). Any OTHER diff = unplanned break.
 

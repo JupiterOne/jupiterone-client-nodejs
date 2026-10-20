@@ -50,7 +50,7 @@ export interface QueryResult {
  * so consumers can continue passing their existing logger. Each method accepts
  * either `(msg)` or `(mergeObject, msg)`, matching both bunyan and pino.
  */
-export declare type LogFn = (objOrMsg: unknown, msg?: string) => void;
+export type LogFn = (objOrMsg: unknown, msg?: string) => void;
 export interface Logger {
     trace(objOrMsg: unknown, msg?: string): void;
     debug(objOrMsg: unknown, msg?: string): void;
@@ -78,7 +78,7 @@ export declare enum SyncJobStatus {
     ERROR_BAD_DATA = "ERROR_BAD_DATA",
     ERROR_UNEXPECTED_FAILURE = "ERROR_UNEXPECTED_FAILURE"
 }
-export declare type SyncJob = {
+export type SyncJob = {
     source: SyncJobSources;
     scope: string;
     accountId: string;
@@ -122,7 +122,7 @@ export declare type SyncJob = {
     numMappedRelationshipDeleteErrors: number;
     syncMode: SyncJobModes;
 };
-export declare type SyncJobOptions = {
+export type SyncJobOptions = {
     source?: SyncJobSources;
     scope?: string;
     syncMode?: string;
@@ -136,10 +136,10 @@ export declare enum SyncJobModes {
     DIFF = "DIFF",
     CREATE_OR_UPDATE = "CREATE_OR_UPDATE"
 }
-export declare type SyncJobResponse = {
+export type SyncJobResponse = {
     job: SyncJob;
 };
-export declare type PublishEventsResponse = {
+export type PublishEventsResponse = {
     events: Array<{
         id: string;
         name: string;
@@ -147,14 +147,14 @@ export declare type PublishEventsResponse = {
         createDate: number;
     }>;
 };
-export declare type ObjectDeletion = {
+export type ObjectDeletion = {
     _id: string;
 };
-export declare type GraphObjectDeletionPayload = {
+export type GraphObjectDeletionPayload = {
     deleteEntities: ObjectDeletion[];
     deleteRelationships: ObjectDeletion[];
 };
-export declare type SyncJobResult = {
+export type SyncJobResult = {
     syncJobId: string;
     finalizeResult: SyncJobResponse;
 };
@@ -199,10 +199,10 @@ export declare class JupiterOneClient {
         list: () => Promise<QueryTypes.QueryResults<IntegrationDefinition>>;
     };
     integrationInstances: {
-        list: <TConfig>(options?: ListIntegrationInstancesOptions) => Promise<QueryTypes.QueryResults<IntegrationInstance<unknown>>>;
-        get: <TConfig_1>(id: string) => Promise<IntegrationInstance<TConfig_1>>;
-        create: <TConfig_2>(instance: Pick<IntegrationInstance<TConfig_2>, "name" | "description" | "config" | "integrationDefinitionId" | "offsiteComplete" | "pollingInterval" | "pollingIntervalCronExpression">) => Promise<IntegrationInstance<TConfig_2>>;
-        update: <TConfig_3>(id: string, update: Partial<Pick<IntegrationInstance<TConfig_3>, "name" | "description" | "config" | "offsiteComplete" | "pollingInterval" | "pollingIntervalCronExpression">>) => Promise<IntegrationInstance<TConfig_3>>;
+        list: <TConfig>(options?: ListIntegrationInstancesOptions) => Promise<QueryTypes.QueryResults<IntegrationInstance>>;
+        get: <TConfig>(id: string) => Promise<IntegrationInstance<TConfig>>;
+        create: <TConfig>(instance: Omit<IntegrationInstance<TConfig>, "id" | "accountId">) => Promise<IntegrationInstance<TConfig>>;
+        update: <TConfig>(id: string, update: Partial<Omit<IntegrationInstance<TConfig>, "id" | "accountId" | "integrationDefinitionId">>) => Promise<IntegrationInstance<TConfig>>;
         delete: (id: string) => Promise<{
             success?: boolean;
         }>;

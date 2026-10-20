@@ -357,7 +357,14 @@ export class JupiterOneClient {
           jitter: true,
         },
       }),
-      new BatchHttpLink({ uri, headers: this.headers, fetch }),
+      // node-fetch 2's `fetch` type differs from the global fetch signature that
+      // apollo-link-http-common expects (surfaced once @types/node 22 added global
+      // fetch). Cast bridges it; Phase 2 (@apollo/client 3) replaces this link setup.
+      new BatchHttpLink({
+        uri,
+        headers: this.headers,
+        fetch: fetch as unknown as typeof globalThis.fetch,
+      }),
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });
