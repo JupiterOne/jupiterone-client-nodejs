@@ -1,8 +1,12 @@
-import { ApolloClient, ApolloError, QueryOptions } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloLink } from 'apollo-link';
-import { RetryLink } from 'apollo-link-retry';
-import { BatchHttpLink } from 'apollo-link-batch-http';
+import {
+  ApolloClient,
+  ApolloError,
+  ApolloLink,
+  InMemoryCache,
+  QueryOptions,
+} from '@apollo/client/core';
+import { RetryLink } from '@apollo/client/link/retry';
+import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
 import gql from 'graphql-tag';

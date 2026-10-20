@@ -154,7 +154,13 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
    current count is a ratchet (new violations fail). Also bumps `pino 8 → 10` and
    `nock 11 → 14` now that TS 5.9 parses their types. 75 tests green,
    lint 0 errors, baseline regenerated under TS 5 (emission-style only). Total audit 44 → 35.
-7. **Phase 2** — Apollo 2 → **@apollo/client 3** + graphql 14 → 16 (next).
+7. **Phase 2** — ✅ **DONE.** Replaced 5 `apollo-*` packages with `@apollo/client ^3.14`,
+   `graphql 14.6 → 16.9`, `graphql-tag → 2.12.6`. Imports use `@apollo/client/core` +
+   `/link/retry` + `/link/batch-http` (classic node resolution, CJS-safe). Only `index.ts`
+   imports + the link setup + the `util/query` `ApolloQueryResult`/`GraphQLFormattedError`
+   types changed. **Production `npm audit` → 0.** 72 tests green (one PollyJS retry assertion
+   updated — Apollo 3 dropped the `"Network error: "` prefix). Contract changes approved +
+   baselined (`PUBLIC-API.md` §6c). TD-9488 graphql@14.7.0 line closed.
 8. **Phase 3** — CLI fleet (chalk/node-fetch/inquirer patch) — follow-up.
 
 ### 4a. Yarn → npm migration

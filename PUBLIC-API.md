@@ -202,6 +202,23 @@ NOT change them silently in the upgrade. If the Apollo 4 swap alters any, call i
   apollo-client 2.6 tolerates it; **Apollo 4 is stricter and may reject** — explicit upgrade risk.
 - `integrationDefinitions.list` uses `errorPolicy: 'all'` → collects partial errors without throwing.
 
+### 6c. Approved contract changes — Phase 2 (apollo-client 2 → @apollo/client 3)
+**Baseline `.d.ts` updated.** `graphql 14 → 16`; the 5 `apollo-*` packages replaced by
+`@apollo/client ^3.14`. Consumer-visible changes:
+- **Type import source:** `ApolloClient` / `QueryOptions` now from `@apollo/client/core`
+  (was `apollo-client`). `graphClient: ApolloClient<any>` field type updated accordingly.
+- **`queryGraphQL` return type:** `ApolloQueryResult<any>` → `InteropApolloQueryResult<any>`
+  (@apollo/client 3 naming). Same runtime shape (`{ data, errors, loading, networkStatus }`).
+- **Error message string:** @apollo/client 3 dropped the `"Network error: "` prefix on
+  network-error messages — a thrown error is now e.g. `Response not successful: Received
+  status code 401` (was `Network error: Response not successful...`). Consumers matching on
+  that prefix must adjust. (PollyJS retry test updated to match.)
+- **`QueryResults<T>.errors`** element type changed `GraphQLError` → `GraphQLFormattedError`
+  (graphql 16 split the full error object from its serialized form; apollo returns the
+  formatted one). Affects `integrationDefinitions.list` / `integrationInstances.list` return
+  types. Runtime values unchanged — same `{ message, locations, path }` shape.
+- Production `npm audit` is now **0** (apollo removal cleared the lodash/minimatch chain).
+
 ### 6b. Approved contract change — Phase 1b (bunyan → pino)
 **Baseline `.d.ts` updated** to reflect this. `bunyan-category` replaced with `pino` to
 remove the `mv → rimraf → glob → inflight` chain from the consumer tree (TD-9488).

@@ -1,4 +1,4 @@
-import { ApolloClient, QueryOptions } from 'apollo-client';
+import { ApolloClient, QueryOptions } from '@apollo/client/core';
 import { Response as FetchResponse } from 'node-fetch';
 import { Entity, EntityForSync, Relationship, RelationshipForSync, IntegrationDefinition, IntegrationInstance, ListIntegrationInstancesOptions, EntitySource } from './types';
 import { QueryTypes } from './util/query';
@@ -185,7 +185,7 @@ export declare class JupiterOneClient {
      * @deprecated This property is no longer supported.
      */
     startPage?: number): Promise<any[]>;
-    queryGraphQL(query: any): Promise<import("apollo-client").ApolloQueryResult<any>>;
+    queryGraphQL(query: any): Promise<import("@apollo/client/core").InteropApolloQueryResult<any>>;
     mutateAlertRule(rule: any, update: any): Promise<any>;
     createEntity(key: string, type: string, classLabels: string[], properties: any): Promise<object>;
     updateEntity(entityId: string, properties: any): Promise<object>;
