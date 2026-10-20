@@ -23,20 +23,20 @@
   },
   "scripts": {
     "env": "export $(grep -v '^#' .env | xargs);",
-    "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
+    "format": "prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --cache --fix --ext .ts,.tsx",
-    "pretest": "yarn lint && yarn type-check",
+    "pretest": "npm run lint && npm run type-check",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
-    "copydist": "cp -R LICENSE *.md yarn.lock package.json ./dist/",
+    "test:upsert": "npm run env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
+    "copydist": "cp -R LICENSE *.md package-lock.json package.json ./dist/",
     "distpackage": "(cd ./dist && sed -ibak -e 's#dist/inde[x]#index#g' package.json && rm package.jsonbak)",
-    "prebuild": "yarn test",
+    "prebuild": "npm test",
     "build": "tsc -p tsconfig.dist.json --declaration",
-    "prepack": "yarn build",
+    "prepack": "npm run build",
     "prepare": "husky install",
-    "audit:fix": "npm_config_yes=true npx yarn-audit-fix"
+    "audit:fix": "npm audit fix"
   },
   "dependencies": {
     "@jupiterone/jupiterone-alert-rules": "^0.20.0",
@@ -73,6 +73,7 @@
     "husky": "^7.0.0",
     "jest": "^27.4.7",
     "lint-staged": "^12.3.3",
+    "nock": "^11.7.0",
     "prettier": "^2.0.2",
     "ts-jest": "^27.1.3",
     "typescript": "^3.8.3"
@@ -112,7 +113,7 @@
   "lint-staged": {
     "linters": {
       "*.{ts,js,json,css,md,yml}": [
-        "yarn format",
+        "npm run format",
         "git add"
       ]
     },
