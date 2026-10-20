@@ -49,7 +49,6 @@
     "apollo-link": "^1.2.14",
     "apollo-link-batch-http": "^1.2.13",
     "apollo-link-retry": "^2.2.13",
-    "bunyan-category": "^0.4.0",
     "chalk": "^4.1.2",
     "cli-progress": "^3.12.0",
     "commander": "^5.0.0",
@@ -58,12 +57,12 @@
     "inquirer": "^8.2.0",
     "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.7",
-    "p-all": "^2.1.0"
+    "p-all": "^2.1.0",
+    "pino": "^8.21.0"
   },
   "devDependencies": {
     "@pollyjs/adapter-node-http": "^2.7.0",
     "@pollyjs/core": "^2.6.3",
-    "@types/bunyan": "^1.8.8",
     "@types/jest": "^27.4.0",
     "@types/node": "^13.9.8",
     "@types/node-fetch": "^3.0.3",

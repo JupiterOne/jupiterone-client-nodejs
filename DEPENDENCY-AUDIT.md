@@ -137,7 +137,12 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
    upgrade first. Residual **prod** vulns (0 critical, 4 high) map to later phases:
    `lodash`→Phase 2 (apollo), `moment`→Phase 1b (bunyan optionals), `tmp`/`inquirer`/
    `external-editor`→Phase 1a (inquirer), `brace-expansion`/`minimatch`→Phase 1a overrides.
-4. **Phase 1b** — kill `inflight` chain (TD-9488).
+4. **Phase 1b** — ✅ **DONE.** Replaced `bunyan-category` with `pino ^8.21.0` (pino 8 types
+   parse under TS 3.8). `inflight` + `mv`/`rimraf@2`/`glob@6` **gone from prod tree**. `Logger`
+   now an exported structural interface (`JupiterOneClientOptions.logger` backward-compatible) —
+   approved contract change, baseline updated (see `PUBLIC-API.md` §6b). Removed `.npmrc`
+   `legacy-peer-deps` (no longer needed — bunyan-category's `@types/bunyan` peer was the cause).
+   Prod vulns 7 → **4**. 72 tests green, build clean.
 5. **Phase 2** — Apollo + graphql (TD-9488 core). Verified by step 1's nock tests.
 6. **Phase 1a / Phase 3** — tooling + CLI fleet (follow-up, post-Nov-1 if needed).
 

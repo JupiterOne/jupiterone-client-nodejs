@@ -199,3 +199,13 @@ NOT change them silently in the upgrade. If the Apollo 4 swap alters any, call i
 - **`integrationInstances.update` / `.delete` pass the `query` keyword into `mutate()`.**
   apollo-client 2.6 tolerates it; **Apollo 4 is stricter and may reject** — explicit upgrade risk.
 - `integrationDefinitions.list` uses `errorPolicy: 'all'` → collects partial errors without throwing.
+
+### 6b. Approved contract change — Phase 1b (bunyan → pino)
+**Baseline `.d.ts` updated** to reflect this. `bunyan-category` replaced with `pino` to
+remove the `mv → rimraf → glob → inflight` chain from the consumer tree (TD-9488).
+- **Before:** `logger?: Logger` where `Logger` = default import from `bunyan-category` (not exported).
+- **After:** `Logger` is a **structural interface exported from the package**
+  (`{ trace, debug, info, warn, error, fatal }`, each `(objOrMsg, msg?) => void`), plus
+  exported `LogFn`. Any bunyan/pino-style logger still satisfies it.
+- **Break risk:** only a consumer who imported bunyan's `Logger` type and used
+  bunyan methods beyond those six. Runtime log output drops the bunyan `category` field.

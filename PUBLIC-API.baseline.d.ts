@@ -1,6 +1,5 @@
 import { ApolloClient, QueryOptions } from 'apollo-client';
 import { Response as FetchResponse } from 'node-fetch';
-import Logger from 'bunyan-category';
 import { Entity, EntityForSync, Relationship, RelationshipForSync, IntegrationDefinition, IntegrationInstance, ListIntegrationInstancesOptions, EntitySource } from './types';
 import { QueryTypes } from './util/query';
 export declare class FetchError extends Error {
@@ -45,6 +44,20 @@ export interface QueryResult {
     id: string;
     entity: object;
     properties: object;
+}
+/**
+ * Minimal structural logger interface. Any bunyan/pino-style logger satisfies it,
+ * so consumers can continue passing their existing logger. Each method accepts
+ * either `(msg)` or `(mergeObject, msg)`, matching both bunyan and pino.
+ */
+export declare type LogFn = (objOrMsg: unknown, msg?: string) => void;
+export interface Logger {
+    trace: LogFn;
+    debug: LogFn;
+    info: LogFn;
+    warn: LogFn;
+    error: LogFn;
+    fatal: LogFn;
 }
 export interface JupiterOneClientOptions {
     account: string;

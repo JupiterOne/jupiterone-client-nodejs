@@ -8,7 +8,7 @@ import { retry } from '@lifeomic/attempt';
 import gql from 'graphql-tag';
 import cliProgress from 'cli-progress';
 
-import Logger, { createLogger } from 'bunyan-category';
+import pino from 'pino';
 
 import { networkRequest } from './networkRequest';
 
@@ -172,6 +172,22 @@ export interface QueryResult {
   properties: object;
 }
 
+/**
+ * Minimal structural logger interface. Any bunyan/pino-style logger satisfies it,
+ * so consumers can continue passing their existing logger. Each method accepts
+ * either `(msg)` or `(mergeObject, msg)`, matching both bunyan and pino.
+ */
+export type LogFn = (objOrMsg: unknown, msg?: string) => void;
+
+export interface Logger {
+  trace: LogFn;
+  debug: LogFn;
+  info: LogFn;
+  warn: LogFn;
+  error: LogFn;
+  fatal: LogFn;
+}
+
 export interface JupiterOneClientOptions {
   account: string;
   accessToken?: string;
@@ -314,7 +330,7 @@ export class JupiterOneClient {
 
     this.logger =
       logger ||
-      createLogger({
+      pino({
         name: 'jupiterone-client-nodejs',
         level: 'info',
       });
