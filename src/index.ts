@@ -357,9 +357,11 @@ export class JupiterOneClient {
           jitter: true,
         },
       }),
-      // node-fetch 2's `fetch` type differs from the global fetch signature that
-      // apollo-link-http-common expects (surfaced once @types/node 22 added global
-      // fetch). Cast bridges it; Phase 2 (@apollo/client 3) replaces this link setup.
+      // The cast is REQUIRED, not a leftover: node-fetch 2's `fetch` type does not
+      // match the DOM `fetch` signature that the Apollo HTTP link expects (surfaced
+      // once @types/node 22 added a global `fetch` type). Removing it fails to compile.
+      // It can only go away in a future native-fetch / ESM migration (dropping node-fetch),
+      // not by swapping the Apollo major.
       new BatchHttpLink({
         uri,
         headers: this.headers,

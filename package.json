@@ -28,7 +28,7 @@
     "env": "export $(grep -v '^#' .env | xargs);",
     "format": "prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --cache --fix --ext .ts,.tsx",
+    "lint": "eslint . --cache --fix --ext .ts,.tsx --max-warnings 27",
     "pretest": "npm run lint && npm run type-check",
     "test": "jest",
     "test-coverage": "jest --coverage",
@@ -58,7 +58,7 @@
     "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.7",
     "p-all": "^2.1.0",
-    "pino": "^8.21.0"
+    "pino": "^10.0.0"
   },
   "devDependencies": {
     "@pollyjs/adapter-node-http": "^2.7.0",
@@ -75,7 +75,7 @@
     "husky": "^7.0.0",
     "jest": "^30.0.0",
     "lint-staged": "^12.3.3",
-    "nock": "^11.7.0",
+    "nock": "^14.0.0",
     "prettier": "^2.0.2",
     "ts-jest": "^29.2.5",
     "typescript": "^5.5.0"
