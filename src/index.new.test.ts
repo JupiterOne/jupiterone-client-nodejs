@@ -234,7 +234,7 @@ describe('Core Index Tests', () => {
 
       const res = await j1.bulkUpload(argumentOne);
       expect(res).toEqual(undefined);
-      expect(areValidSyncJobOptionsSpy).toReturnWith(false);
+      expect(areValidSyncJobOptionsSpy).toHaveReturnedWith(false);
     });
 
     test('Happy Test - No Entities/Relationships Should Return Early', async () => {

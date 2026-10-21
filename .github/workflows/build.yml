@@ -8,18 +8,18 @@ jobs:
     steps:
       - id: setup-node
         name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
 
       - name: Check out code repository source code
         uses: actions/checkout@v2
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
 
       - name: Run build
-        run: yarn build
+        run: npm run build
 
   # Publishing is done in a separate job to allow
   # for all matrix builds to complete.
@@ -30,9 +30,9 @@ jobs:
 
     steps:
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
 
       - name: Check out repo
         uses: actions/checkout@v3
@@ -58,6 +58,6 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
           publish: ${{ env.publish }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
-          yarn
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" >> .npmrc
+          npm ci
           npm publish

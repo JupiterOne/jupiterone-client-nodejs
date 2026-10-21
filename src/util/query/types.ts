@@ -1,9 +1,9 @@
-import { ApolloQueryResult } from 'apollo-client';
-import { GraphQLError } from 'graphql';
+import { ApolloQueryResult } from '@apollo/client/core';
+import { GraphQLFormattedError } from 'graphql';
 
 export interface QueryResults<T> {
   data: Array<T>;
-  errors: ReadonlyArray<GraphQLError>;
+  errors: ReadonlyArray<GraphQLFormattedError>;
 }
 
 export interface QueryOptions {

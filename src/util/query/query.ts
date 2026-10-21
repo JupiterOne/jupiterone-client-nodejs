@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from 'apollo-client';
+import { ApolloQueryResult } from '@apollo/client/core';
 import { QueryTypes } from './';
 import { PageInfo } from '../../types';
 import { getProp } from '../getProp';

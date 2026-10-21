@@ -1,2 +1,3 @@
 dist
 examples
+PUBLIC-API.baseline.d.ts

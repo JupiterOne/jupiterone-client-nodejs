@@ -93,8 +93,10 @@ describe('failing 5 times', () => {
   });
 
   test('client retries 5 times and throws error', async () => {
+    // @apollo/client 3 dropped the "Network error: " prefix that apollo-client 2
+    // prepended to network-error messages (consumer-facing string change).
     await expect(j1Client.queryV1(j1qlString)).rejects.toThrow(
-      /Network error: Response not successful: Received status code 401/,
+      /Response not successful: Received status code 401/,
     );
   }, 100000);
 });

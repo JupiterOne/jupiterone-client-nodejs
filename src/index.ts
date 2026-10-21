@@ -1,14 +1,18 @@
-import { ApolloClient, ApolloError, QueryOptions } from 'apollo-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloLink } from 'apollo-link';
-import { RetryLink } from 'apollo-link-retry';
-import { BatchHttpLink } from 'apollo-link-batch-http';
+import {
+  ApolloClient,
+  ApolloError,
+  ApolloLink,
+  InMemoryCache,
+  QueryOptions,
+} from '@apollo/client/core';
+import { RetryLink } from '@apollo/client/link/retry';
+import { BatchHttpLink } from '@apollo/client/link/batch-http';
 import fetch, { RequestInit, Response as FetchResponse } from 'node-fetch';
 import { retry } from '@lifeomic/attempt';
 import gql from 'graphql-tag';
 import cliProgress from 'cli-progress';
 
-import Logger, { createLogger } from 'bunyan-category';
+import pino from 'pino';
 
 import { networkRequest } from './networkRequest';
 
@@ -172,6 +176,26 @@ export interface QueryResult {
   properties: object;
 }
 
+/**
+ * Minimal structural logger interface. Any bunyan/pino-style logger satisfies it,
+ * so consumers can continue passing their existing logger. Each method accepts
+ * either `(msg)` or `(mergeObject, msg)`, matching both bunyan and pino.
+ */
+export type LogFn = (objOrMsg: unknown, msg?: string) => void;
+
+export interface Logger {
+  // Declared as methods (not `trace: LogFn` properties) on purpose: method
+  // signatures are checked bivariantly, so overloaded bunyan/pino loggers still
+  // satisfy this interface under `strictFunctionTypes`. Property form would be
+  // contravariant and reject them. `LogFn` is exported for standalone use.
+  trace(objOrMsg: unknown, msg?: string): void;
+  debug(objOrMsg: unknown, msg?: string): void;
+  info(objOrMsg: unknown, msg?: string): void;
+  warn(objOrMsg: unknown, msg?: string): void;
+  error(objOrMsg: unknown, msg?: string): void;
+  fatal(objOrMsg: unknown, msg?: string): void;
+}
+
 export interface JupiterOneClientOptions {
   account: string;
   accessToken?: string;
@@ -314,7 +338,7 @@ export class JupiterOneClient {
 
     this.logger =
       logger ||
-      createLogger({
+      pino({
         name: 'jupiterone-client-nodejs',
         level: 'info',
       });
@@ -337,7 +361,16 @@ export class JupiterOneClient {
           jitter: true,
         },
       }),
-      new BatchHttpLink({ uri, headers: this.headers, fetch }),
+      // The cast is REQUIRED, not a leftover: node-fetch 2's `fetch` type does not
+      // match the DOM `fetch` signature that the Apollo HTTP link expects (surfaced
+      // once @types/node 22 added a global `fetch` type). Removing it fails to compile.
+      // It can only go away in a future native-fetch / ESM migration (dropping node-fetch),
+      // not by swapping the Apollo major.
+      new BatchHttpLink({
+        uri,
+        headers: this.headers,
+        fetch: fetch as unknown as typeof globalThis.fetch,
+      }),
     ]);
     const cache = new InMemoryCache();
     this.graphClient = new ApolloClient({ link, cache });

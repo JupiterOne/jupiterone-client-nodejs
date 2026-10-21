@@ -7,6 +7,9 @@
     "url": "https://github.com/JupiterOne/jupiterone-client-nodejs"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "JupiterOne <dev@jupiterone.io>",
@@ -23,67 +26,62 @@
   },
   "scripts": {
     "env": "export $(grep -v '^#' .env | xargs);",
-    "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
+    "format": "prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --cache --fix --ext .ts,.tsx",
-    "pretest": "yarn lint && yarn type-check",
+    "lint": "eslint . --cache --fix --ext .ts,.tsx --max-warnings 27",
+    "pretest": "npm run lint && npm run type-check",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "test:upsert": "yarn env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
-    "copydist": "cp -R LICENSE *.md yarn.lock package.json ./dist/",
+    "test:upsert": "npm run env; node src/j1cli.js -o upsert --entity --account $J1_ACCOUNT_ID --key $J1_API_TOKEN --input-file ./examples-yaml/entities.yml",
+    "copydist": "cp -R LICENSE *.md package-lock.json package.json ./dist/",
     "distpackage": "(cd ./dist && sed -ibak -e 's#dist/inde[x]#index#g' package.json && rm package.jsonbak)",
-    "prebuild": "yarn test",
+    "prebuild": "npm test",
     "build": "tsc -p tsconfig.dist.json --declaration",
-    "prepack": "yarn build",
+    "prepack": "npm run build",
     "prepare": "husky install",
-    "audit:fix": "npm_config_yes=true npx yarn-audit-fix"
+    "audit:fix": "npm audit fix"
   },
   "dependencies": {
+    "@apollo/client": "^3.14.0",
     "@jupiterone/jupiterone-alert-rules": "^0.20.0",
     "@lifeomic/attempt": "^3.0.3",
-    "apollo-cache-inmemory": "^1.5.1",
-    "apollo-client": "^2.6.10",
-    "apollo-link": "^1.2.14",
-    "apollo-link-batch-http": "^1.2.13",
-    "apollo-link-retry": "^2.2.13",
-    "bunyan-category": "^0.4.0",
     "chalk": "^4.1.2",
     "cli-progress": "^3.12.0",
     "commander": "^5.0.0",
-    "graphql": "^14.6.0",
-    "graphql-tag": "^2.10.1",
+    "graphql": "^16.9.0",
+    "graphql-tag": "^2.12.6",
     "inquirer": "^8.2.0",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.7",
-    "p-all": "^2.1.0"
+    "p-all": "^2.1.0",
+    "pino": "^10.0.0"
   },
   "devDependencies": {
     "@pollyjs/adapter-node-http": "^2.7.0",
     "@pollyjs/core": "^2.6.3",
-    "@types/bunyan": "^1.8.8",
-    "@types/jest": "^27.4.0",
-    "@types/node": "^13.9.8",
-    "@types/node-fetch": "^3.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.10.2",
-    "@typescript-eslint/parser": "^5.10.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.0.0",
+    "@types/node-fetch": "^2.6.11",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "dotenv": "^7.0.0",
-    "eslint": "^8.8.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-jest": "^23.8.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jest": "^28.6.0",
     "husky": "^7.0.0",
-    "jest": "^27.4.7",
+    "jest": "^30.0.0",
     "lint-staged": "^12.3.3",
+    "nock": "^14.0.0",
     "prettier": "^2.0.2",
-    "ts-jest": "^27.1.3",
-    "typescript": "^3.8.3"
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.5.0"
   },
   "eslintConfig": {
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended",
       "plugin:jest/recommended",
-      "prettier",
-      "prettier/@typescript-eslint"
+      "prettier"
     ],
     "env": {
       "node": true,
@@ -99,9 +97,10 @@
           "functions": false
         }
       ],
-      "@typescript-eslint/no-var-requires": [
-        "warn"
-      ]
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-require-imports": "warn",
+      "@typescript-eslint/no-var-requires": "warn",
+      "@typescript-eslint/no-unused-vars": "warn"
     }
   },
   "prettier": {
@@ -112,7 +111,7 @@
   "lint-staged": {
     "linters": {
       "*.{ts,js,json,css,md,yml}": [
-        "yarn format",
+        "npm run format",
         "git add"
       ]
     },
