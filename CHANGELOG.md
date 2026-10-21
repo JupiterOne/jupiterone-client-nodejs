@@ -27,8 +27,12 @@ unchanged — most codebases upgrade with no code changes. See
   The default logger is now `pino` (JSON output, no `category` field).
 - **Apollo type import source moved** from `apollo-client` to `@apollo/client/core`
   (affects `client.graphClient` and other directly-imported Apollo types). Related type-only
-  renames: `queryGraphQL` returns `InteropApolloQueryResult`; `QueryResults<T>.errors`
-  elements are `GraphQLFormattedError`. Runtime shapes unchanged.
+  changes: `queryGraphQL` returns `InteropApolloQueryResult` (drops `networkStatus`/`partial`
+  from the type); `QueryResults<T>.errors` elements are `GraphQLFormattedError`. Runtime
+  shapes unchanged.
+- **CLI YAML parsing uses the YAML 1.2 schema** (`js-yaml` 3 → 4). Unquoted scalars like
+  `0777` (now decimal `777`, was octal `511`) and `12:30` (now a string, was `750`) resolve
+  differently. Affects `j1` CLI `.yml`/`.yaml` input only. See `MIGRATING-v3.md` §5.
 
 ### Changed
 

@@ -132,16 +132,38 @@ import { ApolloClient } from '@apollo/client/core';
 const raw: ApolloClient<any> = client.graphClient;
 ```
 
-Related type-only renames (same runtime shape, no behavior change — only matters if you
-annotate these explicitly):
+Related type-only changes (runtime values are unchanged; these affect type-checking):
 
 - `queryGraphQL()` now returns `InteropApolloQueryResult<T>` (was `ApolloQueryResult<T>`).
+  This **drops the `networkStatus` and `partial` fields from the type** (not just a rename).
+  If you read `(await client.queryGraphQL(q)).networkStatus`, it compiled before and now
+  fails to type-check — the field is still present at runtime, but no longer declared. `data`
+  stays non-optional, so there is no new null-safety break.
 - `QueryResults<T>.errors` elements are now `GraphQLFormattedError` (was `GraphQLError`).
   The runtime objects are unchanged (`{ message, locations, path }`).
 
 Most consumers never touch these types — they call the typed methods
 (`createEntity`, `queryV1`, `integrationInstances.list`, etc.), whose signatures are
 **unchanged**.
+
+---
+
+## 5. CLI only: YAML input is parsed with the YAML 1.2 schema
+
+**Applies only if you use the `j1` CLI with `.yml` / `.yaml` input files** (e.g.
+`j1 -o upsert --entity -f entities.yml`). The `js-yaml` upgrade (3 → 4) moves from the
+YAML 1.1 schema to the YAML 1.2 core schema, which resolves some unquoted scalars
+differently:
+
+| YAML value | Parsed before (js-yaml 3) | Parsed now (js-yaml 4) |
+|------------|---------------------------|------------------------|
+| `0777`     | `511` (octal)             | `777` (decimal)        |
+| `12:30`    | `750` (sexagesimal)       | `"12:30"` (string)     |
+
+If your input YAML relies on leading-zero "octal" numbers or colon-separated values, the
+value written to the graph changes with no error. **Quote the values** to pin them, or use
+the explicit `0o777` octal form. (Programmatic API users are unaffected — this is only the
+CLI's YAML file parsing.)
 
 ---
 

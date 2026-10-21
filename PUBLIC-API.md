@@ -2,7 +2,7 @@
 
 **Frozen at:** v2.1.2 (2026-10-20), commit baseline before TD-9488 dep upgrades.
 **Purpose:** Pin the consumer-facing surface so post-upgrade changes can be diffed
-against this. **Nothing here may change** through the EOL upgrade (Apollo 2→4, graphql
+against this. **Nothing here may change** through the EOL upgrade (Apollo 2→3, graphql
 14→16, node-fetch, etc.). Any divergence = breaking change → requires a major bump +
 changelog note.
 
@@ -87,7 +87,7 @@ interface JupiterOneClientOptions {
 Public fields: `graphClient: ApolloClient<any>`, `headers?`, `account`, `accessToken`,
 `useRulesEndpoint`, `apiUrl`, `queryEndpoint`, `rulesEndpoint`, `logger`.
 
-⚠️ **`graphClient: ApolloClient<any>` is a public field.** Apollo 2→4 changes the
+⚠️ **`graphClient: ApolloClient<any>` is a public field.** Apollo 2→3 changes the
 `ApolloClient` type. If any consumer touches `client.graphClient` directly, that is a
 breaking type change — flag it. (Recommend: keep the field name/shape, accept the type swap.)
 
@@ -181,15 +181,17 @@ Flags (commander):
 ---
 
 ## 6. Known-sensitive-to-upgrade items (watch during diff)
-1. `graphClient: ApolloClient<any>` public field type — Apollo 2→4 type change.
+1. `graphClient: ApolloClient<any>` public field type — Apollo 2→3 type change.
 2. GraphQL batched array request/response shape — BatchHttpLink behavior.
-3. Return shapes `res.data.<field>` unwrapping — Apollo 4 may change `errors`/`data` nullability.
+3. Return shapes `res.data.<field>` unwrapping — Apollo 3 may change `errors`/`data` nullability.
 4. `queryV1` deferred-S3 flow — node-fetch version swap affects the S3 GET.
 5. `Logger` type in `JupiterOneClientOptions` — tied to `bunyan-category` (inflight chain).
 
-### 6a. Pinned current behaviors (verified by `src/index.nock.test.ts`, 2.1.2)
-These are **current observable behaviors** — including quirks/bugs. The contract is to
-NOT change them silently in the upgrade. If the Apollo 4 swap alters any, call it out.
+### 6a. Pinned behaviors (verified by `src/index.nock.test.ts`)
+These were the pre-migration watch-items (written when a v4 target was assumed; the stack
+shipped **@apollo/client 3** — see §6c for the actual outcome). They are **observable
+behaviors** — including quirks/bugs — that the migration must not change silently.
+**Status: all verified unchanged under Apollo 3** by the nock suite.
 - **`deleteEntity` resolves to `undefined` on success.** Method reads `res.data.deleteEntity`
   but the mutation's root field is `deleteEntityV2`, so the read is always `undefined`.
   Pre-existing bug; pinned so the migration doesn't accidentally "fix" (change) it.
@@ -197,9 +199,11 @@ NOT change them silently in the upgrade. If the Apollo 4 swap alters any, call i
   `throw new Error('JupiterOne returned error(s)...')` wrapper.** Apollo default
   `errorPolicy: 'none'` rejects before the `if (res.errors)` guard runs → those wrapper
   branches are dead code. **Exception:** `upsertEntityRawData` catches + re-wraps as
-  `Unable to store raw template data for ...`. Apollo 4 error semantics may shift this.
+  `Unable to store raw template data for ...`. **Unchanged under Apollo 3** (verified).
 - **`integrationInstances.update` / `.delete` pass the `query` keyword into `mutate()`.**
-  apollo-client 2.6 tolerates it; **Apollo 4 is stricter and may reject** — explicit upgrade risk.
+  apollo-client 2.6 tolerated it; **✅ RESOLVED — @apollo/client 3 also accepts it**: both
+  methods are covered by `src/index.nock.test.ts` and pass under Apollo 3. (A future
+  @apollo/client 4 upgrade should re-verify, as v4 is stricter.)
 - `integrationDefinitions.list` uses `errorPolicy: 'all'` → collects partial errors without throwing.
 
 ### 6c. Approved contract changes — Phase 2 (apollo-client 2 → @apollo/client 3)
@@ -207,8 +211,12 @@ NOT change them silently in the upgrade. If the Apollo 4 swap alters any, call i
 `@apollo/client ^3.14`. Consumer-visible changes:
 - **Type import source:** `ApolloClient` / `QueryOptions` now from `@apollo/client/core`
   (was `apollo-client`). `graphClient: ApolloClient<any>` field type updated accordingly.
-- **`queryGraphQL` return type:** `ApolloQueryResult<any>` → `InteropApolloQueryResult<any>`
-  (@apollo/client 3 naming). Same runtime shape (`{ data, errors, loading, networkStatus }`).
+- **`queryGraphQL` return type:** `ApolloQueryResult<any>` → `InteropApolloQueryResult<any>`.
+  This is a **narrowing**, not just a rename: the type drops the `networkStatus` and
+  `partial?` fields. A consumer reading `(await queryGraphQL(q)).networkStatus` compiled
+  against v2 but now fails to type-check (the value is still present at runtime — Apollo
+  returns the same object — but it's no longer in the declared type). `data` stays
+  non-optional, so there is no new null-safety break.
 - **Error message string:** @apollo/client 3 dropped the `"Network error: "` prefix on
   network-error messages — a thrown error is now e.g. `Response not successful: Received
   status code 401` (was `Network error: Response not successful...`). Consumers matching on
@@ -218,6 +226,10 @@ NOT change them silently in the upgrade. If the Apollo 4 swap alters any, call i
   formatted one). Affects `integrationDefinitions.list` / `integrationInstances.list` return
   types. Runtime values unchanged — same `{ message, locations, path }` shape.
 - Production `npm audit` is now **0** (apollo removal cleared the lodash/minimatch chain).
+
+> **Follow-up tracked:** `@apollo/client` 3.x is itself maintenance-only (4.x is current).
+> v3 was chosen deliberately — 4.x is ESM/`node16`-resolution-oriented and a harder fit for
+> this CommonJS build — but a future `@apollo/client` 4 upgrade remains an open EOL item.
 
 ### 6b. Approved contract change — Phase 1b (bunyan → pino)
 **Baseline `.d.ts` updated** to reflect this. `bunyan-category` replaced with `pino` to
