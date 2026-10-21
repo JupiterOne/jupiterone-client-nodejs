@@ -8,6 +8,38 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-20
+
+End-of-life dependency remediation. Client methods, arguments, and return values are
+unchanged — most codebases upgrade with no code changes. See
+[`MIGRATING-v3.md`](./MIGRATING-v3.md) for a full before/after guide.
+
+### ⚠️ Breaking Changes
+
+- **Node.js 22 is now required** (`engines: ">=22"`). Node 18/20 are end-of-life.
+- **Error message format changed.** Replacing Apollo Client 2 with `@apollo/client` 3
+  drops the `"Network error: "` prefix on network errors — a failed request now throws
+  e.g. `Response not successful: Received status code 401`. Only affects code that matches
+  on the error message string.
+- **`logger` option type changed** from the `bunyan-category` `Logger` to an exported
+  structural `Logger` interface (`{ trace, debug, info, warn, error, fatal }`). Any
+  bunyan/pino-style logger still satisfies it, so passing an existing logger keeps working.
+  The default logger is now `pino` (JSON output, no `category` field).
+- **Apollo type import source moved** from `apollo-client` to `@apollo/client/core`
+  (affects `client.graphClient` and other directly-imported Apollo types). Related type-only
+  renames: `queryGraphQL` returns `InteropApolloQueryResult`; `QueryResults<T>.errors`
+  elements are `GraphQLFormattedError`. Runtime shapes unchanged.
+
+### Changed
+
+- Replaced `apollo-client` + `apollo-cache-inmemory` + `apollo-link*` (EOL) with
+  `@apollo/client` 3, and `graphql` 14 → 16.
+- Replaced `bunyan-category` with `pino`, removing the deprecated
+  `mv → rimraf → glob → inflight` dependency chain.
+- Upgraded toolchain: TypeScript 3.8 → 5, Jest 27 → 30, ESLint/`@typescript-eslint`,
+  `js-yaml` 3 → 4; migrated the package manager from Yarn to npm; pinned CI to Node 22.
+- **Production `npm audit`: 322 → 0 vulnerabilities.**
+
 ## [2.1.2] - 2025-04-03
 
 - Remove potentially unwanted logging of request URLs
