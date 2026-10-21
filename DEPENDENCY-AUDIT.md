@@ -2,22 +2,22 @@
 
 **Package:** `@jupiterone/jupiterone-client-nodejs` v2.1.2
 **Date:** 2026-10-20
-**Jira:** [TD-9488](https://jupiterone.atlassian.net/browse/TD-9488) — Update EOL dependencies (Bug, assignee: Samuel Poulton)
+**Jira:** [TD-9488](https://jupiterone.atlassian.net/browse/TD-9488)
 **Audit tool:** `yarn audit` (586 deps)
 
 ---
 
-## 0. TD-9488 Scope & Deadline
+## 0. TD-9488 Scope
 
-Ticket deadline: **release before Nov 1, 2026** (~11 days). Ticket names two EOL items explicitly:
+The ticket names two EOL items explicitly:
 
 1. **`graphql@14.7.0`** — EOL. → Phase 2 (Apollo + GraphQL).
 2. **`bunyan → mv → rimraf@2.4.5 → glob@6.0.4 → inflight@1.0.6` chain** — `inflight`
    is deprecated (memory leak, unmaintained). → Phase 1b below.
 
-**Must-ship (by Nov 1):** these two items + the transitive critical/high resolutions (Phase 0).
-**Follow-up (post-deadline):** full tooling/CLI fleet upgrade (Phases 1a, 3) — ship as a
-later release so the deadline isn't blocked by broad churn.
+**Core:** these two items + the transitive critical/high resolutions (Phase 0).
+**Follow-up:** full tooling/CLI fleet upgrade (Phases 1a, 3) — ship as a later release so
+the core isn't blocked by broad churn.
 
 ### Phase 1b — Kill the `inflight` chain
 Source: `bunyan-category@0.4.0` → `bunyan@1.8.15`. The `inflight` leak enters via
@@ -119,6 +119,8 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
 - `@pollyjs/*` is unmaintained. **Keep existing PollyJS tests as-is** (don't rewrite).
 - **New coverage uses `nock`** (maintained, CJS-native — no friction with jest 27 /
   ts-jest CJS build; intercepts node-fetch 2's HTTP calls). Works now, no upgrade needed.
+  **`nock` is pinned to `^11` on this branch as an interim** — nock 14's type declarations
+  don't parse under TypeScript 3.8. It is bumped to `^14` in Phase 1a once TS 5.x lands.
 - `msw` / `undici MockAgent` deferred — ESM-first / native-fetch-only, revisit post-upgrade.
 
 ---
