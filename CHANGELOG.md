@@ -8,7 +8,7 @@ and this project adheres to
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-10-20
+## [3.0.0] - 2026-10-21
 
 End-of-life dependency remediation. Client methods, arguments, and return values are
 unchanged — most codebases upgrade with no code changes. See
