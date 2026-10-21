@@ -193,7 +193,9 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
 - `prettier` 2 → 3; `husky` 7 → 9; `lint-staged` 12 → 17; `dotenv` 7 → 16.
 
 ### Phase 2 — Apollo + GraphQL (runtime, core risk)
-- Replace 5 `apollo-*` pkgs with `@apollo/client` 4 + `graphql` 16.
+- Replace 5 `apollo-*` pkgs with `@apollo/client` 3 + `graphql` 16.
+  (`@apollo/client` 4 is current but ESM/`node16`-resolution-oriented; v3 chosen for the
+  CommonJS build. **v4 upgrade carried as a remaining EOL follow-up** — see §5.)
 - Rewrite only `src/index.ts:1-5` (imports) and `src/index.ts:332-343`
   (ApolloLink / RetryLink / BatchHttpLink / InMemoryCache setup — ~15 isolated lines).
 - Preserve batch-http + retry behavior.
@@ -213,8 +215,15 @@ Keep those on their last CJS major and patch to latest-in-major. No ESM conversi
 ---
 
 ## 5. Risk Notes
-- **Phase 2 is the only runtime-behavior risk.** Apollo 2→4 cache/link API changed;
-  rely on existing PollyJS wire fixtures to catch regressions.
+- **Phase 2 is the only runtime-behavior risk.** Apollo 2→3 cache/link API changed;
+  rely on the nock suite + existing PollyJS wire fixtures to catch regressions.
 - **Path B (ESM conversion)** deferred — would drop `node-fetch` for native `fetch`
   (Node 22 global) and take latest chalk/inquirer, but breaks CJS consumers. Separate effort.
 - Phases 0–1 shippable independently as a patch release before the v3 breaking bundle.
+
+## 6. Remaining EOL follow-ups (post-v3)
+- **`@apollo/client` 3 → 4** — 3.x is maintenance-only; 4.x is current but ESM/`node16`.
+- **CLI deps** — `chalk` 4→6, `node-fetch` 2→3, `inquirer` 8→14, `commander` 5→15 (all
+  ESM-only latests; Path B / ESM conversion).
+- **Dev tooling** — `eslint` 8→10 (flat config), `lint-staged` 12→17, `prettier` 2→3,
+  `husky` 7→9, `dotenv` 7→18.

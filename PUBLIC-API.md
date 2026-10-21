@@ -212,11 +212,10 @@ behaviors** — including quirks/bugs — that the migration must not change sil
 - **Type import source:** `ApolloClient` / `QueryOptions` now from `@apollo/client/core`
   (was `apollo-client`). `graphClient: ApolloClient<any>` field type updated accordingly.
 - **`queryGraphQL` return type:** `ApolloQueryResult<any>` → `InteropApolloQueryResult<any>`.
-  This is a **narrowing**, not just a rename: the type drops the `networkStatus` and
-  `partial?` fields. A consumer reading `(await queryGraphQL(q)).networkStatus` compiled
-  against v2 but now fails to type-check (the value is still present at runtime — Apollo
-  returns the same object — but it's no longer in the declared type). `data` stays
-  non-optional, so there is no new null-safety break.
+  Pure rename — `InteropApolloQueryResult` is field-for-field identical to `ApolloQueryResult`
+  (`data`, `errors?`, `error?`, `loading`, `networkStatus`, `partial?`) and mutually
+  assignable; it's a deprecated bridge type for a future v4. `data` stays non-optional, so
+  no new null-safety break. Only matters if you annotate the return type explicitly.
 - **Error message string:** @apollo/client 3 dropped the `"Network error: "` prefix on
   network-error messages — a thrown error is now e.g. `Response not successful: Received
   status code 401` (was `Network error: Response not successful...`). Consumers matching on

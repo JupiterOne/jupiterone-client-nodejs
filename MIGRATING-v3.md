@@ -132,13 +132,13 @@ import { ApolloClient } from '@apollo/client/core';
 const raw: ApolloClient<any> = client.graphClient;
 ```
 
-Related type-only changes (runtime values are unchanged; these affect type-checking):
+Related type-only renames (same shape, no behavior change — only matters if you annotate
+these explicitly):
 
 - `queryGraphQL()` now returns `InteropApolloQueryResult<T>` (was `ApolloQueryResult<T>`).
-  This **drops the `networkStatus` and `partial` fields from the type** (not just a rename).
-  If you read `(await client.queryGraphQL(q)).networkStatus`, it compiled before and now
-  fails to type-check — the field is still present at runtime, but no longer declared. `data`
-  stays non-optional, so there is no new null-safety break.
+  It is a pure rename — field-for-field identical (`data`, `errors?`, `error?`, `loading`,
+  `networkStatus`, `partial?`) and mutually assignable with `ApolloQueryResult<T>`. `data`
+  stays non-optional, so no new null-safety break.
 - `QueryResults<T>.errors` elements are now `GraphQLFormattedError` (was `GraphQLError`).
   The runtime objects are unchanged (`{ message, locations, path }`).
 
