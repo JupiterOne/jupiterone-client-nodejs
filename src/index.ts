@@ -180,12 +180,16 @@ export interface QueryResult {
 export type LogFn = (objOrMsg: unknown, msg?: string) => void;
 
 export interface Logger {
-  trace: LogFn;
-  debug: LogFn;
-  info: LogFn;
-  warn: LogFn;
-  error: LogFn;
-  fatal: LogFn;
+  // Declared as methods (not `trace: LogFn` properties) on purpose: method
+  // signatures are checked bivariantly, so overloaded bunyan/pino loggers still
+  // satisfy this interface under `strictFunctionTypes`. Property form would be
+  // contravariant and reject them. `LogFn` is exported for standalone use.
+  trace(objOrMsg: unknown, msg?: string): void;
+  debug(objOrMsg: unknown, msg?: string): void;
+  info(objOrMsg: unknown, msg?: string): void;
+  warn(objOrMsg: unknown, msg?: string): void;
+  error(objOrMsg: unknown, msg?: string): void;
+  fatal(objOrMsg: unknown, msg?: string): void;
 }
 
 export interface JupiterOneClientOptions {

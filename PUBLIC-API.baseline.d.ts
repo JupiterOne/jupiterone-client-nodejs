@@ -52,12 +52,12 @@ export interface QueryResult {
  */
 export declare type LogFn = (objOrMsg: unknown, msg?: string) => void;
 export interface Logger {
-    trace: LogFn;
-    debug: LogFn;
-    info: LogFn;
-    warn: LogFn;
-    error: LogFn;
-    fatal: LogFn;
+    trace(objOrMsg: unknown, msg?: string): void;
+    debug(objOrMsg: unknown, msg?: string): void;
+    info(objOrMsg: unknown, msg?: string): void;
+    warn(objOrMsg: unknown, msg?: string): void;
+    error(objOrMsg: unknown, msg?: string): void;
+    fatal(objOrMsg: unknown, msg?: string): void;
 }
 export interface JupiterOneClientOptions {
     account: string;

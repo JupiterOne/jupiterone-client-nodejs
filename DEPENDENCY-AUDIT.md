@@ -30,7 +30,7 @@ bunyan's **`optionalDependencies`** (`mv`, `moment`, `dtrace-provider`,
 - **B (clean):** replace `bunyan-category` logger with a maintained logger (e.g. `pino`).
   Kills the whole EOL bunyan tree; requires rewriting logger usage in `src/index.ts`.
 
-Recommend **A** for the Nov 1 release; file **B** as follow-up.
+Recommend **A** for the core release; file **B** as follow-up.
 
 ---
 
