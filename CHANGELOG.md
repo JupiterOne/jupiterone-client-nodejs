@@ -10,9 +10,10 @@ and this project adheres to
 
 ### Fixed
 
-- `j1 --alert --rule-pack` (provisioning a rule pack) now forwards each rule's `labels` to the
-  rules it creates. Rules from packs that label themselves (for example `product: ai-asm`) were
-  created unlabelled before. Rules without labels are created exactly as before.
+- `j1 --alert --rule-pack` (provisioning a rule pack) now forwards each rule's
+  `labels` to the rules it creates. Rules from packs that label themselves (for
+  example `product: ai-asm`) were created unlabelled before. Rules without
+  labels are created exactly as before.
 
 ## [3.0.0] - 2026-10-21
 
