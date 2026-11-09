@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Provisioning a rule pack (`j1 -o provision-alert-rule-pack --alert -f <pack>`)
+  now forwards each rule's `labels` to the rules it creates. Rules from packs
+  that label themselves (for example `product: ai-asm`) were created unlabelled
+  before. Rules without labels are created exactly as before.
+
 ## [3.0.0] - 2026-10-21
 
 End-of-life dependency remediation. Client methods, arguments, and return values are
