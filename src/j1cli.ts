@@ -9,6 +9,7 @@ import inquirer from 'inquirer';
 import { defaultAlertSettings } from '@jupiterone/jupiterone-alert-rules';
 
 import { JupiterOneClient } from '.';
+import { buildRulePackInstance } from './rulePackInstance';
 import * as error from './util/error';
 
 import { program } from 'commander';
@@ -577,31 +578,7 @@ async function provisionRulePackAlerts(j1Client, rules, defaultSettings) {
         return j1Client.mutateAlertRule(r, update);
       });
     } else {
-      const instance = {
-        ...defaultSettings,
-        name: r.name,
-        description: r.description,
-        question: {
-          queries: r.queries,
-        },
-        operations: r.alertLevel
-          ? [
-              {
-                when: defaultSettings.operations[0].when,
-                actions: [
-                  {
-                    type: 'SET_PROPERTY',
-                    targetProperty: 'alertLevel',
-                    targetValue: r.alertLevel,
-                  },
-                  {
-                    type: 'CREATE_ALERT',
-                  },
-                ],
-              },
-            ]
-          : defaultSettings.operations,
-      };
+      const instance = buildRulePackInstance(r, defaultSettings);
       work.push(() => {
         return j1Client.mutateAlertRule({ instance }, false);
       });
